@@ -2,53 +2,17 @@
   "name": "compiler-cli",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/compiler-cli/src",
-  "projectType": "application",
+  "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nrwl/esbuild:esbuild",
+      "executor": "@nrwl/js:tsc",
       "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
       "options": {
-        "platform": "node",
         "outputPath": "dist/packages/compiler-cli",
-        "format": ["cjs"],
-        "bundle": false,
-        "main": "packages/compiler-cli/src/main.ts",
-        "tsConfig": "packages/compiler-cli/tsconfig.app.json",
-        "assets": ["packages/compiler-cli/src/assets"],
-        "generatePackageJson": true,
-        "esbuildOptions": {
-          "sourcemap": true,
-          "outExtension": {
-            ".js": ".js"
-          }
-        }
-      },
-      "configurations": {
-        "development": {},
-        "production": {
-          "esbuildOptions": {
-            "sourcemap": false,
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
-        }
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/js:node",
-      "defaultConfiguration": "development",
-      "options": {
-        "buildTarget": "compiler-cli:build"
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "compiler-cli:build:development"
-        },
-        "production": {
-          "buildTarget": "compiler-cli:build:production"
-        }
+        "tsConfig": "packages/compiler-cli/tsconfig.lib.json",
+        "packageJson": "packages/compiler-cli/package.json",
+        "main": "packages/compiler-cli/src/index.ts",
+        "assets": ["packages/compiler-cli/*.md"]
       }
     },
     "lint": {
