@@ -11,8 +11,10 @@
         "outputPath": "dist/packages/compiler-cli",
         "tsConfig": "packages/compiler-cli/tsconfig.lib.json",
         "packageJson": "packages/compiler-cli/package.json",
-        "main": "packages/compiler-cli/src/index.ts",
-        "assets": ["packages/compiler-cli/*.md"]
+        "main": "packages/compiler-cli/src/cli.ts",
+        "assets": ["packages/compiler-cli/*.md"],
+        "updateBuildableProjectDepsInPackageJson": true,
+        "buildableProjectDepsInPackageJsonType": "dependencies"
       }
     },
     "lint": {

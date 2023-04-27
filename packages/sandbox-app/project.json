@@ -54,7 +54,7 @@
     },
     "test": {
       "executor": "@nrwl/vite:test",
-      "outputs": ["coverage/packages/sandbox-app"],
+      "outputs": ["{workspaceRoot}/coverage/packages/sandbox-app"],
       "options": {
         "passWithNoTests": true,
         "reportsDirectory": "../../coverage/packages/sandbox-app"
