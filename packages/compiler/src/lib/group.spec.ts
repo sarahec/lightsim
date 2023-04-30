@@ -16,7 +16,7 @@
 
 import { unified } from 'unified';
 
-import { group } from './encapsulate';
+import { group } from './group';
 import { type Node } from 'unist';
 import { u } from 'unist-builder';
 

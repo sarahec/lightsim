@@ -16,7 +16,7 @@
 
  import { VFile } from 'vfile';
 import { Logger, ILogObj } from 'tslog';
-import { group } from './encapsulate';
+import { group } from './group';
 import { toHTML, toMarkdown } from './rendering';
 import { Parent } from 'mdast';
 
