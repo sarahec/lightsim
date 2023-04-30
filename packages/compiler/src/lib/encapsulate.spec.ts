@@ -16,7 +16,7 @@
 
  import { Processor, unified } from 'unified';
 
-import { encapsulate } from './encapsulate';
+import { group } from './encapsulate';
 import { type Node } from 'unist';
 import { u } from 'unist-builder';
 
@@ -29,34 +29,34 @@ const wrapFn = (nodes: Node[], count?: number, matched?: Node) => ({
   type: 'page',
   children: nodes,
 });
+let configuredProcessor: Processor;
+let h2Tree: Node;
+let paginatedH2Tree: Node;
 
-
-describe('encapsulator', () => {
-  let configuredProcessor: Processor;
-  let h2Tree: Node;
-  let paginatedH2Tree: Node;
-
-  beforeEach(() => {
-    configuredProcessor = unified()
-      .use(encapsulate, { match: matchFn, wrap: wrapFn });
-    h2Tree = u('root', [  
+beforeEach(() => {
+  configuredProcessor = unified()
+    .use(group, { match: matchFn, wrap: wrapFn });
+  h2Tree = u('root', [  
+    u('heading', { depth: 2 }),
+    u('text', 'Hello'),
+    u('heading', { depth: 2 }),
+    u('text', 'World'),
+  ]);
+  paginatedH2Tree = u('root', [
+    u('page', [
       u('heading', { depth: 2 }),
       u('text', 'Hello'),
+    ]),
+    u('page', [
       u('heading', { depth: 2 }),
-      u('text', 'World'),
-    ]);
-    paginatedH2Tree = u('root', [
-      u('page', [
-        u('heading', { depth: 2 }),
-        u('text', 'Hello'),
-      ]),
-      u('page', [
-        u('heading', { depth: 2 }),
-        u('text', 'World'), 
-      ]),
-    ]);
-  });
+      u('text', 'World'), 
+    ]),
+  ]);
+});
 
+
+
+describe('group plugin', () => {
   it('Should do nothing if empty tree', async () => {
     const tree = u('root', []);
     const expected = tree;
@@ -79,13 +79,43 @@ describe('encapsulator', () => {
     expect(result).toEqual(paginatedH2Tree);
   });
 
-  describe('match option', () => {
-    it('should accept a match function', () => {
-      const result = unified().use(encapsulate, { match: matchFn, wrap: wrapFn }).runSync(h2Tree);
-      expect(result).toEqual(paginatedH2Tree);
-    });
-
-    // TODO Allow match to be a Node
-  });
 });
+
+describe('match option', () => {
+  it('should accept a match function', () => {
+    const result = unified().use(group, { match: matchFn, wrap: wrapFn }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+  it('should accept a node type', () => {
+    const result = unified().use(group, { match: "heading", wrap: wrapFn }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+  it('should accept a partial node', () => {
+    const result = unified().use(group, { match: u('heading', {depth: 2}), wrap: wrapFn }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+});
+
+
+describe('wrap option', () => {
+  it('should accept a wrap function', () => {
+    const result = configuredProcessor.use(group, {match: matchFn, wrap: wrapFn }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+  it('should accept a node type', () => {
+    const result = unified().use(group, { match: matchFn, wrap: 'page' }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+  it('should accept a partial node', () => {
+    const result = unified().use(group, {match: matchFn, wrap: {type: 'page'} }).runSync(h2Tree);
+    expect(result).toEqual(paginatedH2Tree);
+  });
+
+});
+
 
