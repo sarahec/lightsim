@@ -23,7 +23,7 @@ type WrapFn = (nodes: Node[], count?: number, matched?: Node) => Parent;
 type MatcherType = string | Node | MatchFn;
 type WrapperType = string | Node | WrapFn;
 export interface EncapsulateOptions {
-  match: MatcherType,
+  match: MatcherType;
   wrap: WrapperType;
 }
 
@@ -41,41 +41,32 @@ export function group(options: EncapsulateOptions) {
     // No tree? No-op.
     if (!Object.prototype.hasOwnProperty.call(tree, 'children')) return tree;
 
-    const wrappedNodes: Node[] = [];
-
-    let startIndex = 0;
-    // @ts-expect-error we confirmed the tree has children[]
-    tree.children.forEach((probe: Node, index: number) => {
-      if (matcher(probe) && index > startIndex) {
-        wrappedNodes.push(
-          wrapper(
-            // @ts-expect-error children[] exists
-            tree.children.slice(startIndex, index),
-            wrappedNodes.length,
-            probe
-          )
-        );
-        startIndex = index;
-      }
+    const matches: number[] = [];
+    (tree as Parent).children.forEach((probe: Node, index: number) => {
+      if (matcher(probe)) matches.push(index);
     });
-    // @ts-expect-error children[] exists
-    if (startIndex < tree.children.length) {
-      wrappedNodes.push(wrapper(
-        // @ts-expect-error children[] exists
-        tree.children.slice(startIndex),
-        wrappedNodes.length
-      ));
+    if (matches.length == 0) return tree;
+    const wrappedNodes = matches.map((matchPos, i) => {
+      const atEnd = i == matches.length - 1;
+      const endIndex = atEnd ? undefined : matches[i + 1];
+      return wrapper(
+        (tree as Parent).children.slice(matchPos, endIndex),
+        i,
+        (tree as Parent).children[matchPos]
+      );
+    });
+    const newTree = { ...tree, children: wrappedNodes };
+    // @ts-expect-error the type checker doesn't know what to do with the conditional property
+    if (tree === file?.data) {
+      file.data = newTree;
     }
-    if (!wrappedNodes.length) return tree;
-    // @ts-expect-error a tree is still a tree
-    tree.children = wrappedNodes;
-    return tree;
+    return newTree;
   };
 }
 
 /**
  * Converts a match specifier (type string, partial node, or function) into a function that can be used to test a node.
- * 
+ *
  * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
  */
 function makeMatchFn(matcher: MatcherType): MatchFn {
@@ -86,24 +77,27 @@ function makeMatchFn(matcher: MatcherType): MatchFn {
     return matcher;
   }
 
-  return (probe: Node) => { for (const key in matcher) { 
-    // @ts-expect-error ignore types for this match
-    if (probe[key] !== matcher[key]) return false; } 
-    return true; };
+  return (probe: Node) => {
+    for (const key in matcher) {
+      // @ts-expect-error ignore types for this match
+      if (probe[key] !== matcher[key]) return false;
+    }
+    return true;
+  };
 }
 
 /**
  * Converts a wrapper specifier (type string, partial node, or function) into a wrapper function.
- * 
+ *
  * @param wrapper A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
  */
 function makeWrapFn(wrapper: WrapperType): WrapFn {
   if (typeof wrapper === 'string') {
-    return  (nodes: Node[]) =>  ({type: wrapper, children: nodes});
+    return (nodes: Node[]) => ({ type: wrapper, children: nodes });
   }
   if (typeof wrapper === 'function') {
     return wrapper;
   }
 
-  return (nodes: Node[]) => ({...wrapper, children: nodes});
+  return (nodes: Node[]) => ({ ...wrapper, children: nodes });
 }
