@@ -20,9 +20,11 @@ import { VFile } from 'vfile';
 type MatchFn = (probe: Node) => boolean;
 type WrapFn = (nodes: Node[], count?: number, matched?: Node) => Parent;
 
+type MatcherType = string | Node | MatchFn;
+type WrapperType = string | Node | WrapFn;
 export interface EncapsulateOptions {
-  match: MatchFn,
-  wrap: WrapFn;
+  match: MatcherType,
+  wrap: WrapperType;
 }
 
 /**
@@ -30,9 +32,12 @@ export interface EncapsulateOptions {
  * then wrap in a user-defined container.
  */
 /** @type {import('unified').Plugin<[Options]>} */
-export function encapsulate(options: EncapsulateOptions) {
+export function group(options: EncapsulateOptions) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return (tree: Node, file: VFile): Node => {
+  const matcher = makeMatchFn(options.match);
+  const wrapper = makeWrapFn(options.wrap);
+
+  return (tree: Node, file?: VFile): Node => {
     // No tree? No-op.
     if (!Object.prototype.hasOwnProperty.call(tree, 'children')) return tree;
 
@@ -41,9 +46,9 @@ export function encapsulate(options: EncapsulateOptions) {
     let startIndex = 0;
     // @ts-expect-error we confirmed the tree has children[]
     tree.children.forEach((probe: Node, index: number) => {
-      if (options.match(probe) && index > startIndex) {
+      if (matcher(probe) && index > startIndex) {
         wrappedNodes.push(
-          options.wrap(
+          wrapper(
             // @ts-expect-error children[] exists
             tree.children.slice(startIndex, index),
             wrappedNodes.length,
@@ -55,7 +60,7 @@ export function encapsulate(options: EncapsulateOptions) {
     });
     // @ts-expect-error children[] exists
     if (startIndex < tree.children.length) {
-      wrappedNodes.push(options.wrap(
+      wrappedNodes.push(wrapper(
         // @ts-expect-error children[] exists
         tree.children.slice(startIndex),
         wrappedNodes.length
@@ -66,4 +71,39 @@ export function encapsulate(options: EncapsulateOptions) {
     tree.children = wrappedNodes;
     return tree;
   };
+}
+
+/**
+ * Converts a match specifier (type string, partial node, or function) into a function that can be used to test a node.
+ * 
+ * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
+ */
+function makeMatchFn(matcher: MatcherType): MatchFn {
+  if (typeof matcher === 'string') {
+    return (probe: Node) => probe.type === matcher;
+  }
+  if (typeof matcher === 'function') {
+    return matcher;
+  }
+
+  return (probe: Node) => { for (const key in matcher) { 
+    // @ts-expect-error ignore types for this match
+    if (probe[key] !== matcher[key]) return false; } 
+    return true; };
+}
+
+/**
+ * Converts a wrapper specifier (type string, partial node, or function) into a wrapper function.
+ * 
+ * @param wrapper A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
+ */
+function makeWrapFn(wrapper: WrapperType): WrapFn {
+  if (typeof wrapper === 'string') {
+    return  (nodes: Node[]) =>  ({type: wrapper, children: nodes});
+  }
+  if (typeof wrapper === 'function') {
+    return wrapper;
+  }
+
+  return (nodes: Node[]) => ({...wrapper, children: nodes});
 }
