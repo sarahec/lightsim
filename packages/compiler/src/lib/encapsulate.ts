@@ -15,13 +15,11 @@
  */
 
 import { type Parent, type Node } from 'unist';
-import { VFile } from 'vfile';
+import { type VFile } from 'vfile';
 
-type MatchFn = (probe: Node) => boolean;
-type WrapFn = (nodes: Node[], count?: number, matched?: Node) => Parent;
+import { type MatcherType, makeMatchFn } from './util/matcher';
+import { type WrapperType, makeWrapFn } from './util/wrapper';
 
-type MatcherType = string | Node | MatchFn;
-type WrapperType = string | Node | WrapFn;
 export interface EncapsulateOptions {
   match: MatcherType;
   wrap: WrapperType;
@@ -62,42 +60,4 @@ export function group(options: EncapsulateOptions) {
     }
     return newTree;
   };
-}
-
-/**
- * Converts a match specifier (type string, partial node, or function) into a function that can be used to test a node.
- *
- * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
- */
-function makeMatchFn(matcher: MatcherType): MatchFn {
-  if (typeof matcher === 'string') {
-    return (probe: Node) => probe.type === matcher;
-  }
-  if (typeof matcher === 'function') {
-    return matcher;
-  }
-
-  return (probe: Node) => {
-    for (const key in matcher) {
-      // @ts-expect-error ignore types for this match
-      if (probe[key] !== matcher[key]) return false;
-    }
-    return true;
-  };
-}
-
-/**
- * Converts a wrapper specifier (type string, partial node, or function) into a wrapper function.
- *
- * @param wrapper A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
- */
-function makeWrapFn(wrapper: WrapperType): WrapFn {
-  if (typeof wrapper === 'string') {
-    return (nodes: Node[]) => ({ type: wrapper, children: nodes });
-  }
-  if (typeof wrapper === 'function') {
-    return wrapper;
-  }
-
-  return (nodes: Node[]) => ({ ...wrapper, children: nodes });
 }
