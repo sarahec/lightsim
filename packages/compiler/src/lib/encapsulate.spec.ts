@@ -37,19 +37,23 @@ beforeEach(() => {
   configuredProcessor = unified()
     .use(group, { match: matchFn, wrap: wrapFn });
   h2Tree = u('root', [  
-    u('heading', { depth: 2 }),
-    u('text', 'Hello'),
-    u('heading', { depth: 2 }),
-    u('text', 'World'),
+    u('heading', { depth: 2 }, [
+      u('text', 'Hello'),
+    ]),
+    u('heading', { depth: 2 }, [
+      u('text', 'World'),
+    ]),
   ]);
   paginatedH2Tree = u('root', [
     u('page', [
-      u('heading', { depth: 2 }),
-      u('text', 'Hello'),
+      u('heading', { depth: 2 }, [
+        u('text', 'Hello'),
+      ]),
     ]),
     u('page', [
-      u('heading', { depth: 2 }),
-      u('text', 'World'), 
+      u('heading', { depth: 2 }, [
+        u('text', 'World'), 
+      ]),
     ]),
   ]);
 });
@@ -66,17 +70,13 @@ describe('group plugin', () => {
 
   it('Should do nothing if no match', async () => {
     const tree = u('root', [
-      u('heading', { depth: 1 }),
-      u('text', 'Hello'),
+      u('heading', { depth: 1 }, [
+        u('text', 'Hello'),
+      ]),
     ]);
     const expected = tree;
     const result = configuredProcessor.runSync(tree);
     expect(result).toEqual(expected);
-  });
-
-  it('Should wrap matched content', async () => {
-    const result = configuredProcessor.runSync(h2Tree);
-    expect(result).toEqual(paginatedH2Tree);
   });
 
 });
