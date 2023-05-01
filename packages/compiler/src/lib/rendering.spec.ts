@@ -17,27 +17,21 @@
 import { u } from 'unist-builder';
 import { type Root } from 'mdast';
 
-
 import { toHTML, toMarkdown } from './rendering';
 
 describe('renderer', () => {
+  const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
-const tree = u('root', [
-        u('heading', {depth: 1}, [u('text', 'Hello')])
-    ]);
+  it('renders HTML', () => {
+    const file = toHTML(tree as Root, 0, 'test');
 
-it('renders HTML', () => {
-    const file = toHTML(tree as Root, 1, 'test');
-    
-    expect(file.basename).toBe('test1.html');
+    expect(file.basename).toBe('test.html'); // 0 is elided
     expect(file.value).toBe('<h1>Hello</h1>');
-});
+  });
 
-it('renders Markdown', () => {
+  it('renders Markdown', () => {
     const file = toMarkdown(tree as Root, 1, 'test');
     expect(file.basename).toBe('test1.md');
     expect(file.value).toBe('# Hello\n');
+  });
 });
-
-});
-
