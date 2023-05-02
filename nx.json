@@ -3,7 +3,7 @@
   "npmScope": "lightsim",
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/nx-cloud",
+      "runner": "nx-cloud",
       "options": {
         "cacheableOperations": ["build", "lint", "test", "e2e"],
         "accessToken": "YWZiYjU2ZDgtOWY2MS00ZWFiLTk4NWItMTZhNmJlZjAzZjAxfHJlYWQtd3JpdGU="
@@ -39,7 +39,7 @@
     "libsDir": "packages"
   },
   "generators": {
-    "@nrwl/react": {
+    "@nx/react": {
       "application": {
         "style": "css",
         "linter": "eslint",
