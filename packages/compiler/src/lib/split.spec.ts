@@ -23,12 +23,12 @@ describe('split', () => {
   ]);
 
   it('should return the tree if no matches are found', () => {
-    const processor = unified().use(split, { match: 'foo' });
+    const processor = unified().use(split, { unwrap: 'foo' });
     expect(processor.runSync(tree)).toEqual([tree]);
   });
 
   it('should return a set of trees if found', () => {
-    const processor = unified().use(split, { match: 'page' });
+    const processor = unified().use(split, { unwrap: 'page' });
     const trees = processor.runSync(tree) as unknown as Node[];
     expect(trees).toHaveLength(2);
     expect(trees).toEqual([

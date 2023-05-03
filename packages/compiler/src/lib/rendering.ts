@@ -6,6 +6,27 @@ import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 import { VFile } from 'vfile';
 
+export enum FileFormat {
+  HTML = 'html',
+  Markdown = 'md',
+}
+export interface RenderOptions {
+  count?: number;
+  prefix?: string;
+  suffix?: string;
+  format?: FileFormat;
+};
+
+export function render(trees: (Root[] | Root), options?: RenderOptions): VFile[] {
+  const formatter = options?.format === FileFormat.HTML ? toHTML : toMarkdown;
+  const baseCount = options?.count || 0;
+    if (!Array.isArray(trees)) {
+      return [(formatter(trees, options))];
+    } else {
+      return trees.map((tree, index) => formatter(tree, {...options, count: baseCount + index }));
+    }
+  }
+
 /**
  * Converts a mdast tree to HTML and returns it as a VFile.
  * 
@@ -15,7 +36,12 @@ import { VFile } from 'vfile';
  * @param suffix File extension
  * @returns An in-memory VFile with the file name and HTML
  */
-export function toHTML(tree: Root, count=0, prefix='page', suffix = 'html'){
+export function toHTML(tree: Root, options?: RenderOptions){
+  const {
+    count = 0,
+    prefix = 'page',
+    suffix = 'html',
+  } = options || {};
   const hast = unified()
     .use(remarkRehype)
     .runSync(tree) as HastRoot;
@@ -34,7 +60,12 @@ export function toHTML(tree: Root, count=0, prefix='page', suffix = 'html'){
  * @param suffix File extension
  * @returns An in-memory VFile with the file name and markdown
  */
-export function toMarkdown(tree: Root, count=0, prefix='page', suffix = 'md') {
+export function toMarkdown(tree: Root, options?: RenderOptions){
+  const {
+    count = 0,
+    prefix = 'page',
+    suffix = 'md',
+  } = options || {};
   const markdown = unified()
     .use(remarkStringify)
     .stringify(tree);

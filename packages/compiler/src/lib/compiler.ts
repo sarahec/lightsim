@@ -14,16 +14,17 @@
  limitations under the License.
  */
 
- import { VFile } from 'vfile';
-import { Logger, ILogObj } from 'tslog';
+import { VFile } from 'vfile';
 import { group } from './group';
-import { toHTML, toMarkdown } from './rendering';
-import { Parent } from 'mdast';
+import { FileFormat, RenderOptions, render } from './rendering';
+import { Parent, Root } from 'mdast';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import {split } from './split';
 
-export enum FileFormat {
-  HTML = 'html',
-  Markdown = 'md',
-}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type CompileOptions = RenderOptions;
 
 /**
  * Compiles and formats a list of VFiles.
@@ -32,24 +33,36 @@ export enum FileFormat {
  * @param format Output format
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
-export function compile(sources: VFile[], format: FileFormat): VFile[] {
-  const log: Logger<ILogObj> = new Logger();
-  const outputs: VFile[] = [];
-  // TODO Reimplement as a pair of plugins (one to compile, one to render into files)
-  //   const formatter = format == FileFormat.HTML ? toHTML : toMarkdown;
-  //   for (const source of sources) {
-  //     log.trace(`Compiling ${source.path}`);
-  //     const pages = splitFile(source);
-  //     outputs.push(...pages.map((page) => formatter(page)));
-  //   }
-  return outputs;
-}
+export async function compiler(source: VFile, options?: CompileOptions): Promise<VFile[]> {
+  const configuration = { 
+    format: FileFormat.HTML,
+    match: {type: 'heading', depth: 2},
+    wrap: 'page',
+    unwrap: 'page',
+    count: 0,
+    ...options
+  };
+
+  const ast = await unified()
+      .use(remarkParse)
+      .parse(source);
+
+  const trees = await unified()
+      .use(group, configuration)
+      // TODO Add other stages here
+      .use(split, configuration)
+      .run(ast) as unknown as Root[];
+
+  return render(trees, configuration);
+  }
+
 
 
 export interface Screen extends Parent {
-  type: 'screen'
-};
+  type: 'screen';
+}
 
-export const wrapScreen = (nodes: Node[]) => ({ type: 'screen', children: nodes });
-
-
+export const wrapScreen = (nodes: Node[]) => ({
+  type: 'screen',
+  children: nodes,
+});
