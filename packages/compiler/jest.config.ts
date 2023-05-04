@@ -13,5 +13,5 @@ export default {
     `<rootDir>/node_modules/(?!.*\\.mjs$)`,
   ],
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/compiler',
+  // coverageDirectory: '../../coverage/packages/compiler',
 };
