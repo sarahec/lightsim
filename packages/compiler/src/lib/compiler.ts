@@ -20,7 +20,7 @@ import { FileFormat, RenderOptions, render } from './rendering';
 import { Parent, Root } from 'mdast';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import {SplitOptions, splitTrees } from './splitTrees';
+import {SplitOptions, splitTrees } from './split-trees';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

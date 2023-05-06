@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { u } from 'unist-builder';
-import { SplitOptions, splitTrees } from './splitTrees';
+import { splitTrees } from './split-trees';
 import { unified } from 'unified';
 
 describe('split', () => {
