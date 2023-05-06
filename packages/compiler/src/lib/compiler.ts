@@ -15,16 +15,20 @@
  */
 
 import { VFile } from 'vfile';
-import { group } from './group';
+import { NodeGroupingOptions, groupNodes } from './groupNodes';
 import { FileFormat, RenderOptions, render } from './rendering';
 import { Parent, Root } from 'mdast';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import {split } from './split';
+import {SplitOptions, splitTrees } from './splitTrees';
 
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export type CompileOptions = RenderOptions;
+export interface CompileOptions{ 
+  group?: NodeGroupingOptions;
+  split?: SplitOptions;
+  render?:  RenderOptions;
+};
 
 /**
  * Compiles and formats a list of VFiles.
@@ -48,9 +52,9 @@ export async function compiler(source: VFile, options?: CompileOptions): Promise
       .parse(source);
 
   const trees = await unified()
-      .use(group, configuration)
+      .use(groupNodes, configuration)
       // TODO Add other stages here
-      .use(split, configuration)
+      .use(splitTrees, configuration)
       .run(ast) as unknown as Root[];
 
   return render(trees, configuration);

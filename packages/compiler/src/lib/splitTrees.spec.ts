@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { u } from 'unist-builder';
-import { split } from './split';
+import { SplitOptions, splitTrees } from './splitTrees';
 import { unified } from 'unified';
 
 describe('split', () => {
@@ -23,12 +23,12 @@ describe('split', () => {
   ]);
 
   it('should return the tree if no matches are found', () => {
-    const processor = unified().use(split, { unwrap: 'foo' });
+    const processor = unified().use(splitTrees, { match: 'foo' });
     expect(processor.runSync(tree)).toEqual([tree]);
   });
 
   it('should return a set of trees if found', () => {
-    const processor = unified().use(split, { unwrap: 'page' });
+    const processor = unified().use(splitTrees, { match: 'page' });
     const trees = processor.runSync(tree) as unknown as Node[];
     expect(trees).toHaveLength(2);
     expect(trees).toEqual([
