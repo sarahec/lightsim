@@ -8,10 +8,12 @@ describe('compiler', () => {
       path: 'test.md',
       value: '# Hello World!',
     });
-    const files = await compiler(source, { format: FileFormat.HTML} );
+    const files = await compiler(source, {
+      render: { format: FileFormat.HTML },
+    });
     expect(files).toHaveLength(1); // TODO Should be 1, fix after implementing compile
-      const file: VFile = files[0];
-      expect(file.value).toEqual('<h1>Hello World!</h1>');
-      expect(file.path).toEqual('page.html');
+    const file: VFile = files[0];
+    expect(file.value).toEqual('<h1>Hello World!</h1>');
+    expect(file.path).toEqual('page.html');
   });
 });

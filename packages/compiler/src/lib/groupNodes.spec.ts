@@ -16,7 +16,7 @@
 
 import { unified } from 'unified';
 
-import { group } from './group';
+import { groupNodes } from './groupNodes';
 import { type Node } from 'unist';
 import { u } from 'unist-builder';
 
@@ -29,7 +29,7 @@ const wrapFn = (nodes: Node[]) => ({
   children: nodes,
 });
 
-const processor = unified().use(group, {
+const processor = unified().use(groupNodes, {
   match: matchFn,
   wrap: wrapFn,
 });

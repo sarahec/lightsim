@@ -20,7 +20,7 @@ import { type VFile } from 'vfile';
 import { type MatcherType, makeMatchFn } from './util/matcher';
 import { type WrapperType, makeWrapFn } from './util/wrapper';
 
-export interface EncapsulateOptions {
+export interface NodeGroupingOptions {
   match: MatcherType;
   wrap: WrapperType;
 }
@@ -30,8 +30,7 @@ export interface EncapsulateOptions {
  * then wrap in a user-defined container.
  */
 /** @type {import('unified').Plugin<[Options]>} */
-export function group(options: EncapsulateOptions) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function groupNodes(options: NodeGroupingOptions) {
   const matcher = makeMatchFn(options.match);
   const wrapper = makeWrapFn(options.wrap);
 

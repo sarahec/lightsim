@@ -16,7 +16,7 @@ import { assert } from 'console';
 import { MatcherType, makeMatchFn } from './util/matcher';
 
 export type SplitOptions = {
-  unwrap: MatcherType;
+  match: MatcherType;
 };
 
 /**
@@ -25,8 +25,8 @@ export type SplitOptions = {
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
-export function split(options: SplitOptions): (tree: Node) => Node[] {
-  const matcher = makeMatchFn(options.unwrap);
+export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
+  const matcher = makeMatchFn(options.match);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (tree: any /* Node */) => {
     assert(Object.prototype.hasOwnProperty.call(tree, 'children'));
