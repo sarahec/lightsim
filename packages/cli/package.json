@@ -1,5 +1,5 @@
 {
-  "name": "@lightsim/compiler-cli",
+  "name": "@lightsim/cli",
   "version": "0.1.0",
   "type": "module",
   "bin": {
