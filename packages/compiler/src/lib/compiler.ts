@@ -14,21 +14,21 @@
  limitations under the License.
  */
 
+import { Root } from 'mdast';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
 import { VFile } from 'vfile';
 import { NodeGroupingOptions, groupNodes } from './groupNodes';
 import { FileFormat, RenderOptions, render } from './rendering';
-import { Parent, Root } from 'mdast';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import {SplitOptions, splitTrees } from './split-trees';
-
+import { SplitOptions, splitTrees } from './split-trees';
+import { MatcherType } from './util/matcher';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CompileOptions{ 
+export interface CompileOptions {
   group?: NodeGroupingOptions;
   split?: SplitOptions;
-  render?:  RenderOptions;
-};
+  render?: RenderOptions;
+}
 
 /**
  * Compiles and formats a list of VFiles.
@@ -37,36 +37,32 @@ export interface CompileOptions{
  * @param format Output format
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
-export async function compiler(source: VFile, options?: CompileOptions): Promise<VFile[]> {
-  const configuration = { 
-    format: FileFormat.HTML,
-    match: {type: 'heading', depth: 2},
-    wrap: 'page',
-    unwrap: 'page',
-    count: 0,
-    ...options
+export async function compile(
+  source: VFile,
+  options?: CompileOptions
+): Promise<VFile[]> {
+  const groupConfiguration: NodeGroupingOptions = {
+    match: { type: 'heading', depth: 2 } as MatcherType,
+    wrap: 'screen',
+    ...options?.group,
   };
 
-  const ast = await unified()
-      .use(remarkParse)
-      .parse(source);
+  const splitConfiguration: SplitOptions = {
+    match: 'screen',
+    ...options?.split,
+  };
 
-  const trees = await unified()
-      .use(groupNodes, configuration)
-      // TODO Add other stages here
-      .use(splitTrees, configuration)
-      .run(ast) as unknown as Root[];
+  const renderConfiguration: RenderOptions = {
+    format: FileFormat.HTML,
+    ...options?.render,
+  };
+  const ast = await unified().use(remarkParse).parse(source);
 
-  return render(trees, configuration);
-  }
+  const trees = (await unified()
+    .use(groupNodes, groupConfiguration)
+    // TODO Add other stages here
+    .use(splitTrees, splitConfiguration)
+    .run(ast)) as unknown as Root[];
 
-
-
-export interface Screen extends Parent {
-  type: 'screen';
+  return render(trees, renderConfiguration);
 }
-
-export const wrapScreen = (nodes: Node[]) => ({
-  type: 'screen',
-  children: nodes,
-});
