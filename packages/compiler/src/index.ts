@@ -1,1 +1,1 @@
-export * from './lib/compiler';
+export * from './lib/compiler.js';

@@ -17,8 +17,8 @@
 import { type Parent, type Node } from 'unist';
 import { type VFile } from 'vfile';
 
-import { type MatcherType, makeMatchFn } from './util/matcher';
-import { type WrapperType, makeWrapFn } from './util/wrapper';
+import { type MatcherType, makeMatchFn } from './util/matcher.js';
+import { type WrapperType, makeWrapFn } from './util/wrapper.js';
 
 export interface NodeGroupingOptions {
   match: MatcherType;

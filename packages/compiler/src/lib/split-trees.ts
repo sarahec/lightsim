@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { assert } from 'console';
-import { MatcherType, makeMatchFn } from './util/matcher';
+import { MatcherType, makeMatchFn } from './util/matcher.js';
 
 export type SplitOptions = {
   match: MatcherType;

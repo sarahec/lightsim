@@ -18,10 +18,10 @@ import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
-import { NodeGroupingOptions, groupNodes } from './groupNodes';
-import { FileFormat, RenderOptions, render } from './rendering';
-import { SplitOptions, splitTrees } from './split-trees';
-import { MatcherType } from './util/matcher';
+import { NodeGroupingOptions, groupNodes } from './groupNodes.js';
+import { FileFormat, RenderOptions, render } from './rendering.js';
+import { SplitOptions, splitTrees } from './split-trees.js';
+import { MatcherType } from './util/matcher.js';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CompileOptions {
