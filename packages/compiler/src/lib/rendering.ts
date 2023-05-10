@@ -5,6 +5,7 @@ import remarkRehype from "remark-rehype";
 import remarkStringify from "remark-stringify";
 import { unified } from "unified";
 import { VFile } from 'vfile';
+import rehypeDocument from "rehype-document";
 
 export enum FileFormat {
   HTML = 'html',
@@ -44,10 +45,12 @@ export function toHTML(tree: Root, options?: RenderOptions){
   } = options || {};
   const hast = unified()
     .use(remarkRehype)
+    .use(rehypeDocument, {title: 'TBD'})
     .runSync(tree) as HastRoot;
   const html = unified()
     .use(rehypeStringify)
-    .stringify(hast);
+    .stringify(hast)
+    .trim();
     return makeVFile(html, suffix, count, prefix);
   }
 
@@ -68,7 +71,8 @@ export function toMarkdown(tree: Root, options?: RenderOptions){
   } = options || {};
   const markdown = unified()
     .use(remarkStringify)
-    .stringify(tree);
+    .stringify(tree)
+    .trim();
   return makeVFile(markdown, suffix, count, prefix);
 }
 
