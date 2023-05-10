@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 import { Command } from 'commander';
-import { compileCommand } from './src/compile/command.js';
+import { compileCommand } from './compile/command.js';
 
 const program = new Command();
 

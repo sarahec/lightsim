@@ -9,13 +9,16 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "allowJs": true
+    "allowJs": true,
   },
   "files": [],
   "include": [],
   "references": [
     {
       "path": "./tsconfig.lib.json",
+    },
+    {
+      "path": "./tsconfig.spec.json",
     }
   ]
 }

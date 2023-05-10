@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lightsim/cli": ["packages/cli/src/index.ts"],
+      "@lightsim/cli": ["packages/cli/src/cli.ts"],
       "@lightsim/compiler": ["packages/compiler/src/index.ts"]
     }
   },

@@ -1,8 +1,15 @@
 {
   "name": "@lightsim/cli",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "type": "module",
   "bin": {
-    "compiler-cli": "./src/cli.js"
+    "cli": "./src/cli.js"
+  },
+  "compilerOptions": {
+    "esModuleInterop": true    
+  },
+  "dependencies": {
+    "@lightsim/compiler": "*"
   }
 }
