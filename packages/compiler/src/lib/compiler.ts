@@ -23,6 +23,8 @@ import { FileFormat, RenderOptions, render } from './rendering.js';
 import { SplitOptions, splitTrees } from './split-trees.js';
 import { MatcherType } from './util/matcher.js';
 
+// import { inspect } from 'unist-util-inspect';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CompileOptions {
   group?: NodeGroupingOptions;
@@ -58,11 +60,12 @@ export async function compile(
   };
   const ast = await unified().use(remarkParse).parse(source);
 
-  const trees = (await unified()
+  const processedTree = await unified()
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
-    .use(splitTrees, splitConfiguration)
-    .run(ast)) as unknown as Root[];
+    .run(ast);
 
+  // @ts-expect-error TS wants Node<Data> but there's no way to instantiate that
+  const trees = splitTrees(splitConfiguration)(processedTree) as Root[];
   return render(trees, renderConfiguration);
 }
