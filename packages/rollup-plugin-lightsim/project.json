@@ -1,0 +1,45 @@
+{
+  "name": "rollup-plugin-lightsim",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/rollup-plugin-lightsim/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/rollup-plugin-lightsim",
+        "tsConfig": "packages/rollup-plugin-lightsim/tsconfig.lib.json",
+        "packageJson": "packages/rollup-plugin-lightsim/package.json",
+        "main": "packages/rollup-plugin-lightsim/src/index.ts",
+        "assets": ["packages/rollup-plugin-lightsim/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs rollup-plugin-lightsim {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/rollup-plugin-lightsim/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/rollup-plugin-lightsim/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}
