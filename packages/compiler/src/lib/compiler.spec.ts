@@ -41,4 +41,20 @@ describe('compiler', () => {
     expect(file.path).toEqual('page.md');
   });
 
+  it('Should export multiple pages from one source', async () => {
+    const multiPage = new VFile({
+      path: 'test.md',
+      value: `# Hello\n\n## World!\n\n### How are you?`,
+    });
+    const files = await compile(multiPage, {
+      render: { format: FileFormat.Markdown },
+    });
+    expect(files).toHaveLength(2);
+    expect(files[0].value).toEqual('# Hello');
+    expect(files[0].path).toEqual('page.md');
+    expect(files[1].value).toEqual('## World!\n\n### How are you?');
+    expect(files[1].path).toEqual('page1.md');
+  });
+
+
 });

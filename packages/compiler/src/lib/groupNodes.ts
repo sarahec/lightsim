@@ -43,6 +43,7 @@ export function groupNodes(options: NodeGroupingOptions) {
       if (matcher(probe)) matches.push(index);
     });
     if (matches.length == 0) return tree;
+    matches.unshift(0); // So we always include the sdart of the tree
     const wrappedNodes = matches.map((matchPos, i) => {
       const atEnd = i == matches.length - 1;
       const endIndex = atEnd ? undefined : matches[i + 1];

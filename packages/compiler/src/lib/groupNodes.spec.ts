@@ -51,11 +51,11 @@ describe('group plugin', () => {
 
   it('Should wrap matched content', async () => {
     const h2Tree = u('root', [
-      u('heading', { depth: 2 }, [u('text', 'Hello')]),
+      u('heading', { depth: 1 }, [u('text', 'Hello')]),
       u('heading', { depth: 2 }, [u('text', 'World')]),
     ]);
     const paginatedH2Tree = u('root', [
-      u('page', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
+      u('page', [u('heading', { depth: 1 }, [u('text', 'Hello')])]),
       u('page', [u('heading', { depth: 2 }, [u('text', 'World')])]),
     ]);
     const result = processor.runSync(h2Tree);
