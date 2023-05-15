@@ -18,25 +18,31 @@ import { compile } from '@lightsim/compiler';
 import { glob } from 'glob';
 import { type Plugin } from 'rollup';
 import { read } from 'to-vfile';
+import { VFile } from 'vfile';
 
 export async function rollupPluginLightsim(
-  sourceGlob: string,
+  sourceGlob: string
 ): Promise<Plugin> {
   const sources = await glob(sourceGlob);
   return {
     name: 'lightsim-compiler',
     buildStart() {
-      sources.forEach((file: string) =>  { this.addWatchFile(file); });
+      sources.forEach((file: string) => {
+        this.addWatchFile(file);
+      });
     },
     async watchChange(id) {
       if (sources.includes(id)) {
-        // construct a new VFile by reading the file from disk
-        const source = await read(id);
-        const generated = await compile(source);
-        generated.forEach((file) => { 
-          this.emitFile({type: 'asset', fileName: file.basename, source: String(file.value)}); });
+        const source: VFile = await read(id);
+        const generated: VFile[] = await compile(source);
+        generated.forEach((file) => {
+          this.emitFile({
+            type: 'asset',
+            fileName: file.basename,
+            source: String(file.value),
+          });
+        });
       }
     },
   };
 }
-
