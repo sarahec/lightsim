@@ -16,12 +16,15 @@
 
 import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
+import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
 import { NodeGroupingOptions, groupNodes } from './groupNodes.js';
 import { FileFormat, RenderOptions, render } from './rendering.js';
 import { SplitOptions, splitTrees } from './split-trees.js';
 import { MatcherType } from './util/matcher.js';
+
+const LOGGER_NAME = 'compiler';
 
 // import { inspect } from 'unist-util-inspect';
 
@@ -30,34 +33,44 @@ export interface CompileOptions {
   group?: NodeGroupingOptions;
   split?: SplitOptions;
   render?: RenderOptions;
+  log?: Logger<ILogObj>;
 }
 
 /**
  * Compiles and formats a list of VFiles.
  *
- * @param sources Markdown pages to be compiled
- * @param format Output format
+ * @param source A single markdown page
+ * @param options Options for the compiler
+ * @param logger A parent logger or or `null` to create a new one
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
 export async function compile(
   source: VFile,
   options?: CompileOptions
 ): Promise<VFile[]> {
+  const log =
+    options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
+    new Logger({ name: LOGGER_NAME });
+
   const groupConfiguration: NodeGroupingOptions = {
     match: { type: 'heading', depth: 2 } as MatcherType,
     wrap: 'screen',
+    log: log,
     ...options?.group,
   };
 
   const splitConfiguration: SplitOptions = {
     match: 'screen',
+    log: log,
     ...options?.split,
   };
 
   const renderConfiguration: RenderOptions = {
     format: FileFormat.HTML,
+    log: log,
     ...options?.render,
   };
+  log.trace('compiling', source.path);
   const ast = await unified().use(remarkParse).parse(source);
 
   const processedTree = await unified()

@@ -13,10 +13,14 @@
 // limitations under the License.
 
 import { assert } from 'console';
+import { ILogObj, Logger } from 'tslog';
 import { MatcherType, makeMatchFn } from './util/matcher.js';
+
+const LOGGER_NAME = 'split trees';
 
 export type SplitOptions = {
   match: MatcherType;
+  log?: Logger<ILogObj>;
 };
 
 /**
@@ -27,23 +31,37 @@ export type SplitOptions = {
 /** @type {import('unified').Plugin<[Options]>} */
 export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
   const matcher = makeMatchFn(options.match);
+  const log =
+    options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
+    new Logger({ name: LOGGER_NAME });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (tree: any /* Node */) => {
-    assert(Object.prototype.hasOwnProperty.call(tree, 'children'));
+    assert(
+      Object.prototype.hasOwnProperty.call(tree, 'children'),
+      'no children found in tree'
+    );
     const matches = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tree.children.forEach((probe: any, index: number) => {
-      if (matcher(probe)) matches.push(index);
+      if (matcher(probe)) {
+        log.silly(`found match at index ${index}`);
+        matches.push(index);
+      }
     });
-    if (matches.length == 0) return [tree];
-    assert(
-      matches.length == tree.children.length,
-      'all children should be the same type'
-    );
+    if (matches.length == 0) {
+      log.trace('no matches found');
+      return [tree];
+    }
+    if (matches.length != tree.children.length) {
+      log.warn('all matches should be at the top level of the tree');
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return tree.children.map((child: any /* Node */) => ({
+    const result = tree.children.map((child: any /* Node */) => ({
       ...child,
       type: 'root',
     }));
+    log.silly(`result: ${JSON.stringify(result)}`);
+    return result;
   };
 }
