@@ -17,7 +17,7 @@
 import { u } from 'unist-builder';
 import { type Root } from 'mdast';
 
-import { toHTML, toMarkdown } from './rendering';
+import { toHTML, toMarkdown } from '../rendering';
 
 describe('renderer', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);

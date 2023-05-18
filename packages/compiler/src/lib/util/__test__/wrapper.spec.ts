@@ -15,7 +15,7 @@
  */
 
 import { type Node } from 'unist';
-import { makeWrapFn } from './wrapper';
+import { makeWrapFn } from '../wrapper';
 
 describe('makeWrapFunction', () => {
   it('should accept and return a function', () => {
