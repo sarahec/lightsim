@@ -17,7 +17,7 @@ import { compile } from '@lightsim/compiler';
 import { glob } from 'glob';
 import { read } from 'to-vfile';
 import { VFile } from 'vfile';
-import { rollupPluginLightsim } from '../rollup-plugin-lightsim';
+import rollupPluginLightsim from '../index.js';
 
 describe('rollupPluginLightsim', () => {
   // Generate a Jest mock function for glob
@@ -29,14 +29,14 @@ describe('rollupPluginLightsim', () => {
   });
 
   it('should generate a plugin', async () => {
-    const plugin = await rollupPluginLightsim('content/test.md');
+    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
     expect(plugin).toHaveProperty('name');
     expect(plugin).toHaveProperty('buildStart');
     expect(plugin).toHaveProperty('watchChange');
   });
 
   it('should add files to watch', async () => {
-    const plugin = await rollupPluginLightsim('content/test.md');
+    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
 
     const addWatchFile = jest.fn();
     // @ts-expect-error buildStart is a function and thus is callable
@@ -51,7 +51,7 @@ describe('rollupPluginLightsim', () => {
       value: '<h1>Test</h1>',  // NOTE: The compiler emits full HTML docs by default. This value is only for this test.
     });
 
-    const plugin = await rollupPluginLightsim('content/test.md');
+    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
     // @ts-expect-error read is a mock function
     read.mockResolvedValue(source);
     // @ts-expect-error compile is a mock function
