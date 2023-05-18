@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
+import rollupPluginLightsim from '@lightsim/rollup-plugin';
 
 export default defineConfig({
   cacheDir: '../../node_modules/.vite/sandbox-app',
@@ -21,6 +22,7 @@ export default defineConfig({
     viteTsConfigPaths({
       root: '../../',
     }),
+    rollupPluginLightsim(),
   ],
 
   // Uncomment this if you are using workers.
