@@ -32,7 +32,7 @@ export async function rollupPluginLightsim(
       if (sources.includes(id)) {
         // construct a new VFile by reading the file from disk
         const source = await read(id);
-        const generated = await compile(source);
+        const generated = await compile(source, );
         generated.forEach((file) => { 
           this.emitFile({type: 'asset', fileName: file.basename, source: String(file.value)}); });
       }

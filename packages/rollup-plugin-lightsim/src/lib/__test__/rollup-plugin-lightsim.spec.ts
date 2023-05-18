@@ -1,4 +1,4 @@
-import { rollupPluginLightsim } from './rollup-plugin-lightsim';
+import { rollupPluginLightsim } from '../rollup-plugin-lightsim';
 
 describe('rollupPluginLightsim', () => {
   it('should work', () => {
