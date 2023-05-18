@@ -48,7 +48,7 @@ describe('rollupPluginLightsim', () => {
     const source = new VFile({ path: 'content/test.md', value: '# Test' });
     const compiled = new VFile({
       path: 'test.html',
-      value: '<h1>Test</h1>',
+      value: '<h1>Test</h1>',  // NOTE: The compiler emits full HTML docs by default. This value is only for this test.
     });
 
     const plugin = await rollupPluginLightsim('content/test.md');
