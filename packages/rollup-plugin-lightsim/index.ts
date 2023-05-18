@@ -20,10 +20,17 @@ import { type Plugin } from 'rollup';
 import { read } from 'to-vfile';
 import { VFile } from 'vfile';
 
-export async function rollupPluginLightsim(
-  sourceGlob: string
+interface PluginOptions {
+  path?: string
+}
+
+async function rollupPluginLightsim(
+  options?: PluginOptions,
 ): Promise<Plugin> {
-  const sources = await glob(sourceGlob);
+  const {
+    path = 'content/**/*.md',
+  } = options || {};
+  const sources = await glob(path);
   return {
     name: 'lightsim-compiler',
     buildStart() {
@@ -46,3 +53,5 @@ export async function rollupPluginLightsim(
     },
   };
 }
+
+export { PluginOptions, rollupPluginLightsim as default };
