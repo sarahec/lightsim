@@ -15,7 +15,7 @@
  */
 
 import compile from '@lightsim/compiler';
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { type Plugin } from 'rollup';
 import { read } from 'to-vfile';
 import { ILogObj, Logger } from 'tslog';
@@ -27,13 +27,13 @@ interface PluginOptions {
   log?: Logger<ILogObj>;
 }
 
-async function rollupPluginLightsim(options?: PluginOptions): Promise<Plugin> {
+function rollupPluginLightsim(options?: PluginOptions): Plugin {
   const { path = 'content/**/*.md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ||
     new Logger({ name: LOGGER_NAME });
 
-  const sources = await glob(path);
+  const sources: string[] = globSync(path);
   log.trace(`Found ${sources}`);
   return {
     name: 'lightsim-compiler',
