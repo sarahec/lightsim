@@ -18,7 +18,7 @@ import * as process from 'process';
 import { read } from 'to-vfile';
 import { printVerboseHook, rootDebug } from '../utils.js';
 import { VFile } from 'vfile';
-import { compile } from '@lightsim/compiler';
+import compile from '@lightsim/compiler';
 
 const debug = rootDebug.extend('compile');
 const debugError = rootDebug.extend('compile:error');

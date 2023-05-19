@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-import { compile } from '@lightsim/compiler';
+import compile from '@lightsim/compiler';
 import { glob } from 'glob';
 import { type Plugin } from 'rollup';
 import { read } from 'to-vfile';
