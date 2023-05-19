@@ -14,30 +14,32 @@
 
 import { expect, jest } from '@jest/globals';
 import compile from '@lightsim/compiler';
-import { glob } from 'glob';
+import { globSync } from 'glob';
 import { read } from 'to-vfile';
 import { VFile } from 'vfile';
 import rollupPluginLightsim from '../index.js';
+import { Logger, type ILogObj } from 'tslog';
+import { Plugin } from 'rollup';
+
+const log = new Logger<ILogObj>({ name: 'rollup-plugin-lightsim', minLevel: 5 });
 
 describe('rollupPluginLightsim', () => {
   // Generate a Jest mock function for glob
   // https://jestjs.io/docs/mock-functions#mocking-modules
 
-  beforeAll(() => {
-    // @ts-expect-error glob is a mock function
-    glob.mockResolvedValue(['content/test.md']);
+  let plugin: Plugin;
+  
+  beforeEach(() => {
+    plugin = rollupPluginLightsim({path: 'content/test.md', log: log});
   });
-
-  it('should generate a plugin', async () => {
-    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
+  
+  it('should generate a plugin', () => {
     expect(plugin).toHaveProperty('name');
     expect(plugin).toHaveProperty('buildStart');
     expect(plugin).toHaveProperty('watchChange');
   });
 
-  it('should add files to watch', async () => {
-    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
-
+  it('should add files to watch', () => {
     const addWatchFile = jest.fn();
     // @ts-expect-error buildStart is a function and thus is callable
     plugin.buildStart?.call({ addWatchFile });
@@ -51,7 +53,6 @@ describe('rollupPluginLightsim', () => {
       value: '<h1>Test</h1>',  // NOTE: The compiler emits full HTML docs by default. This value is only for this test.
     });
 
-    const plugin = await rollupPluginLightsim({path: 'content/test.md'});
     // @ts-expect-error read is a mock function
     read.mockResolvedValue(source);
     // @ts-expect-error compile is a mock function
@@ -71,7 +72,7 @@ describe('rollupPluginLightsim', () => {
 
 jest.mock('glob', () => {
   return {
-    glob: jest.fn(),
+    globSync: jest.fn(() => ['content/test.md']),
   };
 });
 
