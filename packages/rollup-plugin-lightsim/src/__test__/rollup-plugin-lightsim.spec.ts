@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { expect, jest } from '@jest/globals';
-import { compile } from '@lightsim/compiler';
+import compile from '@lightsim/compiler';
 import { glob } from 'glob';
 import { read } from 'to-vfile';
 import { VFile } from 'vfile';
@@ -81,8 +81,4 @@ jest.mock('to-vfile', () => {
   };
 });
 
-jest.mock('@lightsim/compiler', () => {
-  return {
-    compile: jest.fn(),
-  };
-});
+jest.mock('@lightsim/compiler', () => jest.fn());

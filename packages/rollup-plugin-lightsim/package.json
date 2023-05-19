@@ -1,6 +1,8 @@
 {
   "name": "@lightsim/rollup-plugin",
   "version": "0.0.1",
+  "type": "module",
+  "description": "A rollup plugin for lightsim",
   "dependencies": {
     "glob": "^10.2.3",
     "rollup": "^3.21.6"
