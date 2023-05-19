@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "type": "module",
   "description": "A rollup plugin for lightsim",
+  "main": "../../dist/packages/rollup-plugin-lightsim/src/index.js",
+  "module": "../../dist/packages/rollup-plugin-lightsim/src/index.js",
   "dependencies": {
     "glob": "^10.2.3",
     "rollup": "^3.21.6"
