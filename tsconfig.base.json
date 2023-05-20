@@ -16,10 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@lightsim/cli": ["packages/cli/src/cli.ts"],
-      "@lightsim/compiler": ["packages/compiler/src/index.ts"],
-      "@lightsim/rollup-plugin": [
-        "packages/rollup-plugin-lightsim/src/index.ts"
-      ]
+      "@lightsim/compiler": ["packages/compiler/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
