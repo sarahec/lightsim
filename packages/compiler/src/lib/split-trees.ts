@@ -33,7 +33,7 @@ export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
   const matcher = makeMatchFn(options.match);
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-    new Logger({ name: LOGGER_NAME });
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (tree: any /* Node */) => {
