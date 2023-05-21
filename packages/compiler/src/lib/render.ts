@@ -38,6 +38,7 @@ export enum FileFormat {
  * @param name Basename for the file (default: 'page')
  * @param count Number between the name and extension, e.g. page*1*.html (unused if unspecified or 0) 
  * @param extension File extension (default: matches output format)
+ * @param asHTMLDocument Whether to wrap HTML in a document (default: false, create a fragment)
  * @param format Whether to render as HTML or markdown
  * @param log Logger to use for logging
  */
@@ -46,6 +47,7 @@ export interface RenderOptions {
   name?: string;
   count?: number;
   extension?: string;
+  addHTMLDocument?: boolean;
   format?: FileFormat;
   log?: Logger<ILogObj>;
 }
@@ -73,11 +75,13 @@ export function toHTML(tree: Root, options?: RenderOptions) {
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
-  const hast = unified()
-    .use(remarkRehype)
-    .use(rehypeDocument, { title: 'TBD' })
-    .runSync(tree) as HastRoot;
+  const processor = options?.addHTMLDocument ? 
+      unified().use(remarkRehype).use(rehypeDocument, { title: 'TBD' }) :
+      unified().use(remarkRehype);
+  const hast = processor.runSync(tree) as HastRoot;
+  log.silly(`HAST: ${JSON.stringify(hast)}`);
   const html = unified().use(rehypeStringify).stringify(hast).trim();
+  log.silly(`HTML: ${html}`);
   return makeVFile(html, suffix, count, name, log);
 }
 

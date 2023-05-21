@@ -18,11 +18,20 @@ import { u } from 'unist-builder';
 import { type Root } from 'mdast';
 
 import { toHTML, toMarkdown } from '../render';
+import { ILogObj, Logger } from 'tslog';
 
-describe('renderer', () => {
+const logger = new Logger({name: 'test', minLevel: 3}) as Logger<ILogObj>;
+
+describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
-  it('renders HTML', () => {
+  it('renders a HTML fragment by default', () => {
+    const file = toHTML(tree as Root, {count: 0, name: 'test', log: logger});
+    expect(file.basename).toBe('test.html'); // count == 0 is elided
+    expect(file.value).toBe('<h1>Hello</h1>');
+  });
+
+  it('renders a HTML doc', () => {
     const doc = `<!doctype html>
 <html lang="en">
 <head>
@@ -34,8 +43,7 @@ describe('renderer', () => {
 <h1>Hello</h1>
 </body>
 </html>`;
-    const file = toHTML(tree as Root, {count: 0, name: 'test'});
-
+    const file = toHTML(tree as Root, {count: 0, name: 'test', addHTMLDocument: true, log: logger});
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe(doc);
   });
