@@ -34,14 +34,14 @@ describe('renderer', () => {
 <h1>Hello</h1>
 </body>
 </html>`;
-    const file = toHTML(tree as Root, {count: 0, prefix: 'test'});
+    const file = toHTML(tree as Root, {count: 0, name: 'test'});
 
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe(doc);
   });
 
   it('renders Markdown', () => {
-    const file = toMarkdown(tree as Root, {count: 1, prefix: 'test'});
+    const file = toMarkdown(tree as Root, {count: 1, name: 'test'});
     expect(file.basename).toBe('test1.md');
     expect(file.value).toBe('# Hello');
   });
