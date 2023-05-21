@@ -16,7 +16,7 @@
 
 import { VFile } from 'vfile';
 import compile from '../../index.js';
-import { FileFormat } from '../rendering.js';
+import { FileFormat } from '../render.js';
 
 describe('compiler', () => {
 
