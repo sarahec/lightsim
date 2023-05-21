@@ -20,7 +20,7 @@ import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
 import { NodeGroupingOptions, groupNodes } from './lib/groupNodes.js';
-import { FileFormat, RenderOptions, render } from './lib/rendering.js';
+import { FileFormat, RenderOptions, render } from './lib/render.js';
 import { SplitOptions, splitTrees } from './lib/split-trees.js';
 import { MatcherType } from './lib/util/matcher.js';
 
