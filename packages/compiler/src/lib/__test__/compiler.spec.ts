@@ -26,7 +26,6 @@ describe('compiler', () => {
   });
 
   it('Should compile a single page to HTML', async () => {
-    // TODO Parse and example the HTML rather than hard-coding it (which is fragile).
     const doc = `<!doctype html>
 <html lang="en">
 <head>
@@ -39,7 +38,7 @@ describe('compiler', () => {
 </body>
 </html>`;
     const files = await compile(singlePage, {
-      render: { format: FileFormat.HTML },
+      render: { format: FileFormat.HTML, addHTMLDocument: true },
     });
     expect(files).toHaveLength(1);
     const file: VFile = files[0];
