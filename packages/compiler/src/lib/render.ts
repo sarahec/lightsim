@@ -64,7 +64,7 @@ export function toHTML(tree: Root, options?: RenderOptions) {
   const { count = 0, prefix = 'page', suffix = 'html' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
-    new Logger({ name: HTML_LOGGER_NAME });
+    new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
   const hast = unified()
     .use(remarkRehype)
     .use(rehypeDocument, { title: 'TBD' })
@@ -86,7 +86,7 @@ export function toMarkdown(tree: Root, options?: RenderOptions) {
   const { count = 0, prefix = 'page', suffix = 'md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
-    new Logger({ name: MD_LOGGER_NAME });
+    new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
   return makeVFile(markdown, suffix, count, prefix);
 }

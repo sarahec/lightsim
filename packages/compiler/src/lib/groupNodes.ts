@@ -39,7 +39,7 @@ export function groupNodes(options: NodeGroupingOptions) {
   const wrapper = makeWrapFn(options.wrap);
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-    new Logger({ name: LOGGER_NAME });
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   return (tree: Node, file?: VFile): Node => {
     // No tree? No-op.

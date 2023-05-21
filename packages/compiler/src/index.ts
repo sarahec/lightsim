@@ -51,7 +51,7 @@ async function compile(
 ): Promise<VFile[]> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-    new Logger({ name: LOGGER_NAME });
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   const groupConfiguration: NodeGroupingOptions = {
     match: { type: 'heading', depth: 2 } as MatcherType,
