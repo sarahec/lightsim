@@ -31,10 +31,21 @@ export enum FileFormat {
   HTML = 'html',
   Markdown = 'md',
 }
+
+/**
+ * Options for rendering a markdown tree to a file.
+ * 
+ * @param name Basename for the file (default: 'page')
+ * @param count Number between the name and extension, e.g. page*1*.html (unused if unspecified or 0) 
+ * @param extension File extension (default: matches output format)
+ * @param format Whether to render as HTML or markdown
+ * @param log Logger to use for logging
+ */
+
 export interface RenderOptions {
+  name?: string;
   count?: number;
-  prefix?: string;
-  suffix?: string;
+  extension?: string;
   format?: FileFormat;
   log?: Logger<ILogObj>;
 }
@@ -55,13 +66,10 @@ export function render(trees: Root[] | Root, options?: RenderOptions): VFile[] {
  * Converts a mdast tree to HTML and returns it as a VFile.
  *
  * @param tree A single markdown tree
- * @param count Suffix for the file name
- * @param prefix Basename for the file
- * @param suffix File extension
- * @returns An in-memory VFile with the file name and HTML
+ * @returns An in-memory VFile
  */
 export function toHTML(tree: Root, options?: RenderOptions) {
-  const { count = 0, prefix = 'page', suffix = 'html' } = options || {};
+  const { count = 0, name: name = 'page', extension: suffix = 'html' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
@@ -70,36 +78,41 @@ export function toHTML(tree: Root, options?: RenderOptions) {
     .use(rehypeDocument, { title: 'TBD' })
     .runSync(tree) as HastRoot;
   const html = unified().use(rehypeStringify).stringify(hast).trim();
-  return makeVFile(html, suffix, count, prefix, log);
+  return makeVFile(html, suffix, count, name, log);
 }
 
 /**
  * Renders a mdast tree to markdown and returns it as a VFile.
 
  * @param tree A single markdown tree
- * @param count Suffix for the file name
- * @param prefix Basename for the file
- * @param suffix File extension
- * @returns An in-memory VFile with the file name and markdown
+ * @returns An in-memory VFile
  */
 export function toMarkdown(tree: Root, options?: RenderOptions) {
-  const { count = 0, prefix = 'page', suffix = 'md' } = options || {};
+  const { count = 0, name: name = 'page', extension: suffix = 'md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
-  return makeVFile(markdown, suffix, count, prefix);
+  return makeVFile(markdown, suffix, count, name);
 }
 
+/**
+ * Utility to make a VFile
+ * @param data contents
+ * @param extension file extension
+ * @param count optional sequence number (ignored if 0, default 1)
+ * @param name base filename (default: 'page')
+ * @param log logger
+ * @returns an in-memory VFile
+ */
 export function makeVFile(
-  value: string,
-  suffix: string,
+  data: string,
+  extension: string,
   count = 1,
-  prefix = 'page',
+  name = 'page',
   log?: Logger<ILogObj>
 ): VFile {
-  const filename = (count ? `${prefix}${count}` : prefix) + '.' + suffix;
+  const filename = (count ? `${name}${count}` : name) + '.' + extension;
   log?.trace(`New file: ${filename}`);
-  log?.silly(`...contents: ${value}`);
-  return new VFile({ basename: filename, value: value });
+  return new VFile({ basename: filename, value: data });
 }
