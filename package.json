@@ -7,10 +7,12 @@
   },
   "private": true,
   "dependencies": {
+    "@types/nunjucks": "^3.2.2",
     "axios": "^1.0.0",
     "commander": "^10.0.1",
     "debug": "^4.3.4",
     "glob": "^10.2.3",
+    "nunjucks": "^3.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-document": "^6.1.0",
