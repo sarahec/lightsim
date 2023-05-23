@@ -19,8 +19,10 @@ import { type Root } from 'mdast';
 
 import { toHTML, toMarkdown } from '../render';
 import { ILogObj, Logger } from 'tslog';
+import { Environment, Template } from 'nunjucks';
 
 const logger = new Logger({name: 'test', minLevel: 3}) as Logger<ILogObj>;
+const template = new Template('TEST:: {{contents}}', new Environment(null, {autoescape: false}));
 
 describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
@@ -31,21 +33,10 @@ describe('render', () => {
     expect(file.value).toBe('<h1>Hello</h1>');
   });
 
-  it('renders a HTML doc', () => {
-    const doc = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>TBD</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-<h1>Hello</h1>
-</body>
-</html>`;
-    const file = toHTML(tree as Root, {count: 0, name: 'test', addHTMLDocument: true, log: logger});
+  it('renders HTML into a template', () => {
+    const file = toHTML(tree as Root, {count: 0, name: 'test', template: template, log: logger});
     expect(file.basename).toBe('test.html'); // count == 0 is elided
-    expect(file.value).toBe(doc);
+    expect(file.value).toBe("TEST:: <h1>Hello</h1>");
   });
 
   it('renders Markdown', () => {

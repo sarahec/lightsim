@@ -16,7 +16,7 @@
 
 import { type Root as HastRoot } from 'hast';
 import { type Root } from 'mdast';
-import rehypeDocument from 'rehype-document';
+import { Template } from 'nunjucks';
 import rehypeStringify from 'rehype-stringify';
 import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
@@ -47,7 +47,7 @@ export interface RenderOptions {
   name?: string;
   count?: number;
   extension?: string;
-  addHTMLDocument?: boolean;
+  template?: Template;
   format?: FileFormat;
   log?: Logger<ILogObj>;
 }
@@ -75,14 +75,13 @@ export function toHTML(tree: Root, options?: RenderOptions) {
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
-  const processor = options?.addHTMLDocument ? 
-      unified().use(remarkRehype).use(rehypeDocument, { title: 'TBD' }) :
-      unified().use(remarkRehype);
-  const hast = processor.runSync(tree) as HastRoot;
+  const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
   log.silly(`HAST: ${JSON.stringify(hast)}`);
   const html = unified().use(rehypeStringify).stringify(hast).trim();
   log.silly(`HTML: ${html}`);
-  return makeVFile(html, suffix, count, name, log);
+
+  const finalHTML = options?.template?.render({ contents: html, title: name, }) ?? html;
+  return makeVFile(finalHTML, suffix, count, name, log);
 }
 
 /**
