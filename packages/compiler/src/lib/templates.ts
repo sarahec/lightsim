@@ -18,7 +18,7 @@ import { Template, Environment, FileSystemLoader } from 'nunjucks';
 
 const defaultEnvironment = new Environment(new FileSystemLoader('templates'), { autoescape: false });
 
-export function loadTemplate(name: string, environment?: Environment): Template {
+export function useTemplate(name: string, environment?: Environment): Template {
 	const env = environment || defaultEnvironment;
   return env.getTemplate(name);
 }
