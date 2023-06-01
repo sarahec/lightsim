@@ -48,7 +48,7 @@ export interface RenderOptions {
   count?: number;
   extension?: string;
   template?: Template;
-  format?: FileFormat;
+  format?: FileFormat | string;
   log?: Logger<ILogObj>;
 }
 
