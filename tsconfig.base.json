@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@lightsim/cli": ["packages/cli/src/cli.ts"],
-      "@lightsim/compiler": ["packages/compiler/src/index.ts"]
+      "@lightsim/compiler": ["packages/compiler/src/index.ts"],
+      "@lightsim/runtime": ["packages/runtime/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
