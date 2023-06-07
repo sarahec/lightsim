@@ -33,8 +33,11 @@ interface CompileOptions {
   group?: NodeGroupingOptions;
   split?: SplitOptions;
   render?: RenderOptions;
+  singlePage?: boolean;
   log?: Logger<ILogObj>;
 }
+
+type CompileResult = VFile[];
 
 /**
  * Compiles and formats a list of VFiles.
@@ -48,7 +51,7 @@ interface CompileOptions {
 async function compile(
   source: VFile,
   options?: CompileOptions
-): Promise<VFile[]> {
+): Promise<CompileResult> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
@@ -71,6 +74,9 @@ async function compile(
     log: log,
     ...options?.render,
   };
+
+  const singlePage = options?.singlePage ?? false;
+
   log.trace('compiling', source.path);
   const ast = await unified().use(remarkParse).parse(source);
 
@@ -80,8 +86,8 @@ async function compile(
     .run(ast);
 
   // @ts-expect-error TS wants Node<Data> but there's no way to instantiate that
-  const trees = splitTrees(splitConfiguration)(processedTree) as Root[];
+  const trees = singlePage ? [processedTree as Root] : splitTrees(splitConfiguration)(processedTree) as Root[];
   return render(trees, renderConfiguration);
 }
 
-export { CompileOptions, compile, compile as default };
+export { CompileOptions, CompileResult, compile as default };
