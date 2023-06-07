@@ -1,6 +1,6 @@
 # This is a test
 
-The ligtsim compiler will convert this docuemnt into a series of pages
+The lightsim compiler will convert this document into a series of pages.
 
 ## This is only a test
 

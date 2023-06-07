@@ -1,15 +1,15 @@
 import { render } from '@testing-library/react';
 
-import App from './app';
+import Root from './root';
 
 describe('App', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<App />);
+    const { baseElement } = render(<Root />);
     expect(baseElement).toBeTruthy();
   });
 
   it('should have a greeting as the title', () => {
-    const { getByText } = render(<App />);
+    const { getByText } = render(<Root />);
     expect(getByText(/Welcome sandbox-app/gi)).toBeTruthy();
   });
 });
