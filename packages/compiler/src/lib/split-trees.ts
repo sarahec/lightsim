@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { assert } from 'console';
 import { ILogObj, Logger } from 'tslog';
 import { MatcherType, makeMatchFn } from './util/matcher.js';
 
@@ -37,10 +36,10 @@ export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (tree: any /* Node */) => {
-    assert(
-      Object.prototype.hasOwnProperty.call(tree, 'children'),
-      'no children found in tree'
-    );
+    if (!Object.prototype.hasOwnProperty.call(tree, 'children')) {
+      log.error('no children found in tree');
+      return [];
+    }
     const matches = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tree.children.forEach((probe: any, index: number) => {
