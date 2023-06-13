@@ -14,22 +14,51 @@
  limitations under the License.
  */
 
+import compile from '@lightsim/compiler';
+import makeRuntime from '@lightsim/runtime';
 import CssBaseline from '@mui/joy/CssBaseline';
 import { CssVarsProvider } from '@mui/joy/styles';
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { ILogObj, Logger } from 'tslog';
+import { VFile } from 'vfile';
 import ErrorPage from './app/error-page';
 import Root from './app/root';
-import SimPanel from './routes/sim_panel';
+import { Page, SimController } from './routes/sim';
 import Source from './routes/source';
 
-const demoSim = [
-  `<h1>First page</h1>
-<p>This is some static data to demonstrate the sim.</p>`,
-  `<h1>Second page</h1>
-<p>This is some more static data.</p>`,
-];
+
+const log = new Logger<ILogObj>({name: 'app', minLevel: 0});
+
+const source = new VFile({value: 
+`# This is a test
+
+The lightsim compiler will convert this document into a series of pages.
+
+Note: This came from a static string in the source code. 
+It could have come from a file, or from a database, or from a web service.
+
+## This is only a test
+
+This page will be used to try out new content types to see the generated content
+
+### Examples
+
+1. A plain slideshow site
+2. A simple branching sim, but with helpful debugging tools
+3. A conditional branching site
+
+## This concludes the test
+
+Thank you for reading.
+`
+});
+
+const compiled = await compile(source);
+
+const runtime = makeRuntime(compiled);
+
 
 const router = createBrowserRouter([
   {
@@ -39,8 +68,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: 'sim',
-        element: <SimPanel />,
-        loader: () => demoSim,
+        element: <SimController runtime={runtime} />,
       },
       {
         path: 'source',
