@@ -14,6 +14,7 @@
  limitations under the License.
  */
 
+import { type CompiledSimulation } from '@lightsim/runtime';
 import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
 import { ILogObj, Logger } from 'tslog';
@@ -26,8 +27,6 @@ import { MatcherType } from './lib/util/matcher.js';
 
 const LOGGER_NAME = 'compiler';
 
-// import { inspect } from 'unist-util-inspect';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface CompileOptions {
   group?: NodeGroupingOptions;
@@ -36,8 +35,6 @@ interface CompileOptions {
   singlePage?: boolean;
   log?: Logger<ILogObj>;
 }
-
-type CompileResult = VFile[];
 
 /**
  * Compiles and formats a list of VFiles.
@@ -51,7 +48,7 @@ type CompileResult = VFile[];
 async function compile(
   source: VFile,
   options?: CompileOptions
-): Promise<CompileResult> {
+): Promise<CompiledSimulation> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
@@ -90,4 +87,4 @@ async function compile(
   return render(trees, renderConfiguration);
 }
 
-export { CompileOptions, CompileResult, compile as default };
+export { CompileOptions, CompiledSimulation, compile as default };
