@@ -2,8 +2,9 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "allowJs": false,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "module": "esnext",
     "strict": true,
     "types": ["vite/client", "vitest"]
   },
