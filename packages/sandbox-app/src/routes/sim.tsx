@@ -14,12 +14,12 @@
  limitations under the License.
  */
 
-import { type RuntimeControls } from '@lightsim/runtime';
+import { type NavigationOptions, type RuntimeControls } from '@lightsim/runtime';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import Divider from '@mui/joy/Divider';
 import Stack from '@mui/joy/Stack';
-import { type ReadonlySignal, useSignal } from '@preact/signals-react';
+import { useSignal, type ReadonlySignal } from '@preact/signals-react';
 import { log } from 'console';
 import { ILogObj, Logger } from 'tslog';
 
@@ -32,8 +32,8 @@ export function SimController(props: SimControllerProps) {
   const runtime = props.runtime;
   const log = props.log?.getSubLogger({name: 'sim-controller'}) ?? new Logger({name: 'sim-controller'});
   let location = runtime.getLocation();
-  const contents = useSignal(props.runtime.getContents(location) ?? "Content missing");
-  const controls = [{name: 'Home', action: 'home'}, {name: 'Next', action: 'next'}, ];
+  const contents = useSignal(runtime.getContents(location) ?? "Content missing");
+  const navigation = useSignal(runtime.getNavigation(location));
 
 
   function perform(action: string): void {
@@ -45,15 +45,16 @@ export function SimController(props: SimControllerProps) {
       log.trace(`location is now ${location}`);
       contents.value = props.runtime.getContents(location);
       log.silly(`contents is now ${contents.value}`);
+      navigation.value = props.runtime.getNavigation(location);
     }
   }
 
-  return <Page log={log} contents={contents} controls={controls} perform={perform} canPerform={runtime.canPerform} />;
+  return <Page log={log} contents={contents} navigation={navigation} perform={perform} canPerform={runtime.canPerform} />;
 }
 
 export interface PageProps {
   contents: ReadonlySignal<string>;
-  controls: { name: string; action: string }[];
+  navigation: ReadonlySignal<NavigationOptions>;
   perform: (action: string) => void;
   canPerform: (action: string) => boolean;
   log?: Logger<ILogObj>;
@@ -69,9 +70,9 @@ export function Page(props: PageProps) {
       <div className="contents" dangerouslySetInnerHTML={{ __html: body }} />
       <Divider />
       <Stack direction="row" justifyContent="right" spacing={2}>
-        {props.controls.map((control) => (
-          <Button key={control.action} disabled={!props.canPerform(control.action)} variant="soft" onClick={() => props.perform(control.action) }>
-            {control.name}
+        {props.navigation.value.map((control) => (
+          <Button key={control.action} disabled={control.disabled} variant="soft" onClick={() => props.perform(control.action) }>
+            {control.label}
         </Button>
         ))}
       </Stack>
