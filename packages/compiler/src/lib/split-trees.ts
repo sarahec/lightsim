@@ -18,8 +18,8 @@ import { MatcherType, makeMatchFn } from './util/matcher.js';
 const LOGGER_NAME = 'split trees';
 
 export type SplitOptions = {
-  match: MatcherType;
-  log?: Logger<ILogObj>;
+  readonly match: MatcherType;
+  readonly log?: Logger<ILogObj>;
 };
 
 /**

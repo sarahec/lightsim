@@ -20,5 +20,5 @@ const defaultEnvironment = new Environment(new FileSystemLoader('templates'), { 
 
 export function useTemplate(name: string, environment?: Environment): Template {
 	const env = environment || defaultEnvironment;
-  return env.getTemplate(name);
+  return Object.freeze(env.getTemplate(name));
 }

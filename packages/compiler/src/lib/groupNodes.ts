@@ -22,9 +22,9 @@ import { makeMatchFn, type MatcherType } from './util/matcher.js';
 import { makeWrapFn, type WrapperType } from './util/wrapper.js';
 
 export interface NodeGroupingOptions {
-  match: MatcherType;
-  wrap: WrapperType;
-  log?: Logger<ILogObj>;
+  readonly match: MatcherType;
+  readonly wrap: WrapperType;
+  readonly log?: Logger<ILogObj>;
 }
 
 const LOGGER_NAME = 'group nodes';
