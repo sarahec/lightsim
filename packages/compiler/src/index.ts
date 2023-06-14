@@ -29,11 +29,11 @@ const LOGGER_NAME = 'compiler';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface CompileOptions {
-  group?: NodeGroupingOptions;
-  split?: SplitOptions;
-  render?: RenderOptions;
-  singlePage?: boolean;
-  log?: Logger<ILogObj>;
+  readonly group?: NodeGroupingOptions;
+  readonly split?: SplitOptions;
+  readonly render?: RenderOptions;
+  readonly singlePage?: boolean;
+  readonly log?: Logger<ILogObj>;
 }
 
 /**

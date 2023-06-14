@@ -44,12 +44,12 @@ export enum FileFormat {
  */
 
 export interface RenderOptions {
-  name?: string;
-  count?: number;
-  extension?: string;
-  template?: Template;
-  format?: FileFormat | string;
-  log?: Logger<ILogObj>;
+  readonly name?: string;
+  readonly count?: number;
+  readonly extension?: string;
+  readonly template?: Template;
+  readonly format?: FileFormat | string;
+  readonly log?: Logger<ILogObj>;
 }
 
 export function render(trees: Root[] | Root, options?: RenderOptions): VFile[] {
