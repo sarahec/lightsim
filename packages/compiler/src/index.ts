@@ -24,6 +24,7 @@ import { NodeGroupingOptions, groupNodes } from './lib/groupNodes.js';
 import { FileFormat, RenderOptions, render } from './lib/render.js';
 import { SplitOptions, splitTrees } from './lib/split-trees.js';
 import { MatcherType } from './lib/util/matcher.js';
+import { freeze } from './lib/freeze.js';
 
 const LOGGER_NAME = 'compiler';
 
@@ -48,7 +49,7 @@ interface CompileOptions {
 async function compile(
   source: VFile,
   options?: CompileOptions
-): Promise<CompiledSimulation> {
+): Promise<Readonly<CompiledSimulation>> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
@@ -78,6 +79,7 @@ async function compile(
   const ast = await unified().use(remarkParse).parse(source);
 
   const processedTree = await unified()
+    .use(freeze) // make the tree immutable
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .run(ast);

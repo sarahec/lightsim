@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { freeze as freezeObj, produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
 
 const LOGGER_NAME = 'freeze';
@@ -21,7 +22,7 @@ export type FreezeOptions = {
 };
 
 /**
- * Walk the tree, calling Object.freeze on each node.
+ * Walk the tree, calling freezing every node.
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
@@ -33,9 +34,6 @@ export function freeze(options?: FreezeOptions): (tree: Node) => Node
 
   log.trace('Freezing tree');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function _freeze(tree: any /* Node */): any /* Node */ {
-    Object.freeze(tree);
-    tree.children?.forEach(_freeze);
-    return tree;
-  };
+  return (tree: any /* Node */): any /* Node */ => 
+     produce(tree, (draft: Node) => { freezeObj(draft, true); });
 }

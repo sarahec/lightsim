@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { freeze, produce } from 'immer';
+import { unified } from 'unified';
 import { u } from 'unist-builder';
 import { splitTrees } from '../split-trees';
-import { unified } from 'unified';
 
 describe('split', () => {
-  const tree = u('root', [
+  const rawTree = u('root', [
     u('page', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
     u('page', [u('heading', { depth: 2 }, [u('text', 'World')])]),
   ]);
-
+  const tree = produce(rawTree, (draft) => { freeze(draft, true); });
+  
   it('should return the tree if no matches are found', () => {
     const processor = unified().use(splitTrees, { match: 'foo' });
-    expect(processor.runSync(tree)).toEqual([tree]);
+    expect(processor.runSync(tree)).toEqual([rawTree]);
   });
 
   it('should return a set of trees if found', () => {
@@ -35,5 +37,7 @@ describe('split', () => {
       u('root', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
       u('root', [u('heading', { depth: 2 }, [u('text', 'World')])]),
     ]);
+    expect(Object.isFrozen(trees)).toBe(true);
+    expect(Object.isFrozen(trees[0])).toBe(true);
   });
 });
