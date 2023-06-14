@@ -15,6 +15,7 @@
  */
 
 import { type Root as HastRoot } from 'hast';
+import { freeze } from 'immer';
 import { type Root } from 'mdast';
 import { Template } from 'nunjucks';
 import rehypeStringify from 'rehype-stringify';
@@ -52,15 +53,15 @@ export interface RenderOptions {
   readonly log?: Logger<ILogObj>;
 }
 
-export function render(trees: Root[] | Root, options?: RenderOptions): VFile[] {
+export function render(trees: Root[] | Root, options?: RenderOptions): Readonly<Readonly<VFile>[]> {
   const formatter = options?.format === FileFormat.HTML ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   if (!Array.isArray(trees)) {
     return [formatter(trees, options)];
   } else {
-    return trees.map((tree, index) =>
+    return freeze(trees.map((tree, index) =>
       formatter(tree, { ...options, count: baseCount + index })
-    );
+    ));
   }
 }
 
@@ -88,7 +89,7 @@ export function toHTML(tree: Root, options?: RenderOptions) {
  * Renders a mdast tree to markdown and returns it as a VFile.
 
  * @param tree A single markdown tree
- * @returns An in-memory VFile
+ * @returns An in-memory VFile (immutable)
  */
 export function toMarkdown(tree: Root, options?: RenderOptions) {
   const { count = 0, name: name = 'page', extension: suffix = 'md' } = options || {};
@@ -114,8 +115,8 @@ export function makeVFile(
   count = 1,
   name = 'page',
   log?: Logger<ILogObj>
-): VFile {
+): Readonly<VFile> {
   const filename = (count ? `${name}${count}` : name) + '.' + extension;
   log?.trace(`New file: ${filename}`);
-  return new VFile({ basename: filename, value: data });
+  return freeze(new VFile({ basename: filename, value: data }));
 }

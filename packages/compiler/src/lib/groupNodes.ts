@@ -20,6 +20,7 @@ import { type VFile } from 'vfile';
 import { ILogObj, Logger } from 'tslog';
 import { makeMatchFn, type MatcherType } from './util/matcher.js';
 import { makeWrapFn, type WrapperType } from './util/wrapper.js';
+import { produce } from 'immer';
 
 export interface NodeGroupingOptions {
   readonly match: MatcherType;
@@ -41,7 +42,7 @@ export function groupNodes(options: NodeGroupingOptions) {
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
-  return (tree: Node, file?: VFile): Node => {
+  return (tree: Node): Readonly<Node> => {
     // No tree? No-op.
     if (!Object.prototype.hasOwnProperty.call(tree, 'children')) {
       log.warn('No children found in tree');
@@ -69,12 +70,8 @@ export function groupNodes(options: NodeGroupingOptions) {
         (tree as Parent).children[matchPos]
       );
     });
-    const newTree = { ...tree, children: wrappedNodes };
+    const newTree = produce(tree, (draft) => ({...draft, children: wrappedNodes})) as Readonly<Node>;
     log.silly(`New tree: ${JSON.stringify(newTree)}`);
-    // @ts-expect-error the type checker doesn't know what to do with the conditional property
-    if (tree === file?.data) {
-      file.data = newTree;
-    }
     return newTree;
   };
 }

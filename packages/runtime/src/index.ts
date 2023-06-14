@@ -23,9 +23,9 @@ import { VFile } from "vfile";
  * @property isHome - whether the session is at the home page.
  */
 export interface RuntimeControls {
-    getContents: (location: number) => string;
-    getLocation: () => number;
-    isComplete: () => boolean;
+    readonly getContents: (location: number) => string;
+    readonly getLocation: () => number;
+    readonly isComplete: () => boolean;
     canPerform(action: string): boolean;
     perform(action: string): void;
 }
@@ -45,12 +45,12 @@ export type CompiledSimulation = VFile[];
  * @returns the control interface.
   */
 
-export default function makeRuntime(sim: CompiledSimulation) {
+export default function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeControls> {
   const _sim = sim;
   let _index = 0;
   const _end = sim.length - 1;
 
-  return {
+  return Object.freeze({
     getContents: (location: number) => String(_sim[location].value),
     getLocation: () => _index,
     isComplete: () => _index >= _end,
@@ -70,5 +70,5 @@ export default function makeRuntime(sim: CompiledSimulation) {
         throw new Error(`Invalid action: ${action}`);
       }
     },
-  };
+  });
 }

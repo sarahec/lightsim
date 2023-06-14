@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
 import { MatcherType, makeMatchFn } from './util/matcher.js';
 
@@ -56,11 +57,8 @@ export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
       log.warn('all matches should be at the top level of the tree');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = tree.children.map((child: any /* Node */) => ({
-      ...child,
-      type: 'root',
-    }));
+    const result = tree.children.map((child: any /* Node */) => (produce(child, (draft: any) => { return { ...draft, type: 'root' }; })));
     log.silly(`result: ${JSON.stringify(result)}`);
-    return result;
+    return Object.freeze(result);
   };
 }
