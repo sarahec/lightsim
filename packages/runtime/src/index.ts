@@ -23,9 +23,10 @@ import { VFile } from "vfile";
  * @property isHome - whether the session is at the home page.
  */
 export interface RuntimeControls {
-    readonly getContents: (location: number) => string;
-    readonly getLocation: () => number;
-    readonly isComplete: () => boolean;
+    getContents(location: number): string;
+    getLocation(): number;
+    getNavigation(location: number): NavigationOptions;
+    isComplete(): boolean;
     canPerform(action: string): boolean;
     perform(action: string): void;
 }
@@ -35,6 +36,14 @@ export enum NavigationAction {
     Back = "back",
     Home = "home",
 }
+
+export interface NavigationOption {
+    readonly label: string;
+    readonly action: NavigationAction | string;
+    readonly disabled: boolean;
+}
+
+export type NavigationOptions = NavigationOption[];
 
 export type CompiledSimulation = VFile[]; 
 
@@ -50,9 +59,14 @@ export default function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeCo
   let _index = 0;
   const _end = sim.length - 1;
 
-  return Object.freeze({
+  return {
     getContents: (location: number) => String(_sim[location].value),
     getLocation: () => _index,
+    getNavigation: (location: number) => [
+      {label: "home", action: "home", disabled: location === 0},
+      {label: "back", action: "back", disabled: location <= 0},
+      {label: "next", action: "next", disabled: location >= _end},
+    ],
     isComplete: () => _index >= _end,
     canPerform: (action: string) => {
       return (action === NavigationAction.Next && _index < _end) ||
@@ -70,5 +84,5 @@ export default function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeCo
         throw new Error(`Invalid action: ${action}`);
       }
     },
-  });
+  };
 }
