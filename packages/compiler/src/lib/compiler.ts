@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-import { type CompiledSimulation } from '@lightsim/runtime';
+import { type CompiledSimulation, type Page } from '@lightsim/runtime';
 import { freeze } from 'immer';
 import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
@@ -87,7 +87,9 @@ async function compile(
 
   // @ts-expect-error TS wants Node<Data> but there's no way to instantiate that
   const trees = singlePage ? [processedTree as Root] : splitTrees(splitConfiguration)(processedTree) as Root[];
-  const pages = render(trees, renderConfiguration);
+  const files = render(trees, renderConfiguration);
+  const pages = files.map((file) => freeze(
+    {format: renderConfiguration.format, file: file, getContents: () => String(file.value),} as Page));
   return freeze( { pages: pages } );
 }
 
