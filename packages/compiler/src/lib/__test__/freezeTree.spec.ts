@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import { u } from 'unist-builder';
-import { freeze } from '../freeze';
+import freezeTree from '../freezeTree';
 import { unified } from 'unified';
 
-describe('freeze', () => {
+describe('freezeTree', () => {
   const tree = u('root', [
     u('page', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
     u('page', [u('heading', { depth: 2 }, [u('text', 'World')])]),
   ]);
 
   it('should freeze all of the children', () => {
-    const processor = unified().use(freeze);
+    const processor = unified().use(freezeTree);
     const tree2 = processor.runSync(tree);
     expect(tree2).toBe(tree);
     tree.children.forEach((node) => { expect(Object.isFrozen(node)).toBe(true); });

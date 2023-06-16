@@ -15,7 +15,7 @@
 import { freeze as freezeObj, produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
 
-const LOGGER_NAME = 'freeze';
+const LOGGER_NAME = 'freezeTree';
 
 export type FreezeOptions = {
   readonly log?: Logger<ILogObj>;
@@ -26,7 +26,7 @@ export type FreezeOptions = {
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
-export function freeze(options?: FreezeOptions): (tree: Node) => Node
+export default function freezeTree(options?: FreezeOptions): (tree: Node) => Node
 {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
