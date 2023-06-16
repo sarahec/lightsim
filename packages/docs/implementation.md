@@ -1,13 +1,23 @@
 # Implementation notes
 
-# Implementation plan
-
 See also: [product requirements](requirements.md)
 
 ## Core approach
 
-Use [MDX](https://mdxjs.com/) to combine content (markdown) with components that provide the core functionality. This 
-will build to a compact web app with optional service worker support.
+Combine content with components that provide the core functionality. This will build to a compact web app with optional service worker support. Static rendering is preferred and the result can be packaged for SCORM or CMI-5.
+
+1. Build a preprocessor for Markdown that handles page splitting and extracts metadata (for TOC, navigation, etc.).
+2. Build a library of React components to handle display, navigation, etc.
+3. Export to [MDX](https://mdxjs.com/) (may be in-memory files)
+4. Compiles to pages w/ JS
+4. Use a bundler to do [static rendering](https://blog.logrocket.com/static-site-generation-with-react-from-scratch/)
+
+### Metadata and customization
+
+Im plain Markdown: Use [generic directives](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444). Prefix determines scope:
+* `:::` used for whole document or section, depending on whether it appears before or after heading (or other split marker.) If first in doc, treat this as frontmatter.
+* `::` used for page
+* `:` used inline
 
 ## Release plan
 
