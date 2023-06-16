@@ -45,7 +45,9 @@ export interface NavigationOption {
 
 export type NavigationOptions = NavigationOption[];
 
-export type CompiledSimulation = VFile[]; 
+export interface CompiledSimulation {
+  readonly pages: Readonly<VFile[]>;
+}
 
 
 /**
@@ -55,12 +57,12 @@ export type CompiledSimulation = VFile[];
   */
 
 export default function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeControls> {
-  const _sim = sim;
+  const _pages = sim.pages;
   let _index = 0;
-  const _end = sim.length - 1;
+  const _end = sim.pages.length - 1;
 
   return {
-    getContents: (location: number) => String(_sim[location].value),
+    getContents: (location: number) => String(_pages[location].value),
     getLocation: () => _index,
     getNavigation: (location: number) => [
       {label: "home", action: "home", disabled: location === 0},
