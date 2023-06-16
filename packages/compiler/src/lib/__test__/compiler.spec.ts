@@ -15,7 +15,7 @@
  */
 
 import { VFile } from 'vfile';
-import compile from '../../index.js';
+import compile from '../compiler.js';
 import { FileFormat } from '../render.js';
 
 describe('compiler', () => {
@@ -25,15 +25,15 @@ describe('compiler', () => {
       path: 'test.md',
       value: `# Hello\n\n## World!\n\n### How are you?`,
     });
-    const files = await compile(multiPage, {
+    const compiled = await compile(multiPage, {
       render: { format: FileFormat.Markdown },
     });
+    const files = compiled.pages;
     expect(files).toHaveLength(2);
     expect(files[0].value).toEqual('# Hello');
     expect(files[0].path).toEqual('page.md');
     expect(files[1].value).toEqual('## World!\n\n### How are you?');
     expect(files[1].path).toEqual('page1.md');
   });
-
 
 });
