@@ -37,6 +37,12 @@ export enum NavigationAction {
     Home = "home",
 }
 
+/**
+ * Interface to per-page navigation
+ * @property label - the label for the navigation option (e.g. link or button)
+ * @property action - the action to perform when the option is selected.
+ * @property disabled - whether the option is disabled.
+ */
 export interface NavigationOption {
     readonly label: string;
     readonly action: NavigationAction | string;
@@ -45,8 +51,23 @@ export interface NavigationOption {
 
 export type NavigationOptions = NavigationOption[];
 
+/**
+ * One exported page from the precompiler
+ * @property format - the format of the page (e.g. markdown)
+ * @property title - the title of the page
+ * @property file - the file containing the page contents.
+ * @property getContents - get the contents of the page as a String
+ */
+export interface Page {
+  readonly format: string;
+  readonly title? : string;
+  readonly file: VFile;
+  getContents(): string;
+}
+
+
 export interface CompiledSimulation {
-  readonly pages: Readonly<VFile[]>;
+  readonly pages: Readonly<Page[]>;
 }
 
 
@@ -62,7 +83,7 @@ export default function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeCo
   const _end = sim.pages.length - 1;
 
   return {
-    getContents: (location: number) => String(_pages[location].value),
+    getContents: (location: number) => String(_pages[location].getContents()),
     getLocation: () => _index,
     getNavigation: (location: number) => [
       {label: "home", action: "home", disabled: location === 0},

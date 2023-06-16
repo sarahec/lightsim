@@ -28,7 +28,7 @@ describe('compiler', () => {
     const compiled = await compile(multiPage, {
       render: { format: FileFormat.Markdown },
     });
-    const files = compiled.pages;
+    const files = compiled.pages.map((page) => page.file);
     expect(files).toHaveLength(2);
     expect(files[0].value).toEqual('# Hello');
     expect(files[0].path).toEqual('page.md');
