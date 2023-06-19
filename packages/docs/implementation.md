@@ -12,7 +12,19 @@ Combine content with components that provide the core functionality. This will b
 4. Compiles to pages w/ JS
 4. Use a bundler to do [static rendering](https://blog.logrocket.com/static-site-generation-with-react-from-scratch/)
 
-### Metadata and customization
+## Metadata
+
+The easiest way to add metadata is via Frontmatter (which is allowed in any segment). This uses `---` as a delimiter and YAML for the content.
+
+### Frontmatter options
+
+* `title`
+: The title for this section (displayed as the page title and in history).
+
+`id`
+: The page's identifier (used as a target for choices)
+
+### Advanced metadata
 
 Im plain Markdown: Use [generic directives](https://talk.commonmark.org/t/generic-directives-plugins-syntax/444). Prefix determines scope:
 * `:::` used for whole document or section, depending on whether it appears before or after heading (or other split marker.) If first in doc, treat this as frontmatter.
