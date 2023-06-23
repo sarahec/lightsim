@@ -24,7 +24,7 @@ export type MatcherType = string | Node | MatchFn;
  *
  * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
  */
-export function makeMatchFn(matcher: MatcherType): MatchFn {
+export default function makeMatchFn(matcher: MatcherType): MatchFn {
   if (typeof matcher === 'string') {
     return (probe: Node) => probe.type === matcher;
   }

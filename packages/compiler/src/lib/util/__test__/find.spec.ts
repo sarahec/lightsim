@@ -14,11 +14,14 @@
  limitations under the License.
  */
 
-import { Template, Environment, FileSystemLoader } from 'nunjucks';
+import { type Node } from 'unist';
+import findPath from '../find';
+import { u } from 'unist-builder';
 
-const defaultEnvironment = new Environment(new FileSystemLoader('templates'), { autoescape: false });
-
-export default function useTemplate(name: string, environment?: Environment): Template {
-	const env = environment || defaultEnvironment;
-  return Object.freeze(env.getTemplate(name));
-}
+describe('findPath', () => {
+  it('should find recursively', () => {
+    const fn = (node: Node) => node.type === 'heading';
+    const tree = u('root', [u('heading', [u('text', 'Hello, world!')])]);
+    expect(findPath(fn, tree)).toEqual([0]);
+  });
+});

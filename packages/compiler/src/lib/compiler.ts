@@ -22,10 +22,10 @@ import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
 import freezeTree from './freezeTree.js';
-import { NodeGroupingOptions, groupNodes } from './groupNodes.js';
-import { FileFormat, RenderOptions, render } from './render.js';
-import { SplitOptions, splitTrees } from './split-trees.js';
-import { MatcherType } from './util/matcher.js';
+import groupNodes, { type NodeGroupingOptions } from './groupNodes.js';
+import render, { FileFormat, type RenderOptions } from './render.js';
+import splitTrees, { type SplitOptions } from './split-trees.js';
+import { type MatcherType } from './util/matcher.js';
 
 const LOGGER_NAME = 'compiler';
 

@@ -15,7 +15,7 @@
 import { freeze, produce } from 'immer';
 import { unified } from 'unified';
 import { u } from 'unist-builder';
-import { splitTrees } from '../split-trees';
+import splitTrees from '../split-trees.js';
 
 describe('split', () => {
   const rawTree = u('root', [

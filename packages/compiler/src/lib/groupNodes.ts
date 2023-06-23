@@ -15,11 +15,10 @@
  */
 
 import { type Node, type Parent } from 'unist';
-import { type VFile } from 'vfile';
 
 import { ILogObj, Logger } from 'tslog';
-import { makeMatchFn, type MatcherType } from './util/matcher.js';
-import { makeWrapFn, type WrapperType } from './util/wrapper.js';
+import makeMatchFn, { type MatcherType } from './util/matcher.js';
+import makeWrapFn, { type WrapperType } from './util/wrapper.js';
 import { produce } from 'immer';
 
 export interface NodeGroupingOptions {
@@ -35,7 +34,7 @@ const LOGGER_NAME = 'group nodes';
  * then wrap in a user-defined container.
  */
 /** @type {import('unified').Plugin<[Options]>} */
-export function groupNodes(options: NodeGroupingOptions) {
+export default function groupNodes(options: NodeGroupingOptions) {
   const matcher = makeMatchFn(options.match);
   const wrapper = makeWrapFn(options.wrap);
   const log =

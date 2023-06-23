@@ -26,7 +26,7 @@ export type WrapperType = string | Node | WrapFn;
  *
  * @param wrapper A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
  */
-export function makeWrapFn(wrapper: WrapperType): WrapFn {
+export default function makeWrapFn(wrapper: WrapperType): WrapFn {
   if (typeof wrapper === 'string') {
     return (nodes: Node[]) => ({ type: wrapper, children: nodes });
   }

@@ -53,7 +53,7 @@ export interface RenderOptions {
   readonly log?: Logger<ILogObj>;
 }
 
-export function render(trees: Root[] | Root, options?: RenderOptions): Readonly<Readonly<VFile>[]> {
+export default function render(trees: Root[] | Root, options?: RenderOptions): Readonly<Readonly<VFile>[]> {
   const formatter = options?.format === FileFormat.HTML ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   if (!Array.isArray(trees)) {
@@ -109,7 +109,7 @@ export function toMarkdown(tree: Root, options?: RenderOptions) {
  * @param log logger
  * @returns an in-memory VFile
  */
-export function makeVFile(
+function makeVFile(
   data: string,
   extension: string,
   count = 1,
