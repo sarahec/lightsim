@@ -14,10 +14,14 @@
  limitations under the License.
  */
 
+import { type Node, type Parent } from "unist";
+import findPath from "./util/find";
+
 /** @type {import('unified').Plugin<[Options]>} */
 export default function collectMetadata() {
-  // @ts-expect-error allow `any` type for now
-  return (tree, file) => {
+  return (tree:  Node | Parent) => {
+    const path = findPath(tree, "yaml");
+
 	return tree;
 	};
 };

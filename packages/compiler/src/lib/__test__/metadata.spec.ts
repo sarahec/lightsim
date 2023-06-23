@@ -20,15 +20,14 @@ import { unified } from "unified";
 
 describe('metadata plugin', () => {
 	  it('should make no change if nothing found', () => {
-		const emptyTree = u('root');
+		const emptyTree = u('root', []);
 		const result = unified().use(collectMetadata).runSync(emptyTree);
 		expect(result).toEqual(emptyTree);
 	  });
 	  
-	  it('should make no change if nothing found', () => {
-		const emptyTree = u('root');
-		const result = unified().use(collectMetadata).runSync(emptyTree);
-		expect(result).toEqual(emptyTree);
+	  it('should add frontmatter to the root', () => {
+		const titleTree = u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]);
+		const result = unified().use(collectMetadata).runSync(titleTree);
+		expect(result).toEqual(u('root', { meta: { title: "This is a test" } }, [u('text', 'hello')]));
 	  });
-
-	  
+});	  
