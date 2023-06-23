@@ -15,7 +15,7 @@
  */
 
 import { type Node } from 'unist';
-import { makeMatchFn } from '../matcher';
+import makeMatchFn from '../matcher';
 
 describe('makeMatchFn', () => {
   it('should accept and return a function', () => {

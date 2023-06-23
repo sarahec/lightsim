@@ -16,7 +16,7 @@
 
 import { unified } from 'unified';
 
-import { groupNodes } from '../groupNodes';
+import groupNodes from '../groupNodes';
 import { type Node } from 'unist';
 import { u } from 'unist-builder';
 

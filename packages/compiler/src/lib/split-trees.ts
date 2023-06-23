@@ -14,7 +14,7 @@
 
 import { produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
-import { MatcherType, makeMatchFn } from './util/matcher.js';
+import makeMatchFn, { type MatcherType } from './util/matcher.js';
 
 const LOGGER_NAME = 'split trees';
 
@@ -29,7 +29,7 @@ export type SplitOptions = {
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
-export function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
+export default function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
   const matcher = makeMatchFn(options.match);
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
