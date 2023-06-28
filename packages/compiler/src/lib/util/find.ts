@@ -15,28 +15,65 @@
  */
 
 import { type Node, type Parent } from 'unist';
-import makeMatchFn from './matcher';
+import makeMatchFn, { type MatcherType} from './matcher';
 
- export type MatchFn = (probe: Node) => boolean;
- export type MatcherType = string | Node | MatchFn;
- 
-export default function findPath(matcher: MatcherType, root: Parent):  number[] | undefined{
+type AnyNode = Node | Parent;
+
+interface PathStep {
+  node: AnyNode;
+  index?: number;
+};
+
+interface FindResult {
+  value: Readonly<AnyNode> | undefined;
+  replace(newValue: AnyNode): AnyNode;
+  remove(): AnyNode;
+};
+
+export default function find(root: AnyNode, matcher: MatcherType): FindResult | undefined {  
   const matchFn = makeMatchFn(matcher);
-    return findPathRecursive(root, []);
+  const found = findPathRecursive(root);
+  return found ? makePath(found) : undefined;
 
   // recursively apply the match function to each node in the tree
   // and return the path to the first node that matches
-    function findPathRecursive(node: Node | Parent, path: number[]): number[] | undefined {
-    if (matchFn(node)) {
-      return path;
+    function findPathRecursive(probe: AnyNode, path: PathStep[] = []): PathStep[] | undefined {
+    if (matchFn(probe)) {
+      return path.concat({ node: probe });
       //@ts-expect-error this is a reasonable way to see if there are any children
-    }  else if (node.children) {
-        const p = node as Parent;
+    }  else if (probe.children) {
+        const p = probe as Parent;
         for (let i = 0; i < p.children.length; i++) {
-            const childPath = findPathRecursive(p.children[i], path.concat(i));
+            const childPath = findPathRecursive(p.children[i], path.concat({ node: p, index: i }));
             if (childPath) return childPath;
         }
-        }
+    }
     return undefined;
     }
+
+    // wrap the path in a Path object
+    function makePath(steps: PathStep[]): FindResult {    
+    const value = steps.pop()?.node;
+    return {
+      value,
+      replace(newValue: AnyNode): AnyNode {
+        if (steps.length === 0) {
+          return newValue as Parent;
+        }
+        const step = steps[steps.length - 1];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (step.node as Parent).children.splice(step.index!, 1, newValue);
+        return steps[0].node;
+      },
+      remove(): AnyNode {
+        if (steps.length === 0) {
+          throw new Error('Cannot remove root node');
+        }
+        const step = steps[steps.length - 1];
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (step.node as Parent).children.splice(step.index!, 1);
+        return steps[0].node;
+      }
+    };
+  };
 }
