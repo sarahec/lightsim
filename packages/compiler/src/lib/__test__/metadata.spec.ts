@@ -28,6 +28,6 @@ describe('metadata plugin', () => {
 	  it('should add frontmatter to the root', () => {
 		const titleTree = u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]);
 		const result = unified().use(collectMetadata).runSync(titleTree);
-		expect(result).toEqual(u('root', { meta: { title: "This is a test" } }, [u('text', 'hello')]));
+		expect(result).toEqual(u('root', { frontmatter: { title: "This is a test" } }, [u('text', 'hello')]));
 	  });
 });	  

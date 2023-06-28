@@ -16,6 +16,8 @@ Combine content with components that provide the core functionality. This will b
 
 The easiest way to add metadata is via Frontmatter (which is allowed in any segment). This uses `---` as a delimiter and YAML for the content.
 
+(Why YAML? See (this comparison)[https://gist.github.com/oconnor663/9aeb4ed56394cb013a20])
+
 ### Frontmatter options
 
 * `title`
