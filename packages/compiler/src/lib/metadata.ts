@@ -15,16 +15,20 @@
  */
 
 import { type Node, type Parent } from "unist";
-import findPath from "./util/find";
+import find from "./util/find";
+import { load } from "js-yaml";
 
 /** @type {import('unified').Plugin<[Options]>} */
 export default function collectMetadata() {
   return (tree:  Node | Parent) => {
-    const path = findPath(tree, "yaml");
-
-	return tree;
+    // For now, find the first instance and move it to the root
+    const path = find(tree, "yaml");
+    if (!path) return tree;
+    path.remove();
+    // @ts-expect-error this node has a value
+    const yaml = load(path?.value?.value);
+    // @ts-expect-error we can add any property to a node
+    tree.frontmatter = yaml;
+	  return tree;
 	};
 };
-
-
-
