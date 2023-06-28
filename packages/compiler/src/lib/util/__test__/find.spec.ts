@@ -14,14 +14,45 @@
  limitations under the License.
  */
 
-import { type Node } from 'unist';
-import findPath from '../find';
 import { u } from 'unist-builder';
+import find from '../find.js';
 
-describe('findPath', () => {
-  it('should find recursively', () => {
-    const fn = (node: Node) => node.type === 'heading';
-    const tree = u('root', [u('heading', [u('text', 'Hello, world!')])]);
-    expect(findPath(fn, tree)).toEqual([0]);
+describe('find', () => {
+  const text = u('text', 'Hello, world!');
+  const heading = u('heading', [text]);
+  const tree = u('root', [heading]);
+
+  it('should return undefined if not found', () => {
+    expect(find(tree, 'nothing')).toBeUndefined();
+  });
+
+  it('should return the found node', () => {
+    const result = find(tree, 'root');
+    expect (result?.value).toBe(tree);
+  });
+
+  it('should return deep nodes', () => {
+    const result = find(tree, 'text');
+    expect(result?.value).toBe(text);
   });
 });
+
+describe('replace', () => {
+  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+
+  it('should replace a mutable node', () => {
+    const result = find(tree, 'text')?.replace(u('text', 'Hey'));
+    expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
+  });
+});
+
+describe('remove', () => {
+  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+
+  it('should remove a mutable node', () => {
+    const result = find(tree, 'text')?.remove();
+    expect(result).toEqual(u('root', [u('heading', [])]));
+  });
+});
+
+
