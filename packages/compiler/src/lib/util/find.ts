@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*
  Copyright 2023 Sarah Clark
 
@@ -20,60 +21,90 @@ import makeMatchFn, { type MatcherType} from './matcher';
 type AnyNode = Node | Parent;
 
 interface PathStep {
-  node: AnyNode;
-  index?: number;
+  node: Parent;
+  index: number;
+  numChildren: number;
 };
 
+/**
+ * The outcome of a find operation.
+ * 
+ * Note that will only work if the node is not the root node.
+ * 
+ * @property value The found node.
+ * @property replace Replaces the found node with the new value. Returns the tree root.
+ * @property remove Removes the found node. Returns the tree root.
+ */
 interface FindResult {
-  value: Readonly<AnyNode> | undefined;
-  replace(newValue: AnyNode): AnyNode;
-  remove(): AnyNode;
+  value: Readonly<AnyNode>;
+  replace: (newValue: AnyNode) => AnyNode;
+  remove: () => AnyNode;
 };
 
-export default function find(root: AnyNode, matcher: MatcherType): FindResult | undefined {  
-  const matchFn = makeMatchFn(matcher);
-  const found = findPathRecursive(root);
-  return found ? makePath(found) : undefined;
+/**
+ * Returns a generator with all matching nodes in depth-first order.
+ * 
+ * @param root start of the search tree.
+ * @param matcher matching pattern for the node (string, object, or function: boolean)
+ */
+export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindResult> {
 
-  // recursively apply the match function to each node in the tree
-  // and return the path to the first node that matches
-    function findPathRecursive(probe: AnyNode, path: PathStep[] = []): PathStep[] | undefined {
-    if (matchFn(probe)) {
-      return path.concat({ node: probe });
-      //@ts-expect-error this is a reasonable way to see if there are any children
-    }  else if (probe.children) {
-        const p = probe as Parent;
-        for (let i = 0; i < p.children.length; i++) {
-            const childPath = findPathRecursive(p.children[i], path.concat({ node: p, index: i }));
-            if (childPath) return childPath;
-        }
-    }
-    return undefined;
-    }
+  function makeFindResult(value: AnyNode, parents: PathStep[]): FindResult {
+    const noParents = parents.length === 0;
 
-    // wrap the path in a Path object
-    function makePath(steps: PathStep[]): FindResult {    
-    const value = steps.pop()?.node;
+    // Copy the `parents` array, making a shallow copy of each step
+    const parentCopy = parents.map((step) => ({node: step.node, index: step.index})) as PathStep[];
+
     return {
       value,
-      replace(newValue: AnyNode): AnyNode {
-        if (steps.length === 0) {
-          return newValue as Parent;
-        }
-        const step = steps[steps.length - 1];
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      replace: (newValue: AnyNode) => {
+        if (noParents) throw new Error('Cannot replace root node');
+        const step = parentCopy.at(-1)!;
         (step.node as Parent).children.splice(step.index!, 1, newValue);
-        return steps[0].node;
+        return parentCopy[0].node;
       },
-      remove(): AnyNode {
-        if (steps.length === 0) {
-          throw new Error('Cannot remove root node');
-        }
-        const step = steps[steps.length - 1];
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      remove: () => {
+        if (noParents) throw new Error('Cannot remove root node');
+        const step = parentCopy.at(-1)!;
         (step.node as Parent).children.splice(step.index!, 1);
-        return steps[0].node;
+        return parentCopy[0].node;
       }
     };
   };
+  
+  const matchFn = makeMatchFn(matcher);
+  const parents: PathStep[] = [];
+  let probe = root;
+  let step: PathStep | undefined;
+
+  while (probe) {
+    if (matchFn(probe)) {
+      yield makeFindResult(probe, parents);
+    }
+    // @ts-expect-error idiomatic JS is fine
+    if (probe.children) { // descend into a parent node
+        step = { node: probe as Parent, index: 0, numChildren: ((probe as Parent).children.length)};
+        parents.push(step);
+    } else {
+      step!.index++;
+      while (step!.index >= step!.numChildren) { // ascend to the next parent
+        step = parents.pop();
+        if (!step) return {value: undefined, done: true};
+        step.index++;
+      }
+    }
+    probe = step!.node.children[step!.index];
+  }
+  return {value: undefined, done: true};
+}
+
+/**
+ * Returns the first matching node in depth-first order.
+ * 
+ * @param root start of the search tree.
+ * @param matcher matching pattern for the node (string, object, or function: boolean)
+ */
+export default function find(root: AnyNode, matcher: MatcherType): FindResult | undefined {
+  const found = findAll(root, matcher).next();
+  return found.done ? undefined : found.value;
 }
