@@ -14,20 +14,23 @@
  limitations under the License.
  */
 
+import { freeze } from "immer";
+import { unified } from "unified";
 import { u } from "unist-builder";
 import collectMetadata from "../metadata.js";
-import { unified } from "unified";
 
 describe('metadata plugin', () => {
-	  it('should make no change if nothing found', () => {
+	it('should make no change if nothing found', () => {
 		const emptyTree = u('root', []);
 		const result = unified().use(collectMetadata).runSync(emptyTree);
 		expect(result).toEqual(emptyTree);
-	  });
+	});
 	  
-	  it('should add frontmatter to the root', () => {
-		const titleTree = u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]);
-		const result = unified().use(collectMetadata).runSync(titleTree);
-		expect(result).toEqual(u('root', { frontmatter: { title: "This is a test" } }, [u('text', 'hello')]));
-	  });
+	describe('with frontmatter', () => {
+		it('should parse as yaml', () => {
+			const titleTree = freeze(u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]), true);
+			const result = unified().use(collectMetadata).runSync(titleTree);
+			expect(result).toEqual(u('root', { meta: { title: "This is a test" } }, [u('text', 'hello')]));
+		});
+	});
 });	  
