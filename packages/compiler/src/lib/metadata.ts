@@ -15,7 +15,7 @@
  */
 
 import { type Node, type Parent } from "unist";
-import find from "./util/find";
+import find from "./util/find.js";
 import { load } from "js-yaml";
 
 /** @type {import('unified').Plugin<[Options]>} */

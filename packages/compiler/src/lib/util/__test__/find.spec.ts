@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /*
  Copyright 2023 Sarah Clark
 
@@ -15,7 +16,36 @@
  */
 
 import { u } from 'unist-builder';
-import find from '../find.js';
+import find, { findAll } from '../find.js';
+
+describe('findAll', () => {
+  const bodyText = u('text', 'This is a test!');
+  const headingText = u('text', 'Hello, world!');
+  const heading = u('heading', [headingText]);
+
+  const tree = u('root', [heading, bodyText]);
+
+  it('should return nothing if not found', () => {
+    const gen = findAll(tree, 'nothing')
+    expect(gen.next().done).toBe(true);
+  });
+
+  it('should return the found node', () => {
+    const gen: Generator = findAll(tree, 'root');
+    const next = gen.next();
+    expect (next.value.value).toBe(tree);
+    expect (next.done).toBe(false);
+    expect (gen.next().done).toBe(true);
+  });
+
+  it('should return all found nodes', () => {
+    const gen = findAll(tree, 'text');
+    expect(gen.next().value.value).toBe(headingText);
+    expect(gen.next().value.value).toBe(bodyText);
+    expect(gen.next().done).toBe(true);
+  });
+});
+
 
 describe('find', () => {
   const text = u('text', 'Hello, world!');
@@ -34,6 +64,15 @@ describe('find', () => {
   it('should return deep nodes', () => {
     const result = find(tree, 'text');
     expect(result?.value).toBe(text);
+  });
+});
+
+describe('replace', () => {
+  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+
+  it('should replace a mutable node', () => {
+    const result = find(tree, 'text')!.replace(u('text', 'Hey'));
+    expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
   });
 });
 
