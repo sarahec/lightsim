@@ -17,12 +17,15 @@
 import { type CompiledSimulation, type Page } from '@lightsim/runtime';
 import { freeze } from 'immer';
 import { Root } from 'mdast';
+import remarkDirective from 'remark-directive';
+import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
 import freezeTree from './freezeTree.js';
 import groupNodes, { type NodeGroupingOptions } from './groupNodes.js';
+import collectMetadata from './metadata.js';
 import render, { FileFormat, type RenderOptions } from './render.js';
 import splitTrees, { type SplitOptions } from './split-trees.js';
 import { type MatcherType } from './util/matcher.js';
@@ -80,7 +83,10 @@ async function compile(
   const ast = await unified().use(remarkParse).parse(source);
 
   const processedTree = await unified()
+    .use([remarkFrontmatter, remarkDirective])
     .use(freezeTree) // make the tree immutable
+    .use(collectMetadata)
+    // @ts-expect-error TS TODO fix the type definitions for groupNodes and other plugins
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .run(ast);
