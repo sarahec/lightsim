@@ -15,6 +15,7 @@
  limitations under the License.
  */
 
+import { freeze, produce } from 'immer';
 import { u } from 'unist-builder';
 import find, { findAll } from '../find.js';
 
@@ -53,10 +54,7 @@ describe('find', () => {
   const tree = u('root', [heading]);
 
   it('should return undefined if not found', () => {
-    expect(find(tree, 'nothing')).toBeUndefined();
-  });
-
-  it('should return the found node', () => {
+    expect(find(tree, 'nothing')).toBeUndefined();find
     const result = find(tree, 'root');
     expect (result?.value).toBe(tree);
   });
@@ -67,31 +65,31 @@ describe('find', () => {
   });
 });
 
-describe('replace', () => {
-  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+describe('findResult', () => {
+    it('should replace a mutable node', () => {
+      const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+      const result = find(tree, 'text')!.replace(u('text', 'Hey'));
+      expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
+    });
+  
+    it('replace should work with immer', () => {
+      const tree = freeze(u('root', [u('heading', [u('text', 'Hello, world')])]), true);
+      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>) 
+      const result = produce(tree, (draft) => find(draft, 'text')!.replace(u('text', 'Hey')));
+      expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
+    });
 
-  it('should replace a mutable node', () => {
-    const result = find(tree, 'text')!.replace(u('text', 'Hey'));
-    expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
-  });
+    it('should remove a mutable node', () => {
+      const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
+      const result = find(tree, 'text')?.remove();
+      expect(result).toEqual(u('root', [u('heading', [])]));
+    });
+
+    it('remove should work with immer', () => {
+      const tree = freeze(u('root', [u('heading', [u('text', 'Hello, world')])]), true);
+      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>) 
+      const result = produce(tree, (draft) => find(draft, 'text')?.remove());
+      expect(result).toEqual(u('root', [u('heading', [])]));
+    });
+
 });
-
-describe('replace', () => {
-  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
-
-  it('should replace a mutable node', () => {
-    const result = find(tree, 'text')?.replace(u('text', 'Hey'));
-    expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
-  });
-});
-
-describe('remove', () => {
-  const tree = u('root', [u('heading', [u('text', 'Hello, world')])]);
-
-  it('should remove a mutable node', () => {
-    const result = find(tree, 'text')?.remove();
-    expect(result).toEqual(u('root', [u('heading', [])]));
-  });
-});
-
-
