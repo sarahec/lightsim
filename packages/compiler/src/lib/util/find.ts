@@ -34,11 +34,13 @@ interface PathStep {
  * @property value The found node.
  * @property replace Replaces the found node with the new value. Returns the tree root.
  * @property remove Removes the found node. Returns the tree root.
+ * @property findParent Reverse search the parents to find a node. Returns a new FindResult.
  */
 interface FindResult {
   value: Readonly<AnyNode>;
   replace: (newValue: AnyNode) => AnyNode;
   remove: () => AnyNode;
+  findParent(matcher?: MatcherType): FindResult | undefined;
 };
 
 /**
@@ -57,6 +59,23 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
 
     return {
       value,
+
+      findParent: (matcher?: MatcherType) => {
+        if (noParents) return undefined;
+        if (!matcher) {
+          return makeFindResult(parentCopy.at(-1)!.node, parentCopy.slice(0, -1));
+        }
+        const matchFn = makeMatchFn(matcher);
+        for (let i = parentCopy.length - 1; i >= 0; i--) {
+          const step = parentCopy[i];
+          if (matchFn(step.node)) {
+            return makeFindResult(step.node, parentCopy.slice(0, i));
+          }
+        }     
+        // no match found
+        return undefined;
+      },
+
       replace: (newValue: AnyNode) => {
         if (noParents) throw new Error('Cannot replace root node');
         const step = parentCopy.at(-1)!;
