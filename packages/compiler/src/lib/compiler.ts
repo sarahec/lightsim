@@ -83,10 +83,8 @@ async function compile(
   const ast = await unified().use(remarkParse).parse(source);
 
   const processedTree = await unified()
-    .use([remarkFrontmatter, remarkDirective])
     .use(freezeTree) // make the tree immutable
     .use(collectMetadata)
-    // @ts-expect-error TS TODO fix the type definitions for groupNodes and other plugins
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .run(ast);

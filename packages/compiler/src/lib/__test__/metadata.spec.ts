@@ -15,22 +15,36 @@
  */
 
 import { freeze } from "immer";
+import { Root } from "mdast";
+import { Logger } from "tslog";
 import { unified } from "unified";
 import { u } from "unist-builder";
-import collectMetadata from "../metadata.js";
+import collectMetadata, { MetadataOptions } from "../metadata.js";
+
+const log = new Logger({ minLevel: 3 });
+
+const optionsLogger = { log: log } as MetadataOptions;
 
 describe('metadata plugin', () => {
 	it('should make no change if nothing found', () => {
 		const emptyTree = u('root', []);
-		const result = unified().use(collectMetadata).runSync(emptyTree);
+		const result = unified().use(collectMetadata, optionsLogger).runSync(emptyTree);
 		expect(result).toEqual(emptyTree);
 	});
 	  
 	describe('with frontmatter', () => {
 		it('should parse as yaml', () => {
 			const titleTree = freeze(u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]), true);
-			const result = unified().use(collectMetadata).runSync(titleTree);
+			const result = unified().use(collectMetadata, optionsLogger).runSync(titleTree);
 			expect(result).toEqual(u('root', { meta: { title: "This is a test" } }, [u('text', 'hello')]));
 		});
 	});
-});	  
+
+	describe('with directives', () => {
+		it('should hoist directives to the heading', () => {
+			const titleTree = u('root', [u('heading', { depth: 1 }, 'First line'), u('textDirective', { name: 'title', attributes: "This is a test", }), u('text', 'hello')]) as Root;
+			const result = unified().use(collectMetadata, optionsLogger).runSync(titleTree);
+			expect(result).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'This is a test' } }, 'First line'), u('text', 'hello')]));
+		});
+	});
+});
