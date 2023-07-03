@@ -73,7 +73,7 @@ export default function collectMetadata(options?: MetadataOptions) {
     if (path) {
       path.remove();
       // @ts-expect-error this node has a value
-      const yaml = load(path?.value?.value);
+      const yaml = load(path?.node?.value);
       // @ts-expect-error we can add any property to a node
       tree.meta = yaml;
       log.trace('Parsed frontmatter and attached to root');
@@ -85,14 +85,14 @@ export default function collectMetadata(options?: MetadataOptions) {
     for (const directive of findAll(tree, matchDirectives)) {
       if (!directive) break;
         // @ts-expect-error name exists
-        log.trace(`Found directive: ${directive.value.name}`);
+        log.trace(`Found directive: ${directive.node.name}`);
       const target = directive.findBefore(matchLocation);
       if (target) {
         directive.remove();
         // @ts-expect-error we can add any property to a node (and this is writable)
-        target.value.meta ||= {};
+        target.node.meta ||= {};
         // @ts-expect-error these attributes also exist
-        target.value.meta[directive.value.name] = directive.value.attributes;
+        target.node.meta[directive.node.name] = directive.node.attributes;
       }
     }
     return tree;

@@ -57,12 +57,12 @@ describe('find', () => {
   it('should return undefined if not found', () => {
     expect(find(tree, 'nothing')).toBeUndefined();find
     const result = find(tree, 'root');
-    expect (result?.value).toBe(tree);
+    expect (result?.node).toBe(tree);
   });
 
   it('should return deep nodes', () => {
     const result = find(tree, 'text');
-    expect(result?.value).toBe(text);
+    expect(result?.node).toBe(text);
   });
 });
 
@@ -81,12 +81,12 @@ describe('findResult', () => {
 
     it('should return the immediate parent if no matcher', () => {
       const result = find(tree, 'text')!.findParent();
-      expect(result?.value).toEqual(u('heading', [u('text', 'Hello, world')]));
+      expect(result?.node).toEqual(u('heading', [u('text', 'Hello, world')]));
     });
 
     it('should return the parent specified by the matcher', () => {
       const result = find(tree, 'text')!.findParent('root');
-      expect(result?.value).toEqual(tree);
+      expect(result?.node).toEqual(tree);
     });
   });
 
@@ -103,7 +103,7 @@ describe('findResult', () => {
 
     it('should return the peer specified by the matcher', () => {
       const result = find(tree, 'text')!.findBefore('heading');
-      expect(result?.value.type).toEqual('heading');
+      expect(result?.node.type).toEqual('heading');
     });
   });
 
