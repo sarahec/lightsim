@@ -14,26 +14,103 @@
  limitations under the License.
  */
 
-import { type Node, type Parent } from "unist";
-import find from "./util/find.js";
-import { load } from "js-yaml";
 import { produce } from "immer";
+import { load } from "js-yaml";
+import { type Root } from 'mdast';
+import remarkDirective from "remark-directive";
+import remarkFrontmatter from "remark-frontmatter";
+import { ILogObj, Logger } from 'tslog';
+import { unified } from "unified";
+import { type Node } from "unist";
+import find, { findAll } from "./util/find.js";
+import makeMatchFn, { type MatcherType } from './util/matcher.js';
+
+/**
+ * Returns true if this node should be included as metadata.
+ * @param name The name of the metadata property
+ * @param value The value of the metadata property
+ * @param node The node (a directive) containing the metadata
+ */
+export type MetadataFilter = (node: Node, name?: string, value?: object, ) => boolean;
+
+export interface MetadataOptions {
+  readonly allowFrontmatter?: boolean;
+  readonly allowDirectives?: boolean;
+  readonly directivesLocation?: MatcherType;
+  readonly filter?: MetadataFilter;
+  readonly log?: Logger<ILogObj>;
+}
+
+const LOGGER_NAME = 'metadata';
+
 
 /** @type {import('unified').Plugin<[Options]>} */
-export default function collectMetadata() {
+export default function collectMetadata(options?: MetadataOptions) {
+  const log =
+    options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
+    new Logger({ name: LOGGER_NAME, minLevel: 3});
+
+  const settings = { 
+    allowFrontmatter: true, 
+    allowDirectives: true, 
+    directivesLocation: matchHeadings, 
+    filter: (node: Node) => node.type === 'textDirective',
+    ...options };
+  
+  // @ts-expect-error missing name or attributes will just come up undefined, which is fine
+  const matchDirectives = (node: Node) => settings.filter(node, node.name, node.attributes);
+  const matchLocation = makeMatchFn(settings.directivesLocation);
+
+
+  function matchHeadings(node: Node): boolean {
+    // @ts-expect-error this node should have a depth if it's a heading
+    return node.type === 'heading' && node.depth <= 2;
+  };
+
   // Parse the frontmatter (type: 'yaml') and add it to the root as `meta`
-  return (tree:  Node | Parent) => {
-    // For now, find the first instance and move it to the root
+  function hoistFrontmatter(tree: Root): Root {
+    const path = find(tree, 'yaml');
+    if (path) {
+      path.remove();
+      // @ts-expect-error this node has a value
+      const yaml = load(path?.value?.value);
+      // @ts-expect-error we can add any property to a node
+      tree.meta = yaml;
+      log.trace('Parsed frontmatter and attached to root');
+    }
+    return tree;
+  }
+
+  function hoistDirectives(tree: Root): Root {
+    for (const directive of findAll(tree, matchDirectives)) {
+      if (!directive) break;
+        // @ts-expect-error name exists
+        log.trace(`Found directive: ${directive.value.name}`);
+      const target = directive.findBefore(matchLocation);
+      if (target) {
+        directive.remove();
+        // @ts-expect-error we can add any property to a node (and this is writable)
+        target.value.meta ||= {};
+        // @ts-expect-error these attributes also exist
+        target.value.meta[directive.value.name] = directive.value.attributes;
+      }
+    }
+    return tree;
+  }
+
+  return (tree:  Root) => {
     const result = produce(tree, (draft) => {
-      const path = find(draft, "yaml");
-      if (path) {
-        path.remove();
-        // @ts-expect-error this node has a value
-        const yaml = load(path?.value?.value);
-        // @ts-expect-error we can add any property to a node
-        draft.meta = yaml;
+      if (settings.allowFrontmatter) {
+        unified().use(remarkFrontmatter).runSync(draft);
+        hoistFrontmatter(draft);
+      }
+      if (settings.allowDirectives) {
+        unified().use(remarkDirective).runSync(draft);
+        hoistDirectives(draft);
       }
     });
 	  return result;
 	};
+
+  
 };
