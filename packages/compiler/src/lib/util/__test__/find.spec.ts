@@ -90,6 +90,23 @@ describe('findResult', () => {
     });
   });
 
+  describe('findBefore', () => {
+
+    beforeEach(() => {
+      tree = u('root', [u('heading', [u('text', 'Hello, world')]), u('meta', { name: 'title', attributes: 'Hello'})]) as Root;
+    });
+
+    it('should return undefined if no match', () => {
+      const result = find(tree, 'meta')!.findBefore('none');
+      expect(result).toBeUndefined();
+    });
+
+    it('should return the peer specified by the matcher', () => {
+      const result = find(tree, 'text')!.findBefore('heading');
+      expect(result?.value.type).toEqual('heading');
+    });
+  });
+
   describe('replace', () => {
     it('should replace a mutable node', () => {
       const result = find(tree, 'text')!.replace(u('text', 'Hey'));

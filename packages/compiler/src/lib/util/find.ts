@@ -41,6 +41,7 @@ interface FindResult {
   replace: (newValue: AnyNode) => AnyNode;
   remove: () => AnyNode;
   findParent(matcher?: MatcherType): FindResult | undefined;
+  findBefore(matcher: MatcherType): FindResult | undefined;
 };
 
 /**
@@ -55,8 +56,7 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
     const noParents = parents.length === 0;
 
     // Copy the `parents` array, making a shallow copy of each step
-    const parentCopy = parents.map((step) => ({node: step.node, index: step.index})) as PathStep[];
-
+    const parentCopy = Object.freeze(parents.map((step) => ({...step}))) as PathStep[];
     return {
       value,
 
@@ -72,6 +72,25 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
             return makeFindResult(step.node, parentCopy.slice(0, i));
           }
         }     
+        // no match found
+        return undefined;
+      },
+
+      // Reverse search along the peers all the way up the chain
+      findBefore: (matcher: MatcherType) => {
+        const matchFn = makeMatchFn(matcher);
+        for (let i = parentCopy.length - 1; i >= 0; i--) {
+          const step = parentCopy[i];
+          for (let j = step.index; j >= 0; j--) {
+            const sibling = step.node.children[j];
+            if (matchFn(sibling)) {
+              return makeFindResult(sibling, parentCopy.slice(0, i));
+            }
+          }
+          if (matchFn(step.node)) {
+            return makeFindResult(step.node, parentCopy.slice(0, i));
+          }
+        }
         // no match found
         return undefined;
       },
