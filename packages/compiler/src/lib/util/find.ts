@@ -36,8 +36,8 @@ interface PathStep {
  * @property remove Removes the found node. Returns the tree root.
  * @property findParent Reverse search the parents to find a node. Returns a new FindResult.
  */
-interface FindResult {
-  value: Readonly<AnyNode>;
+export interface FindResult {
+  node: Readonly<AnyNode>;
   replace: (newValue: AnyNode) => AnyNode;
   remove: () => AnyNode;
   findParent(matcher?: MatcherType): FindResult | undefined;
@@ -58,7 +58,7 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
     // Copy the `parents` array, making a shallow copy of each step
     const parentCopy = Object.freeze(parents.map((step) => ({...step}))) as PathStep[];
     return {
-      value,
+      node: value,
 
       findParent: (matcher?: MatcherType) => {
         if (noParents) return undefined;

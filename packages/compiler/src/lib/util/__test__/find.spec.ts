@@ -18,7 +18,7 @@
 import { freeze, produce } from 'immer';
 import { type Root } from 'mdast';
 import { u } from 'unist-builder';
-import find, { findAll } from '../find.js';
+import find, { FindResult, findAll } from '../find.js';
 
 describe('findAll', () => {
   const bodyText = u('text', 'This is a test!');
@@ -35,15 +35,15 @@ describe('findAll', () => {
   it('should return the found node', () => {
     const gen: Generator = findAll(tree, 'root');
     const next = gen.next();
-    expect (next.value.value).toBe(tree);
+    expect (next.value.node).toBe(tree);
     expect (next.done).toBe(false);
     expect (gen.next().done).toBe(true);
   });
 
   it('should return all found nodes', () => {
     const gen = findAll(tree, 'text');
-    expect(gen.next().value.value).toBe(headingText);
-    expect(gen.next().value.value).toBe(bodyText);
+    expect(gen.next().value.node).toBe(headingText);
+    expect(gen.next().value.node).toBe(bodyText);
     expect(gen.next().done).toBe(true);
   });
 });
@@ -57,12 +57,12 @@ describe('find', () => {
   it('should return undefined if not found', () => {
     expect(find(tree, 'nothing')).toBeUndefined();find
     const result = find(tree, 'root');
-    expect (result?.value).toBe(tree);
+    expect (result?.node).toBe(tree);
   });
 
   it('should return deep nodes', () => {
     const result = find(tree, 'text');
-    expect(result?.value).toBe(text);
+    expect(result?.node).toBe(text);
   });
 });
 
@@ -81,12 +81,12 @@ describe('findResult', () => {
 
     it('should return the immediate parent if no matcher', () => {
       const result = find(tree, 'text')!.findParent();
-      expect(result?.value).toEqual(u('heading', [u('text', 'Hello, world')]));
+      expect(result?.node).toEqual(u('heading', [u('text', 'Hello, world')]));
     });
 
     it('should return the parent specified by the matcher', () => {
       const result = find(tree, 'text')!.findParent('root');
-      expect(result?.value).toEqual(tree);
+      expect(result?.node).toEqual(tree);
     });
   });
 
@@ -103,7 +103,7 @@ describe('findResult', () => {
 
     it('should return the peer specified by the matcher', () => {
       const result = find(tree, 'text')!.findBefore('heading');
-      expect(result?.value.type).toEqual('heading');
+      expect(result?.node.type).toEqual('heading');
     });
   });
 
