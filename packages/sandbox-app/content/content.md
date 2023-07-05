@@ -1,6 +1,12 @@
+---
+title: "Demo sim"
+---
+
 # This is a test
 
 The lightsim compiler will convert this document into a series of pages.
+
+***Note:*** *The page title should be "Demo Sim". This comes from the frontmatter.*
 
 ## This is only a test
 
