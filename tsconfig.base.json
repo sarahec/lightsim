@@ -10,15 +10,27 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@lightsim/cli": ["packages/cli/src/cli.ts"],
-      "@lightsim/compiler": ["packages/compiler/src/index.ts"],
-      "@lightsim/runtime": ["packages/runtime/src/index.ts"]
+      "@lightsim/cli": [
+        "packages/cli/src/cli.ts"
+      ],
+      "@lightsim/compiler": [
+        "packages/compiler/src/index.ts"
+      ],
+      "@lightsim/runtime": [
+        "packages/runtime/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }
