@@ -17,8 +17,6 @@
 import { type CompiledSimulation, type Page } from '@lightsim/runtime';
 import { freeze } from 'immer';
 import { Root } from 'mdast';
-import remarkDirective from 'remark-directive';
-import remarkFrontmatter from 'remark-frontmatter';
 import remarkParse from 'remark-parse';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
