@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-import { type CompiledSimulation, type Page } from '@lightsim/runtime';
+import { Page, type CompiledSimulation } from '@lightsim/runtime';
 import { freeze } from 'immer';
 import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
@@ -31,7 +31,7 @@ import { type MatcherType } from './util/matcher.js';
 const LOGGER_NAME = 'compiler';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CompileOptions {
+export interface CompileOptions {
   readonly group?: NodeGroupingOptions;
   readonly split?: SplitOptions;
   readonly render?: RenderOptions;
@@ -48,7 +48,7 @@ interface CompileOptions {
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
 
-async function compile(
+export async function compile(
   source: VFile,
   options?: CompileOptions
 ): Promise<Readonly<CompiledSimulation>> {
@@ -78,11 +78,11 @@ async function compile(
   const singlePage = options?.singlePage ?? false;
 
   log.trace('compiling', source.path);
-  const ast = await unified().use(remarkParse).parse(source);
+  const ast = unified().use(remarkParse).parse(source);
 
   const processedTree = await unified()
     .use(freezeTree) // make the tree immutable
-    .use(collectMetadata)
+    .use(collectMetadata) // move metadata to the root or its section heading
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .run(ast);
@@ -94,5 +94,3 @@ async function compile(
     {format: renderConfiguration.format, file: file, getContents: () => String(file.value),} as Page));
   return freeze( { pages: pages } );
 }
-
-export { CompileOptions, CompiledSimulation, compile as default };

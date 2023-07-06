@@ -14,6 +14,6 @@
  limitations under the License.
  */
 
- import compile, { CompileOptions, type CompiledSimulation } from './lib/compiler';
+import { compile, CompileOptions } from './lib/compiler';
  
- export { type CompileOptions, type CompiledSimulation, compile as default }; 
+export { type CompileOptions, compile as default };
