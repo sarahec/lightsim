@@ -12,13 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { type VFile } from 'vfile';
 
-import { type CompiledSimulation, type Page, type PageMetadata } from "./lib/interfaces";
-import { makeRuntime, type RuntimeControls, type NavigationOption } from "./lib/runtime";
+/**
+ * One exported page from the precompiler
+ * @property format - the format of the page (e.g. markdown)
+ * @property title - the title of the page
+ * @property file - the file containing the page contents.
+ * @property getContents - get the contents of the page as a String
+ */
+export interface Page {
+  readonly format: string;
+  readonly title? : string;
+  readonly file: VFile;
+  getContents(): string;
+}
 
-export {
-  makeRuntime as default, type CompiledSimulation, type Page,
-  type PageMetadata,
-  type RuntimeControls, type NavigationOption,
-};
+export interface CompiledSimulation {
+  readonly pages: Readonly<Page[]>;
+}
 
+export interface PageMetadata {
+  title?: string;
+}
