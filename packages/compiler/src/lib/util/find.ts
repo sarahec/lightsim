@@ -15,12 +15,10 @@
  limitations under the License.
  */
 
-import { type Node, type Parent } from 'unist';
+ import { type Node, type Parent } from 'unist';
 import makeMatchFn, { type MatcherType} from './matcher';
 
-type AnyNode = Node | Parent;
-
-interface PathStep {
+type PathStep = {
   node: Parent;
   index: number;
   numChildren: number;
@@ -36,10 +34,10 @@ interface PathStep {
  * @property remove Removes the found node. Returns the tree root.
  * @property findParent Reverse search the parents to find a node. Returns a new FindResult.
  */
-export interface FindResult {
-  node: Readonly<AnyNode>;
-  replace: (newValue: AnyNode) => AnyNode;
-  remove: () => AnyNode;
+export type FindResult = {
+  node: Readonly<Node>;
+  replace: (newValue: Node) => Node;
+  remove: () => Node;
   findParent(matcher?: MatcherType): FindResult | undefined;
   findBefore(matcher: MatcherType): FindResult | undefined;
 };
@@ -50,9 +48,9 @@ export interface FindResult {
  * @param root start of the search tree.
  * @param matcher matching pattern for the node (string, object, or function: boolean)
  */
-export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindResult> {
+export function *findAll(root: Node, matcher: MatcherType): Generator<FindResult> {
 
-  function makeFindResult(value: AnyNode, parents: PathStep[]): FindResult {
+  function makeFindResult(value: Node, parents: PathStep[]): FindResult {
     const noParents = parents.length === 0;
 
     // Copy the `parents` array, making a shallow copy of each step
@@ -95,7 +93,7 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
         return undefined;
       },
 
-      replace: (newValue: AnyNode) => {
+      replace: (newValue: Node) => {
         if (noParents) throw new Error('Cannot replace root node');
         const step = parentCopy.at(-1)!;
         (step.node as Parent).children.splice(step.index!, 1, newValue);
@@ -142,7 +140,7 @@ export function *findAll(root: AnyNode, matcher: MatcherType): Generator<FindRes
  * @param root start of the search tree.
  * @param matcher matching pattern for the node (string, object, or function: boolean)
  */
-export default function find(root: AnyNode, matcher: MatcherType): FindResult | undefined {
+export default function find(root: Node, matcher: MatcherType): FindResult | undefined {
   const found = findAll(root, matcher).next();
   return found.done ? undefined : found.value;
 }

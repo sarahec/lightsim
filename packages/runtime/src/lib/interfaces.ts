@@ -21,17 +21,15 @@ import { type VFile } from 'vfile';
  * @property file - the file containing the page contents.
  * @property getContents - get the contents of the page as a String
  */
-export interface Page {
+export type Page = {
   readonly format: string;
   readonly title? : string;
   readonly file: VFile;
   getContents(): string;
 }
 
-export interface CompiledSimulation {
+export type CompiledSimulation = {
   readonly pages: Readonly<Page[]>;
 }
 
-export interface PageMetadata {
-  title?: string;
-}
+export type Metadata = Record<string, string>;
