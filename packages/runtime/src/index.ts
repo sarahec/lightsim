@@ -13,12 +13,16 @@
 // limitations under the License.
 
 
-import { type CompiledSimulation, type Page, type PageMetadata } from "./lib/interfaces";
-import { makeRuntime, type RuntimeControls, type NavigationOption } from "./lib/runtime";
+import {
+  type CompiledSimulation, type Page, type Metadata,
+} from "./lib/interfaces";
+import {
+  makeRuntime, type RuntimeControls,
+  type NavigationOption
+} from "./lib/runtime";
 
 export {
-  makeRuntime as default, type CompiledSimulation, type Page,
-  type PageMetadata,
+  makeRuntime as default, type CompiledSimulation, type Page, type Metadata,
   type RuntimeControls, type NavigationOption,
 };
 
