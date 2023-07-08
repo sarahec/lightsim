@@ -19,7 +19,6 @@ import { produce } from "immer";
 import { load } from "js-yaml";
 import { Root as MdastRoot } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
-import { unified } from "unified";
 import { Node as UnistNode } from "unist";
 import find, { findAll } from "./util/find.js";
 import makeMatchFn, { type MatcherType } from './util/matcher.js';
@@ -35,8 +34,6 @@ export type MetadataFilter = (node: Node, name?: string, value?: object,) => boo
 export type MetadataScope = 'global' | 'page';
 
 export type MetadataOptions = {
-  // readonly allowFrontmatter?: boolean;
-  // readonly allowDirectives?: boolean;
   readonly directivesLocation?: MatcherType;
   readonly filter?: MetadataFilter;
   readonly log?: Logger<ILogObj>;
@@ -61,8 +58,6 @@ export function hoistMetadata(options: MetadataOptions = {}) {
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   const settings = {
-    // allowFrontmatter: true,
-    // allowDirectives: true,
     directivesLocation: matchHeadings,
     filter: (node: Node) => node.type === 'textDirective',
     ...options
