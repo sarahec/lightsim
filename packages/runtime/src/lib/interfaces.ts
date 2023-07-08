@@ -16,14 +16,14 @@ import { type VFile } from 'vfile';
 
 /**
  * One exported page from the precompiler
+ * @property metadata - the metadata for the page
  * @property format - the format of the page (e.g. markdown)
- * @property title - the title of the page
  * @property file - the file containing the page contents.
  * @property getContents - get the contents of the page as a String
  */
 export type Page = {
+  readonly metadata: Readonly<Metadata>;
   readonly format: string;
-  readonly title? : string;
   readonly file: VFile;
   getContents(): string;
 }
