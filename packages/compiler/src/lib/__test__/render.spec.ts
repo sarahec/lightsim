@@ -44,4 +44,58 @@ describe('render', () => {
     expect(file.basename).toBe('test1.md');
     expect(file.value).toBe('# Hello');
   });
+
+  describe('with metadata', () => {
+    let treeWithFrontmatter: Root;
+    let treeWithPageMetadata: Root;
+    const globalMetadata = { title: 'Test', foo: 'bar' };
+    const pageMetadata = { title: 'Page' };
+    
+    beforeEach(() => {
+      treeWithFrontmatter = u('root', {meta: globalMetadata},  [
+        u('heading', { depth: 1 }, [u('text', 'Hello')]),
+      ]) as Root;
+      treeWithPageMetadata = u('root', {meta: globalMetadata},  [
+        u('heading', { depth: 1, meta: { scope: 'page', ...pageMetadata } }, [u('text', 'Hello')]),
+      ]) as Root;
+    });
+
+    it('captures frontmatter when rendering html', () => {
+      const file = toHTML(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual(globalMetadata);
+    });
+
+    it('captures frontmatter when rendering markdown', () => {
+      const file = toMarkdown(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual(globalMetadata);
+    });
+
+    it('captures page metadata when rendering html', () => {
+      const file = toHTML(treeWithPageMetadata, { count: 1, name: 'test' });
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual(pageMetadata);
+    });
+
+    it('captures page metadata when rendering markdown', () => {
+      const file = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' });
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual(pageMetadata);
+    });
+
+    it('merges page metadata when rendering html', () => {
+      const file = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
+    });
+
+    it('merges page metadata when rendering markdown', () => {
+      const file = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      // @ts-expect-error extra fields are permitted. We add `metadata`.
+      expect(file.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
+    });
+
+  });
+
 });

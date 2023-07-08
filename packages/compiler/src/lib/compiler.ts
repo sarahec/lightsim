@@ -23,8 +23,8 @@ import { unified } from 'unified';
 import { VFile } from 'vfile';
 import freezeTree from './freezeTree.js';
 import groupNodes, { type NodeGroupingOptions } from './groupNodes.js';
-import collectMetadata from './metadata.js';
-import render, { FileFormat, type RenderOptions } from './render.js';
+import { extractMetadata, hoistMetadata } from './metadata.js';
+import render, { type RenderOptions } from './render.js';
 import splitTrees, { type SplitOptions } from './split-trees.js';
 import { type MatcherType } from './util/matcher.js';
 
@@ -70,7 +70,7 @@ export async function compile(
   };
 
   const renderConfiguration: RenderOptions = {
-    format: FileFormat.HTML,
+    format: 'html',
     log: log,
     ...options?.render,
   };
@@ -80,16 +80,16 @@ export async function compile(
   log.trace('compiling', source.path);
   const ast = unified().use(remarkParse).parse(source);
 
-  const processedTree = await unified()
+  const transformedTree = unified()
     .use(freezeTree) // make the tree immutable
-    .use(collectMetadata) // move metadata to the root or its section heading
+    .use(hoistMetadata) // move metadata to the root or its section heading
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
-    .run(ast);
-
-  // @ts-expect-error TS wants Node<Data> but there's no way to instantiate that
-  const trees = singlePage ? [processedTree as Root] : splitTrees(splitConfiguration)(processedTree) as Root[];
-  const files = render(trees, renderConfiguration);
+    .runSync(ast);
+  
+  const globalMetadata = extractMetadata(transformedTree as Root, 'global', log);
+  const trees = singlePage ? [transformedTree as Root] : splitTrees(splitConfiguration)(transformedTree) as Root[];
+  const files = render(trees, renderConfiguration, globalMetadata);
   const pages = files.map((file) => freeze(
     {format: renderConfiguration.format, file: file, getContents: () => String(file.value),} as Page));
   return freeze( { pages: pages } );

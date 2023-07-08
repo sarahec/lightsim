@@ -15,8 +15,7 @@
  */
 
 import { VFile } from 'vfile';
-import { compile }  from '../compiler.js';
-import { FileFormat } from '../render.js';
+import { compile } from '../compiler.js';
 
 describe('compiler', () => {
 
@@ -26,7 +25,7 @@ describe('compiler', () => {
       value: `# Hello\n\n## World!\n\n### How are you?`,
     });
     const compiled = await compile(multiPage, {
-      render: { format: FileFormat.Markdown },
+      render: { format: 'md' },
     });
     const files = compiled.pages.map((page) => page.file);
     expect(files).toHaveLength(2);

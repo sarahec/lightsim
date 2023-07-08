@@ -14,6 +14,7 @@
  limitations under the License.
  */
 
+import { Metadata } from '@lightsim/runtime';
 import { type Root as HastRoot } from 'hast';
 import { freeze } from 'immer';
 import { type Root } from 'mdast';
@@ -24,14 +25,12 @@ import remarkStringify from 'remark-stringify';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
+import { extractMetadata } from './metadata';
 
 const HTML_LOGGER_NAME = 'rendering html';
 const MD_LOGGER_NAME = 'rendering markdown';
 
-export enum FileFormat {
-  HTML = 'html',
-  Markdown = 'md',
-}
+export type FileFormat = 'html' | 'md';
 
 /**
  * Options for rendering a markdown tree to a file.
@@ -44,7 +43,7 @@ export enum FileFormat {
  * @param log Logger to use for logging
  */
 
-export interface RenderOptions {
+export type RenderOptions = {
   readonly name?: string;
   readonly count?: number;
   readonly extension?: string;
@@ -53,14 +52,15 @@ export interface RenderOptions {
   readonly log?: Logger<ILogObj>;
 }
 
-export default function render(trees: Root[] | Root, options?: RenderOptions): Readonly<Readonly<VFile>[]> {
-  const formatter = options?.format === FileFormat.HTML ? toHTML : toMarkdown;
+export default function render(trees: Root[] | Root, options?: RenderOptions, globalMetadata?: Metadata): Readonly<Readonly<VFile>[]> {
+  const formatter = options?.format === 'html' ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   if (!Array.isArray(trees)) {
-    return [formatter(trees, options)];
+    // Single tree
+    return [formatter(trees, options, globalMetadata)];
   } else {
     return freeze(trees.map((tree, index) =>
-      formatter(tree, { ...options, count: baseCount + index })
+      formatter(tree, { ...options, count: baseCount + index }, globalMetadata)
     ));
   }
 }
@@ -69,35 +69,40 @@ export default function render(trees: Root[] | Root, options?: RenderOptions): R
  * Converts a mdast tree to HTML and returns it as a VFile.
  *
  * @param tree A single markdown tree
- * @returns An in-memory VFile
+ * @returns An in-memory VFile wth an added `metadata` field
  */
-export function toHTML(tree: Root, options?: RenderOptions) {
+export function toHTML(tree: Root, options?: RenderOptions, globalMetadata: Metadata = {}) {
   const { count = 0, name: name = 'page', extension: suffix = 'html' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
+  const pageMetadata = extractMetadata(tree, 'page', log);
+  const metadata = { ...globalMetadata, ...pageMetadata };
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
-  log.silly(`HAST: ${JSON.stringify(hast)}`);
+  log.silly(`hast: ${JSON.stringify(hast)}`);
   const html = unified().use(rehypeStringify).stringify(hast).trim();
-  log.silly(`HTML: ${html}`);
+  log.silly(`html: ${html}`);
 
   const finalHTML = options?.template?.render({ contents: html, title: name, }) ?? html;
-  return makeVFile(finalHTML, suffix, count, name, log);
+  return makeVFile(finalHTML, suffix, count, name, metadata, log);
 }
 
 /**
  * Renders a mdast tree to markdown and returns it as a VFile.
 
  * @param tree A single markdown tree
- * @returns An in-memory VFile (immutable)
+ * @returns An in-memory VFile wth an added `metadata` field
  */
-export function toMarkdown(tree: Root, options?: RenderOptions) {
+export function toMarkdown(tree: Root, options?: RenderOptions, globalMetadata: Metadata = {}) {
   const { count = 0, name: name = 'page', extension: suffix = 'md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
+  const pageMetadata = extractMetadata(tree, 'page', log) || {}
+  const metadata = { ...globalMetadata, ...pageMetadata };
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
-  return makeVFile(markdown, suffix, count, name);
+  log.silly(`markdown: ${JSON.stringify(markdown)}`);
+  return makeVFile(markdown, suffix, count, name, metadata, log);
 }
 
 /**
@@ -106,6 +111,7 @@ export function toMarkdown(tree: Root, options?: RenderOptions) {
  * @param extension file extension
  * @param count optional sequence number (ignored if 0, default 1)
  * @param name base filename (default: 'page')
+ * @param metadata optional metadata to attach to the file
  * @param log logger
  * @returns an in-memory VFile
  */
@@ -114,9 +120,10 @@ function makeVFile(
   extension: string,
   count = 1,
   name = 'page',
+  metadata? : Metadata,
   log?: Logger<ILogObj>
 ): Readonly<VFile> {
   const filename = (count ? `${name}${count}` : name) + '.' + extension;
-  log?.trace(`New file: ${filename}`);
-  return freeze(new VFile({ basename: filename, value: data }));
+  log?.trace(`New file: ${filename}, metadata: ${JSON.stringify(metadata)}`);
+  return freeze(new VFile({ basename: filename, value: data, metadata: metadata }));
 }
