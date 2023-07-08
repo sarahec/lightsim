@@ -21,7 +21,7 @@ import makeMatchFn, { type MatcherType } from './util/matcher.js';
 import makeWrapFn, { type WrapperType } from './util/wrapper.js';
 import { produce } from 'immer';
 
-export interface NodeGroupingOptions {
+export type NodeGroupingOptions = {
   readonly match: MatcherType;
   readonly wrap: WrapperType;
   readonly log?: Logger<ILogObj>;
