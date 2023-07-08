@@ -22,7 +22,7 @@ import { CompiledSimulation } from "./interfaces.js";
  * @property perform - perform the given action.
  * @property isHome - whether the session is at the home page.
  */
-export interface RuntimeControls {
+export type RuntimeControls = {
   getContents(location: number): string;
   getLocation(): number;
   getNavigation(location: number): NavigationOption[];
@@ -31,11 +31,7 @@ export interface RuntimeControls {
   perform(action: string): void;
 }
 
-export enum NavigationAction {
-  Next = "next",
-  Back = "back",
-  Home = "home",
-}
+export type NavigationAction = 'next' | 'back' | 'home';
 
 /**
 * Interface to per-page navigation
@@ -43,7 +39,7 @@ export enum NavigationAction {
 * @property action - the action to perform when the option is selected.
 * @property disabled - whether the option is disabled.
 */
-export interface NavigationOption {
+export type NavigationOption = {
   readonly label: string;
   readonly action: NavigationAction | string;
   readonly disabled: boolean;
@@ -70,16 +66,16 @@ export function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeControls> 
     ],
     isComplete: () => _index >= _end,
     canPerform: (action: string) => {
-      return (action === NavigationAction.Next && _index < _end) ||
-        (action === NavigationAction.Back && _index > 0) ||
-        (action === NavigationAction.Home && _index !== 0);
+      return (action === 'next' && _index < _end) ||
+        (action === 'back' && _index > 0) ||
+        (action === 'home' && _index !== 0);
     },
     perform: (action: string) => {
-      if (action === NavigationAction.Next) {
+      if (action === 'next') {
         _index++;
-      } else if (action === NavigationAction.Back) {
+      } else if (action === 'back') {
         _index--;
-      } else if (action === NavigationAction.Home) {
+      } else if (action === 'home') {
         _index = 0;
       } else {
         throw new Error(`Invalid action: ${action}`);
@@ -87,6 +83,7 @@ export function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeControls> 
     },
   };
 }
+
 
 
 

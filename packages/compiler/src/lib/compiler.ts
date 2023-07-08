@@ -31,7 +31,7 @@ import { type MatcherType } from './util/matcher.js';
 const LOGGER_NAME = 'compiler';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CompileOptions {
+export type CompileOptions = {
   readonly group?: NodeGroupingOptions;
   readonly split?: SplitOptions;
   readonly render?: RenderOptions;
