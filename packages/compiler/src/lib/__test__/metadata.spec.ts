@@ -19,32 +19,47 @@ import { Root } from "mdast";
 import { Logger } from "tslog";
 import { unified } from "unified";
 import { u } from "unist-builder";
-import collectMetadata, { MetadataOptions } from "../metadata.js";
+import { hoistMetadata, type MetadataOptions, extractMetadata } from "../metadata.js";
 
 const log = new Logger({ minLevel: 3 });
 
 const optionsLogger = { log: log } as MetadataOptions;
 
-describe('metadata plugin', () => {
+describe('hoistMetadata', () => {
 	it('should make no change if nothing found', () => {
 		const emptyTree = u('root', []);
-		const result = unified().use(collectMetadata, optionsLogger).runSync(emptyTree);
+		const result = unified().use(hoistMetadata, optionsLogger).runSync(emptyTree);
 		expect(result).toEqual(emptyTree);
 	});
 	  
 	describe('with frontmatter', () => {
 		it('should parse as yaml', () => {
 			const titleTree = freeze(u('root', [u('yaml', "title: This is a test"), u('text', 'hello')]), true);
-			const result = unified().use(collectMetadata, optionsLogger).runSync(titleTree);
-			expect(result).toEqual(u('root', { meta: { title: "This is a test" } }, [u('text', 'hello')]));
+			const result = unified().use(hoistMetadata, optionsLogger).runSync(titleTree);
+			expect(result).toEqual(u('root', { meta: { title: 'This is a test', scope: 'global' } }, [u('text', 'hello')]));
 		});
 	});
 
 	describe('with directives', () => {
 		it('should hoist directives to the heading', () => {
 			const titleTree = u('root', [u('heading', { depth: 1 }, 'First line'), u('textDirective', { name: 'title', attributes: "This is a test", }), u('text', 'hello')]) as Root;
-			const result = unified().use(collectMetadata, optionsLogger).runSync(titleTree);
-			expect(result).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'This is a test' } }, 'First line'), u('text', 'hello')]));
+			const result = unified().use(hoistMetadata, optionsLogger).runSync(titleTree);
+			expect(result).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'This is a test', scope: 'page' } }, 'First line'), u('text', 'hello')]));
 		});
 	});
+});
+
+describe('extract', () => {
+	it('should find global data (frontmatter)', () => {
+		const withFrontmatter = u('root', { meta: { title: "This is a test", scope: 'global' } }, [u('text', 'hello')])
+		const result = extractMetadata(withFrontmatter, 'global');
+		expect(result).toEqual({ title: "This is a test" });
+	});
+
+	it('should find page data (directives)', () => {
+		const withDirectives = u('root', [u('heading', { depth: 1, meta: { title: "This is a test", scope: 'page' } }, 'First line'), u('text', 'hello')]) as Root;
+		const result = extractMetadata(withDirectives, 'page');
+		expect(result).toEqual({ title: "This is a test" });
+	});
+
 });

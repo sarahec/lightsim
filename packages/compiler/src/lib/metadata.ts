@@ -14,14 +14,15 @@
  limitations under the License.
  */
 
+import { Metadata } from "@lightsim/runtime";
 import { produce } from "immer";
 import { load } from "js-yaml";
-import { type Root } from 'mdast';
+import { Root as MdastRoot } from 'mdast';
 import remarkDirective from "remark-directive";
 import remarkFrontmatter from "remark-frontmatter";
 import { ILogObj, Logger } from 'tslog';
 import { unified } from "unified";
-import { type Node } from "unist";
+import { Node as UnistNode } from "unist";
 import find, { findAll } from "./util/find.js";
 import makeMatchFn, { type MatcherType } from './util/matcher.js';
 
@@ -33,7 +34,9 @@ import makeMatchFn, { type MatcherType } from './util/matcher.js';
  */
 export type MetadataFilter = (node: Node, name?: string, value?: object, ) => boolean;
 
-export interface MetadataOptions {
+export type MetadataScope = 'global' | 'page';
+
+export type MetadataOptions = {
   readonly allowFrontmatter?: boolean;
   readonly allowDirectives?: boolean;
   readonly directivesLocation?: MatcherType;
@@ -41,11 +44,20 @@ export interface MetadataOptions {
   readonly log?: Logger<ILogObj>;
 }
 
+// Syntactic sugar for accessing the metadata
+interface Root extends MdastRoot {
+  meta?: Record<string, string>;
+} 
+
+interface Node extends UnistNode  {
+  meta?: Record<string, string>;
+} 
+
 const LOGGER_NAME = 'metadata';
 
-
 /** @type {import('unified').Plugin<[Options]>} */
-export default function collectMetadata(options?: MetadataOptions) {
+export function hoistMetadata(options?: MetadataOptions) {
+
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3});
@@ -75,7 +87,7 @@ export default function collectMetadata(options?: MetadataOptions) {
       // @ts-expect-error this node has a value
       const yaml = load(path?.node?.value);
       // @ts-expect-error we can add any property to a node
-      tree.meta = yaml;
+      tree.meta = { scope: 'global', ...yaml };
       log.trace('Parsed frontmatter and attached to root');
     }
     return tree;
@@ -83,17 +95,21 @@ export default function collectMetadata(options?: MetadataOptions) {
 
   function hoistDirectives(tree: Root): Root {
     for (const directive of findAll(tree, matchDirectives)) {
+      const log = options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
+        new Logger({ name: LOGGER_NAME, minLevel: 3});
+  
       if (!directive) break;
         // @ts-expect-error name exists
         log.trace(`Found directive: ${directive.node.name}`);
-      const target = directive.findBefore(matchLocation);
-      if (target) {
+      const probe = directive.findBefore(matchLocation);
+      if (probe) {
         directive.remove();
-        // @ts-expect-error we can add any property to a node (and this is writable)
-        target.node.meta ||= {};
+        const destination = probe.node as Node;
+        destination.meta ||= {scope: 'page'};
         // @ts-expect-error these attributes also exist
-        target.node.meta[directive.node.name] = directive.node.attributes;
+        destination.meta[directive.node.name] = directive.node.attributes;
       }
+
     }
     return tree;
   }
@@ -112,5 +128,19 @@ export default function collectMetadata(options?: MetadataOptions) {
 	  return result;
 	};
 
-  
 };
+
+export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<ILogObj>): Metadata | undefined {
+  const LOGGER_NAME = 'extract metadata';
+  const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
+  
+  // @ts-expect-error TS wants `.scope` to be ['scope'] but that's no possible when meta is optional
+  const location = find(tree, (probe) => (probe as Node).meta?.scope === scope);
+  if (!location) return undefined;
+  // @ts-expect-error location.node is a generic node (not our sugared type)
+  const metadata = { ...location?.node?.meta };
+  if (metadata.scope) delete metadata.scope;
+  _log.trace(`Found metadata: ${JSON.stringify(metadata)}`);
+  return metadata as Metadata;
+}
