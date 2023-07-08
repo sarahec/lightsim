@@ -28,19 +28,19 @@ describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
   it('renders a HTML fragment by default', () => {
-    const file = toHTML(tree as Root, {count: 0, name: 'test', log: logger});
+    const file = toHTML(tree as Root, {count: 0, name: 'test', log: logger}).file;
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe('<h1>Hello</h1>');
   });
 
   it('renders HTML into a template', () => {
-    const file = toHTML(tree as Root, {count: 0, name: 'test', template: template, log: logger});
+    const file = toHTML(tree as Root, {count: 0, name: 'test', template: template, log: logger}).file;
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe("TEST:: <h1>Hello</h1>");
   });
 
   it('renders Markdown', () => {
-    const file = toMarkdown(tree as Root, {count: 1, name: 'test'});
+    const file = toMarkdown(tree as Root, {count: 1, name: 'test'}).file;
     expect(file.basename).toBe('test1.md');
     expect(file.value).toBe('# Hello');
   });
@@ -61,39 +61,33 @@ describe('render', () => {
     });
 
     it('captures frontmatter when rendering html', () => {
-      const file = toHTML(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual(globalMetadata);
+      const page = toHTML(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      expect(page.metadata).toEqual(globalMetadata);
     });
 
     it('captures frontmatter when rendering markdown', () => {
-      const file = toMarkdown(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual(globalMetadata);
+      const page = toMarkdown(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      expect(page.metadata).toEqual(globalMetadata);
     });
 
     it('captures page metadata when rendering html', () => {
-      const file = toHTML(treeWithPageMetadata, { count: 1, name: 'test' });
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual(pageMetadata);
+      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' });
+      expect(page.metadata).toEqual(pageMetadata);
     });
 
     it('captures page metadata when rendering markdown', () => {
-      const file = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' });
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual(pageMetadata);
+      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' });
+      expect(page.metadata).toEqual(pageMetadata);
     });
 
     it('merges page metadata when rendering html', () => {
-      const file = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
+      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
 
     it('merges page metadata when rendering markdown', () => {
-      const file = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
-      // @ts-expect-error extra fields are permitted. We add `metadata`.
-      expect(file.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
+      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
 
   });

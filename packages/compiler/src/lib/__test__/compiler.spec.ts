@@ -19,7 +19,7 @@ import { compile } from '../compiler.js';
 
 describe('compiler', () => {
 
-  it('Should export multiple pages from one source', async () => {
+  it('should export multiple pages from one source', async () => {
     const multiPage = new VFile({
       path: 'test.md',
       value: `# Hello\n\n## World!\n\n### How are you?`,
@@ -33,6 +33,23 @@ describe('compiler', () => {
     expect(files[0].path).toEqual('page.md');
     expect(files[1].value).toEqual('## World!\n\n### How are you?');
     expect(files[1].path).toEqual('page1.md');
+  });
+
+  it('Should export frontmatter as metadata', async () => {
+    const multiPage = new VFile({
+      path: 'test.md',
+      value: `---\ntitle: Hello world\n---\n# Hello\n\n## World!\n\n### How are you?`,
+    });
+    const html = await compile(multiPage, {
+      render: { format: 'html' },
+    });
+    const md = await compile(multiPage, {
+      render: { format: 'md' },
+    });
+    expect(html.pages.at(0)?.metadata).toEqual({ title: 'Hello world' });
+    expect(html.pages.at(1)?.metadata).toEqual({ title: 'Hello world' });
+    expect(md.pages.at(0)?.metadata).toEqual({ title: 'Hello world' });
+    expect(md.pages.at(1)?.metadata).toEqual({ title: 'Hello world' });
   });
 
 });

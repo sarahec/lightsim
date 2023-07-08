@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CompiledSimulation } from "./interfaces.js";
+import { CompiledSimulation, Metadata } from "./interfaces.js";
 
 /**
  * Control interface for a session with the simulation. 
@@ -25,7 +25,8 @@ import { CompiledSimulation } from "./interfaces.js";
 export type RuntimeControls = {
   getContents(location: number): string;
   getLocation(): number;
-  getNavigation(location: number): NavigationOption[];
+  getMetadata(location?: number): Metadata;
+  getNavigation(location?: number): NavigationOption[];
   isComplete(): boolean;
   canPerform(action: string): boolean;
   perform(action: string): void;
@@ -59,11 +60,18 @@ export function makeRuntime(sim: CompiledSimulation): Readonly<RuntimeControls> 
   return {
     getContents: (location: number) => String(_pages[location].getContents()),
     getLocation: () => _index,
-    getNavigation: (location: number) => [
-      {label: "home", action: "home", disabled: location === 0},
-      {label: "back", action: "back", disabled: location <= 0},
-      {label: "next", action: "next", disabled: location >= _end},
-    ],
+    getMetadata: (location?: number) => {
+      const loc = location ?? _index;
+      return _pages[loc].metadata ?? {};
+    },
+    getNavigation: (location?: number) => {
+      const loc = location ?? _index;
+      return [
+        { label: "home", action: "home", disabled: loc === 0 },
+        { label: "back", action: "back", disabled: loc <= 0 },
+        { label: "next", action: "next", disabled: loc >= _end },
+      ]
+    },
     isComplete: () => _index >= _end,
     canPerform: (action: string) => {
       return (action === 'next' && _index < _end) ||

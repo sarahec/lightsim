@@ -15,6 +15,8 @@
  */
 
 import { Page, type CompiledSimulation } from '@lightsim/runtime';
+import remarkDirective from "remark-directive";
+import remarkFrontmatter from "remark-frontmatter";
 import { freeze } from 'immer';
 import { Root } from 'mdast';
 import remarkParse from 'remark-parse';
@@ -78,7 +80,7 @@ export async function compile(
   const singlePage = options?.singlePage ?? false;
 
   log.trace('compiling', source.path);
-  const ast = unified().use(remarkParse).parse(source);
+  const ast = unified().use(remarkParse).use([remarkFrontmatter, remarkDirective]).parse(source);
 
   const transformedTree = unified()
     .use(freezeTree) // make the tree immutable
@@ -86,11 +88,10 @@ export async function compile(
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .runSync(ast);
-  
+
   const globalMetadata = extractMetadata(transformedTree as Root, 'global', log);
   const trees = singlePage ? [transformedTree as Root] : splitTrees(splitConfiguration)(transformedTree) as Root[];
-  const files = render(trees, renderConfiguration, globalMetadata);
-  const pages = files.map((file) => freeze(
-    {format: renderConfiguration.format, file: file, getContents: () => String(file.value),} as Page));
-  return freeze( { pages: pages } );
+  const pages = render(trees, renderConfiguration, globalMetadata);
+
+  return freeze({ pages: pages });
 }

@@ -18,8 +18,6 @@ import { Metadata } from "@lightsim/runtime";
 import { produce } from "immer";
 import { load } from "js-yaml";
 import { Root as MdastRoot } from 'mdast';
-import remarkDirective from "remark-directive";
-import remarkFrontmatter from "remark-frontmatter";
 import { ILogObj, Logger } from 'tslog';
 import { unified } from "unified";
 import { Node as UnistNode } from "unist";
@@ -32,13 +30,13 @@ import makeMatchFn, { type MatcherType } from './util/matcher.js';
  * @param value The value of the metadata property
  * @param node The node (a directive) containing the metadata
  */
-export type MetadataFilter = (node: Node, name?: string, value?: object, ) => boolean;
+export type MetadataFilter = (node: Node, name?: string, value?: object,) => boolean;
 
 export type MetadataScope = 'global' | 'page';
 
 export type MetadataOptions = {
-  readonly allowFrontmatter?: boolean;
-  readonly allowDirectives?: boolean;
+  // readonly allowFrontmatter?: boolean;
+  // readonly allowDirectives?: boolean;
   readonly directivesLocation?: MatcherType;
   readonly filter?: MetadataFilter;
   readonly log?: Logger<ILogObj>;
@@ -47,28 +45,29 @@ export type MetadataOptions = {
 // Syntactic sugar for accessing the metadata
 interface Root extends MdastRoot {
   meta?: Record<string, string>;
-} 
+}
 
-interface Node extends UnistNode  {
+interface Node extends UnistNode {
   meta?: Record<string, string>;
-} 
+}
 
 const LOGGER_NAME = 'metadata';
 
 /** @type {import('unified').Plugin<[Options]>} */
-export function hoistMetadata(options?: MetadataOptions) {
+export function hoistMetadata(options: MetadataOptions = {}) {
 
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-    new Logger({ name: LOGGER_NAME, minLevel: 3});
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
-  const settings = { 
-    allowFrontmatter: true, 
-    allowDirectives: true, 
-    directivesLocation: matchHeadings, 
+  const settings = {
+    // allowFrontmatter: true,
+    // allowDirectives: true,
+    directivesLocation: matchHeadings,
     filter: (node: Node) => node.type === 'textDirective',
-    ...options };
-  
+    ...options
+  };
+
   // @ts-expect-error missing name or attributes will just come up undefined, which is fine
   const matchDirectives = (node: Node) => settings.filter(node, node.name, node.attributes);
   const matchLocation = makeMatchFn(settings.directivesLocation);
@@ -96,16 +95,16 @@ export function hoistMetadata(options?: MetadataOptions) {
   function hoistDirectives(tree: Root): Root {
     for (const directive of findAll(tree, matchDirectives)) {
       const log = options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-        new Logger({ name: LOGGER_NAME, minLevel: 3});
-  
+        new Logger({ name: LOGGER_NAME, minLevel: 3 });
+
       if (!directive) break;
-        // @ts-expect-error name exists
-        log.trace(`Found directive: ${directive.node.name}`);
+      // @ts-expect-error name exists
+      log.trace(`Found directive: ${directive.node.name}`);
       const probe = directive.findBefore(matchLocation);
       if (probe) {
         directive.remove();
         const destination = probe.node as Node;
-        destination.meta ||= {scope: 'page'};
+        destination.meta ||= { scope: 'page' };
         // @ts-expect-error these attributes also exist
         destination.meta[directive.node.name] = directive.node.attributes;
       }
@@ -114,19 +113,10 @@ export function hoistMetadata(options?: MetadataOptions) {
     return tree;
   }
 
-  return (tree:  Root) => {
-    const result = produce(tree, (draft) => {
-      if (settings.allowFrontmatter) {
-        unified().use(remarkFrontmatter).runSync(draft);
-        hoistFrontmatter(draft);
-      }
-      if (settings.allowDirectives) {
-        unified().use(remarkDirective).runSync(draft);
-        hoistDirectives(draft);
-      }
-    });
-	  return result;
-	};
+  return (tree: Root) => produce(tree, (draft) => {
+    hoistFrontmatter(draft);
+    hoistDirectives(draft);
+  });
 
 };
 
@@ -134,7 +124,7 @@ export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<I
   const LOGGER_NAME = 'extract metadata';
   const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
-  
+
   // @ts-expect-error TS wants `.scope` to be ['scope'] but that's no possible when meta is optional
   const location = find(tree, (probe) => (probe as Node).meta?.scope === scope);
   if (!location) return undefined;
