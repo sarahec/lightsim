@@ -15,8 +15,8 @@
  limitations under the License.
  */
 
- import { type Node, type Parent } from 'unist';
-import makeMatchFn, { type MatcherType} from './matcher';
+import { type Node, type Parent } from 'unist';
+import makeMatchFn, { type MatcherType } from './matcher';
 
 type PathStep = {
   node: Parent;
@@ -48,13 +48,13 @@ export type FindResult = {
  * @param root start of the search tree.
  * @param matcher matching pattern for the node (string, object, or function: boolean)
  */
-export function *findAll(root: Node, matcher: MatcherType): Generator<FindResult> {
+export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult> {
 
   function makeFindResult(value: Node, parents: PathStep[]): FindResult {
     const noParents = parents.length === 0;
 
     // Copy the `parents` array, making a shallow copy of each step
-    const parentCopy = Object.freeze(parents.map((step) => ({...step}))) as PathStep[];
+    const parentCopy = Object.freeze(parents.map((step) => ({ ...step }))) as PathStep[];
     return {
       node: value,
 
@@ -69,7 +69,7 @@ export function *findAll(root: Node, matcher: MatcherType): Generator<FindResult
           if (matchFn(step.node)) {
             return makeFindResult(step.node, parentCopy.slice(0, i));
           }
-        }     
+        }
         // no match found
         return undefined;
       },
@@ -101,13 +101,22 @@ export function *findAll(root: Node, matcher: MatcherType): Generator<FindResult
       },
       remove: () => {
         if (noParents) throw new Error('Cannot remove root node');
-        const step = parentCopy.at(-1)!;
-        (step.node as Parent).children.splice(step.index!, 1);
+        const parents = parentCopy.slice(0, -1);
+        while (parents.length > 0) {
+          const parent = parents.at(-1)!;
+          (parent.node).children.splice(parent.index!, 1);
+          // @ts-expect-error remove the children array if it's empty 
+          if (parent.node.children.length === 0) delete parent.node.children;
+          if (parent.node.children || parent.node.type == 'root') break;
+          parents.pop();
+        }
         return parentCopy[0].node;
       }
     };
   };
-  
+
+
+
   const matchFn = makeMatchFn(matcher);
   const parents: PathStep[] = [];
   let probe = root;
@@ -119,19 +128,19 @@ export function *findAll(root: Node, matcher: MatcherType): Generator<FindResult
     }
     // @ts-expect-error idiomatic JS is fine
     if (probe.children) { // descend into a parent node
-        step = { node: probe as Parent, index: 0, numChildren: ((probe as Parent).children.length)};
-        parents.push(step);
+      step = { node: probe as Parent, index: 0, numChildren: ((probe as Parent).children.length) };
+      parents.push(step);
     } else {
       step!.index++;
       while (step!.index >= step!.numChildren) { // ascend to the next parent
         step = parents.pop();
-        if (!step) return {value: undefined, done: true};
+        if (!step) return { value: undefined, done: true };
         step.index++;
       }
     }
     probe = step!.node.children[step!.index];
   }
-  return {value: undefined, done: true};
+  return { value: undefined, done: true };
 }
 
 /**
