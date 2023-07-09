@@ -55,7 +55,7 @@ export default function splitTrees(options: SplitOptions): (tree: Node) => Node[
       return [tree];
     }
     if (matches.length != tree.children.length) {
-      log.warn('all matches should be at the top level of the tree');
+      log.debug('all matches should be at the top level of the tree');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = tree.children.map((child: any /* Node */) => (produce(child, (draft: any) => { return { ...draft, type: 'root' }; })));
