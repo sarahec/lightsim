@@ -88,6 +88,7 @@ export async function compile(
     .use(groupNodes, groupConfiguration)
     // TODO Add other stages here
     .runSync(ast);
+  // console.log(JSON.stringify(transformedTree, null)); // <<<
 
   const globalMetadata = extractMetadata(transformedTree as Root, 'global', log);
   const trees = singlePage ? [transformedTree as Root] : splitTrees(splitConfiguration)(transformedTree) as Root[];

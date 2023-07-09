@@ -93,15 +93,15 @@ export function hoistMetadata(options: MetadataOptions = {}) {
         new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
       if (!directive) break;
-      // @ts-expect-error name exists
-      log.trace(`Found directive: ${directive.node.name}`);
       const probe = directive.findBefore(matchLocation);
       if (probe) {
         directive.remove();
         const destination = probe.node as Node;
-        destination.meta ||= { scope: 'page' };
-        // @ts-expect-error these attributes also exist
-        destination.meta[directive.node.name] = directive.node.attributes;
+        destination.meta ||= {};
+        const metadata = parseDirective(directive.node, log);
+        if (metadata) {
+          destination.meta = { ...metadata, ...destination.meta };
+        }
       }
 
     }
@@ -128,4 +128,25 @@ export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<I
   if (metadata.scope) delete metadata.scope;
   _log.trace(`Found metadata: ${JSON.stringify(metadata)}`);
   return metadata as Metadata;
+}
+
+export function parseDirective(node: Node, log?: Logger<ILogObj>): Metadata {
+  const LOGGER_NAME = 'parse directive';
+  const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
+    new Logger({ name: LOGGER_NAME, minLevel: 3 });
+
+  _log.trace(`Directive: ${JSON.stringify(node)}`);
+
+  if (node.type != 'textDirective') {
+    _log.error(`Node is not a directive: ${JSON.stringify(node)}`);
+    return {};
+  }
+  _log.trace(`Parsing directive: ${node.type}`);
+  const text = find(node, 'text');
+  if (!text) {
+    _log.error(`Directive has no text: ${JSON.stringify(node)}`);
+    return {};
+  }
+  // @ts-expect-error text node has a value and a textDirective has a name
+  return { [node.name]: text.node.value };
 }
