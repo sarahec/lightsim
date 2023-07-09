@@ -15,12 +15,12 @@
  */
 
 import { type Node } from 'unist';
-import makeMatchFn from '../matcher';
+import makeMatchFn, { MatchFn } from '../matcher.js';
 
 describe('makeMatchFn', () => {
   it('should accept and return a function', () => {
-    const fn = (node: Node) => node.type === 'heading';
-    expect(makeMatchFn(fn)).toEqual(fn);
+    const fn: MatchFn = (node: Node) => node.type === 'heading';
+    expect(makeMatchFn(fn)).toBe(fn);
   });
 
   it('should accept a node type', () => {
@@ -30,7 +30,7 @@ describe('makeMatchFn', () => {
   });
 
   it('should accept a partial node', () => {
-    const fn = makeMatchFn({ type: 'heading', depth: 2 } as Node);
+    const fn = makeMatchFn({ type: 'heading', depth: 2 });
     expect(fn({ type: 'heading', depth: 1 } as Node)).toEqual(false);
     expect(fn({ type: 'heading', depth: 2 } as Node)).toEqual(true);
     expect(fn({ type: 'root' })).toEqual(false);

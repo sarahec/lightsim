@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  Copyright 2023 Sarah Clark
 
@@ -16,27 +17,43 @@
 
 import { type Node } from 'unist';
 
-export type MatchFn = (probe: Node) => boolean;
-export type MatcherType = string | Node | MatchFn;
+/**
+ * Matching function, matched the parameters used by unist::filter
+ */
+export type MatchFn = (probe: Node, name?: string, value?: object,) => boolean;
+
+export type MatcherType = string | Record<string, any> | MatchFn;
 
 /**
  * Converts a match specifier (type string, partial node, or function) into a function that can be used to test a node.
  *
- * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a function (node) => boolean.
+ * @param matcher A type string ('foo'), a partial node ({type: 'foo', value: 'bar'}), or a MatchFn.
  */
 export default function makeMatchFn(matcher: MatcherType): MatchFn {
-  if (typeof matcher === 'string') {
-    return (probe: Node) => probe.type === matcher;
-  }
-  if (typeof matcher === 'function') {
-    return matcher;
-  }
-
-  return (probe: Node) => {
-    for (const key in matcher) {
-      // @ts-expect-error implicit any
-      if (probe[key] !== matcher[key]) return false;
-    }
-    return true;
+  switch (typeof matcher) {
+    case 'string':
+      return (probe: Node) => probe.type === matcher;
+      break;
+    case 'function':
+      return matcher as MatchFn;
+      break;
+    case 'object': {
+      const m = matcher as Record<string, any>;
+      return (probe: Node, name?: string, value?: object,) => {
+        for (const key in m) {
+          if (key === 'name') {
+            if (name !== m[key]) return false;
+          }
+          if (key === 'value') {
+            if (value !== undefined && value !== m[key]) return false;
+          }
+          // @ts-expect-error an unknown key will return undefined, which we can compare to the desired value
+          if (probe[key] !== m[key]) return false;
+        }
+        return true;
+      };
+    };
+    default:
+      throw new Error(`Invalid matcher type: ${typeof matcher}`);
   };
 }

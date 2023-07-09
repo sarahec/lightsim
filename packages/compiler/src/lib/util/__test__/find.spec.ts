@@ -51,7 +51,7 @@ describe('findAll', () => {
 
 describe('find', () => {
   const text = u('text', 'Hello, world!');
-  const heading = u('heading', [text]);
+  const heading = u('heading', { name: 'h1' }, [text]);
   const tree = u('root', [heading]);
 
   it('should return undefined if not found', () => {
@@ -60,10 +60,16 @@ describe('find', () => {
     expect(result?.node).toBe(tree);
   });
 
-  it('should return deep nodes', () => {
+  it('should find based on node type', () => {
     const result = find(tree, 'text');
     expect(result?.node).toBe(text);
   });
+
+  it('should find based on node value', () => {
+    const result = find(tree, { type: 'text', value: 'Hello, world!' });
+    expect(result?.node).toBe(text);
+  });
+
 });
 
 describe('findResult', () => {
