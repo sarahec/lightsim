@@ -95,7 +95,7 @@ export function hoistMetadata(options: MetadataOptions = {}) {
       if (!directive) break;
       const probe = directive.findBefore(matchLocation);
       if (probe) {
-        directive.remove();
+        directive.remove(true);
         const destination = probe.node as Node;
         destination.meta ||= {};
         const metadata = parseDirective(directive.node, log);
@@ -111,6 +111,7 @@ export function hoistMetadata(options: MetadataOptions = {}) {
   return (tree: Root) => produce(tree, (draft) => {
     hoistFrontmatter(draft);
     hoistDirectives(draft);
+    return draft;
   });
 
 };

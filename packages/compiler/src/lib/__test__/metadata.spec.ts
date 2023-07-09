@@ -46,22 +46,21 @@ describe('hoistMetadata', () => {
 			u('paragraph', [u('textDirective', { name: 'title', attributes: {} }, [u('text', "This is a test")])]),
 			u('text', 'hello')]) as Root;
 			const result = unified().use(hoistMetadata, optionsLogger).runSync(titleTree);
-			console.log(JSON.stringify(result, null, 2)); // <<<x
 			expect(result).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'This is a test', } }, 'First line'), u('text', 'hello')]));
 		});
 	});
 });
 
-describe.skip('extract', () => {
+describe('extract', () => {
 	it('should find global data (frontmatter)', () => {
-		const withFrontmatter = u('root', { meta: { title: "This is a test", scope: 'global' } }, [u('text', 'hello')])
-		const result = extractMetadata(withFrontmatter, 'global');
+		const treeWithFrontmatter = u('root', { meta: { title: "This is a test", scope: 'global' } }, [u('text', 'hello')])
+		const result = extractMetadata(treeWithFrontmatter, 'global');
 		expect(result).toEqual({ title: "This is a test" });
 	});
 
 	it('should find page data (directives)', () => {
-		const withDirectives = u('root', [u('heading', { depth: 1, meta: { title: "This is a test", scope: 'page' } }, 'First line'), u('text', 'hello')]) as Root;
-		const result = extractMetadata(withDirectives, 'page');
+		const treeWithDirectives = u('root', [u('heading', { depth: 1, meta: { title: "This is a test", scope: 'page' } }, 'First line'), u('text', 'hello')]) as Root;
+		const result = extractMetadata(treeWithDirectives, 'page');
 		expect(result).toEqual({ title: "This is a test" });
 	});
 

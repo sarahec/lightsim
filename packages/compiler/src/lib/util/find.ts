@@ -37,7 +37,7 @@ type PathStep = {
 export type FindResult = {
   node: Readonly<Node>;
   replace: (newValue: Node) => Node;
-  remove: () => Node;
+  remove: (removeEmptyContainer?: boolean) => Node;
   findParent(matcher?: MatcherType): FindResult | undefined;
   findBefore(matcher: MatcherType): FindResult | undefined;
 };
@@ -54,7 +54,7 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
     const noParents = parents.length === 0;
 
     // Copy the `parents` array, making a shallow copy of each step
-    const parentCopy = Object.freeze(parents.map((step) => ({ ...step }))) as PathStep[];
+    const parentCopy = parents.map((step) => ({ ...step })) as PathStep[];
     return {
       node: value,
 
@@ -99,16 +99,13 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
         (step.node as Parent).children.splice(step.index!, 1, newValue);
         return parentCopy[0].node;
       },
-      remove: () => {
+      remove: (removeEmptyContainer?: boolean) => {
         if (noParents) throw new Error('Cannot remove root node');
-        const parents = parentCopy.slice(0, -1);
-        while (parents.length > 0) {
-          const parent = parents.at(-1)!;
-          (parent.node).children.splice(parent.index!, 1);
-          // @ts-expect-error remove the children array if it's empty 
-          if (parent.node.children.length === 0) delete parent.node.children;
-          if (parent.node.children || parent.node.type == 'root') break;
-          parents.pop();
+        const step = parentCopy.at(-1)!;
+        (step.node).children.splice(step.index!, 1);
+        if (removeEmptyContainer && step.node.children.length === 0 && parentCopy.length > 1) {
+          const parentStep = parentCopy.at(-2)!;
+          parentStep.node.children.splice(parentStep.index!, 1);
         }
         return parentCopy[0].node;
       }

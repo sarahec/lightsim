@@ -124,19 +124,19 @@ describe('findResult', () => {
   describe('remove', () => {
     it('should remove a mutable node', () => {
       const result = find(tree, 'text')?.remove();
-      expect(result).toEqual(u('root'));
+      expect(result).toEqual(u('root', [u('heading', [])]));
     });
 
     it('should work with immer', () => {
       const _tree = freeze(tree, true);
       // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>) 
       const result = produce(_tree, (draft) => find(draft, 'text')?.remove());
-      expect(result).toEqual(u('root'));
+      expect(result).toEqual(u('root', [u('heading', [])]));
     });
 
     it('should clean up parent if no children', () => {
-      const result = find(tree, 'text')?.remove();
-      expect(result).toEqual(u('root'));
+      const result = find(tree, 'text')?.remove(true);
+      expect(result).toEqual(u('root', []));
     });
 
   });
