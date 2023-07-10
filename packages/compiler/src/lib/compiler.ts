@@ -28,7 +28,6 @@ import groupNodes, { type NodeGroupingOptions } from './groupNodes.js';
 import { extractMetadata, hoistMetadata } from './metadata.js';
 import render, { type RenderOptions } from './render.js';
 import splitTrees, { type SplitOptions } from './split-trees.js';
-import { type MatcherType } from './util/matcher.js';
 
 const LOGGER_NAME = 'compiler';
 
@@ -59,7 +58,7 @@ export async function compile(
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   const groupConfiguration: NodeGroupingOptions = {
-    match: { type: 'heading', depth: 2 } as MatcherType,
+    match: { type: 'heading', depth: 2 },
     wrap: 'screen',
     log: log,
     ...options?.group,
