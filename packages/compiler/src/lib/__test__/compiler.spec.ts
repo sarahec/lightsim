@@ -35,7 +35,7 @@ describe('compiler', () => {
     expect(files[1].path).toEqual('page1.md');
   });
 
-  it('Should recognize frontmatter as metadata', async () => {
+  it('should recognize frontmatter as metadata', async () => {
     const multiPage = new VFile({
       path: 'test.md',
       value: `---\ntitle: Hello world\n---\n# Hello\n\n## World!\n\n### How are you?`,
@@ -55,7 +55,7 @@ describe('compiler', () => {
   it.skip('Should recognize directives as metadata', async () => {
     const multiPage = new VFile({
       path: 'test.md',
-      value: `# Hello\n:title[Page 1]\n## World!\n\n:title[Page 2]\n### How are you?`,
+      value: `---\ntitle: Frontmatter\n---\n# Hello\n::title[Page 1]\n## World!\n\n::title[Page 2]\n### How are you?`,
     });
     const html = await compile(multiPage, {
       render: { format: 'html' },
@@ -69,8 +69,6 @@ describe('compiler', () => {
     });
     expect(md.pages.at(0)?.metadata).toEqual({ title: 'Page 1' });
     expect(md.pages.at(1)?.metadata).toEqual({ title: 'Page 2' });
-
-
   });
 
 

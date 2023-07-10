@@ -23,19 +23,17 @@ import { Node as UnistNode } from "unist";
 import find, { findAll } from "./util/find.js";
 import makeMatchFn, { type MatcherType } from './util/matcher.js';
 
-/**
- * Returns true if this node should be included as metadata.
- * @param name The name of the metadata property
- * @param value The value of the metadata property
- * @param node The node (a directive) containing the metadata
- */
-export type MetadataFilter = (node: Node, name?: string, value?: object,) => boolean;
-
 export type MetadataScope = 'global' | 'page';
 
+/**
+ * Options for the metadata plugin.
+ * @property directivesLocation A function that returns true if a node is a heading that should be used to locate metadata
+ * @property filter A function that returns true if a node should be included as metadata
+ * @property log A logger (optional)
+ */
 export type MetadataOptions = {
-  readonly directivesLocation?: MatcherType;
-  readonly filter?: MetadataFilter;
+  readonly isTarget?: MatcherType;
+  readonly isMetadata?: MatcherType;
   readonly log?: Logger<ILogObj>;
 }
 
@@ -59,64 +57,94 @@ export function hoistMetadata(options: MetadataOptions = {}) {
 
   const settings = {
     directivesLocation: matchHeadings,
-    filter: (node: Node) => node.type === 'textDirective',
+    filter: (node: Node) => node.type === 'leafDirective',
     ...options
   };
-
-  // @ts-expect-error missing name or attributes will just come up undefined, which is fine
-  const matchDirectives = (node: Node) => settings.filter(node, node.name, node.attributes);
-  const matchLocation = makeMatchFn(settings.directivesLocation);
-
 
   function matchHeadings(node: Node): boolean {
     // @ts-expect-error this node should have a depth if it's a heading
     return node.type === 'heading' && node.depth <= 2;
   };
 
-  // Parse the frontmatter (type: 'yaml') and add it to the root as `meta`
-  function hoistFrontmatter(tree: Root): Root {
-    const path = find(tree, 'yaml');
-    if (path) {
-      path.remove();
-      // @ts-expect-error this node has a value
-      const yaml = load(path?.node?.value);
-      // @ts-expect-error we can add any property to a node
-      tree.meta = { scope: 'global', ...yaml };
-      log.trace('Parsed frontmatter and attached to root');
-    }
-    return tree;
+  return (tree: Root) => {
+    // console.log("Before hoisting: ", JSON.stringify(tree, null, 2)); // <<<
+    const result = produce(tree, (draft) => {
+      hoistFrontmatter(draft, log);
+      hoistDirectives(draft, settings.isMetadata, settings.isTarget, log);
+    });
+    // console.log("After hoisting: ", JSON.stringify(result, null, 2)); // <<<
+    return result;
   }
-
-  function hoistDirectives(tree: Root): Root {
-    for (const directive of findAll(tree, matchDirectives)) {
-      const log = options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
-        new Logger({ name: LOGGER_NAME, minLevel: 3 });
-
-      if (!directive) break;
-      const probe = directive.findBefore(matchLocation);
-      if (probe) {
-        directive.remove(true);
-        const destination = probe.node as Node;
-        destination.meta ||= {};
-        const metadata = parseDirective(directive.node, log);
-        if (metadata) {
-          destination.meta = { ...metadata, ...destination.meta };
-        }
-      }
-
-    }
-    return tree;
-  }
-
-  return (tree: Root) => produce(tree, (draft) => {
-    hoistFrontmatter(draft);
-    hoistDirectives(draft);
-    return draft;
-  });
-
 };
 
-export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<ILogObj>): Metadata | undefined {
+/**
+ * Parse the frontmatter (type: 'yaml') and add it to the root as `meta`.
+ * @param tree The AST that has been parsed with RemarkFrontmatter
+ * @param log A logger (optional)
+ **/
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function hoistFrontmatter(tree: Root, log?: Logger<any>): Root {
+  const path = find(tree, 'yaml');
+  if (path) {
+    path.remove();
+    // @ts-expect-error this node has a value
+    const yaml = load(path?.node?.value);
+    // @ts-expect-error we can add any property to a node
+    tree.meta = { scope: 'global', ...yaml };
+    log?.trace('Parsed frontmatter and attached to root');
+  }
+  return tree;
+}
+
+/**
+ * Parse the directive nodes and add it to the closest section above as `meta`.
+ * 
+ * Note: This is exposed for testing purposes.
+ * 
+ * @param tree The AST that has been parsed with Remark Frontmatter
+ * @param directivesPattern Matches directive nodes. Default: `leafDirective`
+ * @param destinationPattern Matches destination nodes. Default: `heading`
+ * @param log A logger (optional)
+ **/
+
+export function hoistDirectives(tree: Root, directivesPattern?: MatcherType,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  destinationPattern?: MatcherType, log?: Logger<any>): Root {
+  const matchDirectives = makeMatchFn(directivesPattern ?? 'leafDirective');
+  const matchDestination = makeMatchFn(destinationPattern ?? 'heading');
+
+  for (const directive of findAll(tree, matchDirectives)) {
+    if (!directive) {
+      log?.trace(`No directives found`);
+      break;
+    }
+    log?.trace(`Found directive: ${JSON.stringify(directive.node)}`);
+    const probe = directive.findBefore(matchDestination);
+    if (!probe) {
+      log?.trace(`No destination found`);
+    } else {
+      const destination = probe.node as Node;
+      log?.trace(`Found destination: ${JSON.stringify(directive.node)}`);
+      destination.meta ||= { scope: 'page' };
+      const metadata = parseDirective(directive.node, log);
+      if (metadata) {
+        destination.meta = { ...destination.meta, ...metadata, };
+      }
+      directive.remove();
+    }
+
+  }
+  return tree;
+}
+
+/**
+ * 
+ * @param tree Utility function to read the metadata at a particular scope
+ * @param scope A scope striung (e.g. 'global' or 'page')
+ * @param log Logger (optional)
+ * @returns a metadata object or undefined if no metadata was found
+ */
+export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<ILogObj>) {
   const LOGGER_NAME = 'extract metadata';
   const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
@@ -131,23 +159,30 @@ export function extractMetadata(tree: Root, scope: MetadataScope, log?: Logger<I
   return metadata as Metadata;
 }
 
-export function parseDirective(node: Node, log?: Logger<ILogObj>): Metadata {
+/**
+ * Parse a directive node into a metadata object.
+ * @param node The directive node
+ * @param log A logger (optional)
+ * @returns a metadata object or undefined if no metadata was found
+ */
+export function parseDirective(node: Node, log?: Logger<ILogObj>) {
   const LOGGER_NAME = 'parse directive';
   const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   _log.trace(`Directive: ${JSON.stringify(node)}`);
 
-  if (node.type != 'textDirective') {
+  if (node.type != 'leafDirective') {
     _log.error(`Node is not a directive: ${JSON.stringify(node)}`);
-    return {};
+    return undefined;
   }
   _log.trace(`Parsing directive: ${node.type}`);
   const text = find(node, 'text');
   if (!text) {
     _log.error(`Directive has no text: ${JSON.stringify(node)}`);
-    return {};
+    return undefined;
   }
-  // @ts-expect-error text node has a value and a textDirective has a name
+  // console.log("Text directive: ", JSON.stringify(node)); // <<<
+  // @ts-expect-error text node has a value and a leafDirective has a name
   return { [node.name]: text.node.value };
 }

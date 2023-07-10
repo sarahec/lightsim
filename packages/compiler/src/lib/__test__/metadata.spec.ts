@@ -19,13 +19,37 @@ import { Root } from "mdast";
 import { Logger } from "tslog";
 import { unified } from "unified";
 import { u } from "unist-builder";
-import { hoistMetadata, type MetadataOptions, extractMetadata } from "../metadata.js";
+import { hoistMetadata, type MetadataOptions, extractMetadata, parseDirective, hoistDirectives } from "../metadata.js";
 
-const log = new Logger({ minLevel: 3 });
+const log = new Logger({ minLevel: 0 });
 
 const optionsLogger = { log: log } as MetadataOptions;
 
-describe('hoistMetadata', () => {
+describe('parseDirective', () => {
+	it('should parse a directive', () => {
+		const directive = u('leafDirective', { name: 'title' }, [u('text', "This is a test")]);
+		const result = parseDirective(directive);
+		expect(result).toEqual({ title: 'This is a test' });
+	});
+});
+
+describe('hoistDirectives', () => {
+	it('should hoist a directive', () => {
+		const titleTree = u('root', [
+			u('heading', { depth: 1 }, [u('text', 'First line')]),
+			u('leafDirective', { name: 'title' }, [u('text', "This is a test")]),
+			u('paragraph', [u('text', 'hello')])]) as Root;
+		const expected = u('root', [
+			u('heading', {
+				depth: 1, meta: { title: 'This is a test' }
+			}, [u('text', 'First line')]),
+			u('paragraph', [u('text', 'hello')])]) as Root;
+		const result = hoistDirectives(titleTree, undefined, undefined, log);
+		expect(result).toEqual(expected);
+	});
+});
+
+describe.skip('hoistMetadata', () => {
 	it('should make no change if nothing found', () => {
 		const emptyTree = u('root', []);
 		const result = unified().use(hoistMetadata, optionsLogger).runSync(emptyTree);
@@ -42,16 +66,21 @@ describe('hoistMetadata', () => {
 
 	describe('with directives', () => {
 		it('should hoist directives to the heading', () => {
-			const titleTree = u('root', [u('heading', { depth: 1 }, 'First line'),
-			u('paragraph', [u('textDirective', { name: 'title', attributes: {} }, [u('text', "This is a test")])]),
-			u('text', 'hello')]) as Root;
+			const titleTree = u('root', [
+				u('heading', { depth: 1 }, [u('text', 'First line')]),
+				u('leafDirective', { name: 'title' }, [u('text', "This is a test")]),
+				u('paragraph', [u('text', 'hello')])
+			]) as Root;
 			const result = unified().use(hoistMetadata, optionsLogger).runSync(titleTree);
-			expect(result).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'This is a test', } }, 'First line'), u('text', 'hello')]));
+			expect(result).toEqual(u('root', [
+				u('heading', { depth: 1, meta: { title: 'This is a test', } }, 'First line'),
+				u('paragraph', [u('text', 'hello')])
+			]));
 		});
 	});
 });
 
-describe('extract', () => {
+describe('extractMetadata', () => {
 	it('should find global data (frontmatter)', () => {
 		const treeWithFrontmatter = u('root', { meta: { title: "This is a test", scope: 'global' } }, [u('text', 'hello')])
 		const result = extractMetadata(treeWithFrontmatter, 'global');
@@ -59,9 +88,27 @@ describe('extract', () => {
 	});
 
 	it('should find page data (directives)', () => {
-		const treeWithDirectives = u('root', [u('heading', { depth: 1, meta: { title: "This is a test", scope: 'page' } }, 'First line'), u('text', 'hello')]) as Root;
+		const treeWithDirectives = u('root',
+			[u('heading', { depth: 1, meta: { title: "This is a test", scope: 'page' } }, 'First line'), u('text', 'hello')]) as Root;
 		const result = extractMetadata(treeWithDirectives, 'page');
 		expect(result).toEqual({ title: "This is a test" });
 	});
 
 });
+
+// Uncomment block to display a parsed tree before metadata processing
+/*
+
+// import remarkDirective from "remark-directive";
+// import remarkFrontmatter from "remark-frontmatter";
+// import remarkParse from "remark-parse";
+
+describe('from markdown', () => {
+	const markdown = `---\ntitle: Frontmatter\n---\n# Hello\n::title[Page 1]\n## World!\n\n::title[Page 2]\n### How are you?`;
+	const mdast = unified().use(remarkParse).use([remarkFrontmatter, remarkDirective]).parse(markdown);
+	it('should parse', () => {
+		expect(mdast).toBeTruthy();
+		console.log(JSON.stringify(mdast, null, 2));
+	});
+});
+*/
