@@ -78,8 +78,10 @@ export function toHTML(tree: Root, options?: RenderOptions, globalMetadata: Meta
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
   const pageMetadata = extractMetadata(tree, 'page', log);
   const metadata = { ...globalMetadata, ...pageMetadata };
+  // @ts-expect-error runSync expects Node<Data>
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
   log.silly(`hast: ${JSON.stringify(hast)}`);
+  // @ts-expect-error stringify expects Node<Data>
   const html = unified().use(rehypeStringify).stringify(hast).trim();
   log.silly(`html: ${html}`);
 
@@ -100,6 +102,7 @@ export function toMarkdown(tree: Root, options?: RenderOptions, globalMetadata: 
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const pageMetadata = extractMetadata(tree, 'page', log) || {}
   const metadata = { ...globalMetadata, ...pageMetadata };
+  // @ts-expect-error stringify expects Node<Data>
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
   log.silly(`markdown: ${JSON.stringify(markdown)}`);
   return makePage(markdown, suffix, count, name, metadata, log);
