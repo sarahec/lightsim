@@ -18,7 +18,7 @@
 import { freeze, produce } from 'immer';
 import { type Root } from 'mdast';
 import { u } from 'unist-builder';
-import find, { FindResult, findAll } from '../find.js';
+import find, { findAll } from '../find.js';
 
 describe('findAll', () => {
   const bodyText = u('text', 'This is a test!');
@@ -77,40 +77,6 @@ describe('findResult', () => {
 
   beforeEach(() => {
     tree = u('root', [u('heading', [u('text', 'Hello, world')])]) as Root;
-  });
-
-  describe('findParent', () => {
-    it('should return undefined if no parent matches', () => {
-      const result = find(tree, 'text')!.findParent('unknown');
-      expect(result).toBeUndefined();
-    });
-
-    it('should return the immediate parent if no matcher', () => {
-      const result = find(tree, 'text')!.findParent();
-      expect(result?.node).toEqual(u('heading', [u('text', 'Hello, world')]));
-    });
-
-    it('should return the parent specified by the matcher', () => {
-      const result = find(tree, 'text')!.findParent('root');
-      expect(result?.node).toEqual(tree);
-    });
-  });
-
-  describe('findBefore', () => {
-
-    beforeEach(() => {
-      tree = u('root', [u('heading', [u('text', 'Hello, world')]), u('meta', { name: 'title', attributes: 'Hello' })]) as Root;
-    });
-
-    it('should return undefined if no match', () => {
-      const result = find(tree, 'meta')!.findBefore('none');
-      expect(result).toBeUndefined();
-    });
-
-    it('should return the peer specified by the matcher', () => {
-      const result = find(tree, 'text')!.findBefore('heading');
-      expect(result?.node.type).toEqual('heading');
-    });
   });
 
   describe('replace', () => {

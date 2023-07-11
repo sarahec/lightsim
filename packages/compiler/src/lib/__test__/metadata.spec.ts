@@ -70,7 +70,7 @@ describe.skip('hoistMetadata', () => {
 				u('heading', { depth: 1 }, [u('text', 'First line')]),
 				u('leafDirective', { name: 'title' }, [u('text', "This is a test")]),
 				u('paragraph', [u('text', 'hello')])
-			]) as Root;
+			]);
 			const result = unified().use(hoistMetadata, optionsLogger).runSync(titleTree);
 			expect(result).toEqual(u('root', [
 				u('heading', { depth: 1, meta: { title: 'This is a test', } }, 'First line'),

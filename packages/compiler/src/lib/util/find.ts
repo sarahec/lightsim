@@ -32,14 +32,11 @@ type PathStep = {
  * @property value The found node.
  * @property replace Replaces the found node with the new value. Returns the tree root.
  * @property remove Removes the found node. Returns the tree root.
- * @property findParent Reverse search the parents to find a node. Returns a new FindResult.
  */
 export type FindResult = {
   node: Readonly<Node>;
   replace: (newValue: Node) => Node;
   remove: (removeEmptyContainer?: boolean) => Node;
-  findParent(matcher?: MatcherType): FindResult | undefined;
-  findBefore(matcher: MatcherType): FindResult | undefined;
 };
 
 /**
@@ -57,42 +54,6 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
     const parentCopy = parents.map((step) => ({ ...step })) as PathStep[];
     return {
       node: value,
-
-      findParent: (matcher?: MatcherType) => {
-        if (noParents) return undefined;
-        if (!matcher) {
-          return makeFindResult(parentCopy.at(-1)!.node, parentCopy.slice(0, -1));
-        }
-        const matchFn = makeMatchFn(matcher);
-        for (let i = parentCopy.length - 1; i >= 0; i--) {
-          const step = parentCopy[i];
-          if (matchFn(step.node)) {
-            return makeFindResult(step.node, parentCopy.slice(0, i));
-          }
-        }
-        // no match found
-        return undefined;
-      },
-
-      // Reverse search along the peers all the way up the chain
-      findBefore: (matcher: MatcherType) => {
-        const matchFn = makeMatchFn(matcher);
-        for (let i = parentCopy.length - 1; i >= 0; i--) {
-          const step = parentCopy[i];
-          for (let j = step.index; j >= 0; j--) {
-            const sibling = step.node.children[j];
-            if (matchFn(sibling)) {
-              return makeFindResult(sibling, parentCopy.slice(0, i));
-            }
-          }
-          if (matchFn(step.node)) {
-            return makeFindResult(step.node, parentCopy.slice(0, i));
-          }
-        }
-        // no match found
-        return undefined;
-      },
-
       replace: (newValue: Node) => {
         if (noParents) throw new Error('Cannot replace root node');
         const step = parentCopy.at(-1)!;
@@ -111,8 +72,6 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
       }
     };
   };
-
-
 
   const matchFn = makeMatchFn(matcher);
   const parents: PathStep[] = [];
@@ -137,6 +96,7 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
     }
     probe = step!.node.children[step!.index];
   }
+
   return { value: undefined, done: true };
 }
 

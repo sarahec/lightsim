@@ -112,27 +112,45 @@ export function hoistDirectives(tree: Root, directivesPattern?: MatcherType,
   destinationPattern?: MatcherType, log?: Logger<any>): Root {
   const matchDirectives = makeMatchFn(directivesPattern ?? 'leafDirective');
   const matchDestination = makeMatchFn(destinationPattern ?? 'heading');
+  const matchEither = (probe: Node) => matchDirectives(probe) || matchDestination(probe);
 
-  for (const directive of findAll(tree, matchDirectives)) {
-    if (!directive) {
+  let target: Node = tree;
+  let scope: MetadataScope = 'global';
+  let metadata: Metadata = {};
+
+  log?.silly(`hoistDirectives: ${JSON.stringify(tree)}`); /// <<<
+  for (const findResult of findAll(tree, matchEither)) {
+    if (!findResult || !findResult.node) {
       log?.trace(`No directives found`);
-      break;
+      return tree;
     }
-    log?.trace(`Found directive: ${JSON.stringify(directive.node)}`);
-    const probe = directive.findBefore(matchDestination);
-    if (!probe) {
-      log?.trace(`No destination found`);
-    } else {
-      const destination = probe.node as Node;
-      log?.trace(`Found destination: ${JSON.stringify(directive.node)}`);
-      destination.meta ||= { scope: 'page' };
-      const metadata = parseDirective(directive.node, log);
-      if (metadata) {
-        destination.meta = { ...destination.meta, ...metadata, };
+    if (findResult.node.type === 'heading') {   // We've found a new section
+      if (metadata[scope]) {
+        // Copy to current target
+        target.meta = { ...target.meta, ...metadata };
       }
-      directive.remove();
+      target = findResult.node;
+      metadata = {};
+      scope = 'page';
+      continue;
+    } else if (findResult.node.type === 'leafDirective') {
+      const directive = findResult.node;
+      const _metadata = parseDirective(directive, log);
+      if (!_metadata) {
+        log?.warn(`could not parse directive ${JSON.stringify(directive)}`);
+      } else {
+        metadata = { ...metadata, ..._metadata, scope: scope };
+        log?.trace(`Parsed directive ${JSON.stringify(directive)} into ${JSON.stringify(metadata)}`);
+        log?.trace(`removing directive ${JSON.stringify(directive)} from ${JSON.stringify(findResult.findParent())})})}}`);
+        findResult.remove();
+      }
+    } else {
+      log?.warn(`Unexpected node type ${findResult.node.type}`);
     }
-
+  }
+  if (target && metadata[scope]) {
+    // Copy to current target
+    target.meta = { ...target.meta, ...metadata };
   }
   return tree;
 }
