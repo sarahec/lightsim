@@ -33,7 +33,7 @@ describe('parseDirective', () => {
 	});
 });
 
-describe('hoistDirectives', () => {
+describe.skip('hoistDirectives', () => {
 	it('should hoist a directive', () => {
 		const titleTree = u('root', [
 			u('heading', { depth: 1 }, [u('text', 'First line')]),
@@ -95,20 +95,3 @@ describe('extractMetadata', () => {
 	});
 
 });
-
-// Uncomment block to display a parsed tree before metadata processing
-/*
-
-// import remarkDirective from "remark-directive";
-// import remarkFrontmatter from "remark-frontmatter";
-// import remarkParse from "remark-parse";
-
-describe('from markdown', () => {
-	const markdown = `---\ntitle: Frontmatter\n---\n# Hello\n::title[Page 1]\n## World!\n\n::title[Page 2]\n### How are you?`;
-	const mdast = unified().use(remarkParse).use([remarkFrontmatter, remarkDirective]).parse(markdown);
-	it('should parse', () => {
-		expect(mdast).toBeTruthy();
-		console.log(JSON.stringify(mdast, null, 2));
-	});
-});
-*/

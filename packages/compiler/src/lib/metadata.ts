@@ -17,11 +17,12 @@
 import { Metadata } from "@lightsim/runtime";
 import { produce } from "immer";
 import { load } from "js-yaml";
-import { Root as MdastRoot } from 'mdast';
+import { Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
 import { Node as UnistNode } from "unist";
 import find, { findAll } from "./util/find.js";
 import makeMatchFn, { type MatcherType } from './util/matcher.js';
+import { CONTINUE, SKIP, Test, Visitor, visitParents } from "unist-util-visit-parents";
 
 export type MetadataScope = 'global' | 'page';
 
@@ -141,7 +142,6 @@ export function hoistDirectives(tree: Root, directivesPattern?: MatcherType,
       } else {
         metadata = { ...metadata, ..._metadata, scope: scope };
         log?.trace(`Parsed directive ${JSON.stringify(directive)} into ${JSON.stringify(metadata)}`);
-        log?.trace(`removing directive ${JSON.stringify(directive)} from ${JSON.stringify(findResult.findParent())})})}}`);
         findResult.remove();
       }
     } else {
@@ -158,7 +158,7 @@ export function hoistDirectives(tree: Root, directivesPattern?: MatcherType,
 /**
  * 
  * @param tree Utility function to read the metadata at a particular scope
- * @param scope A scope striung (e.g. 'global' or 'page')
+ * @param scope A scope string (e.g. 'global' or 'page')
  * @param log Logger (optional)
  * @returns a metadata object or undefined if no metadata was found
  */
@@ -203,4 +203,83 @@ export function parseDirective(node: Node, log?: Logger<ILogObj>) {
   // console.log("Text directive: ", JSON.stringify(node)); // <<<
   // @ts-expect-error text node has a value and a leafDirective has a name
   return { [node.name]: text.node.value };
+}
+
+export type PageRecord = {
+  num: number;
+  root: Node;
+  metadata: Metadata;
+}
+
+type ScanResult = {
+  frontmatter?: Metadata;
+  pages: PageRecord[];
+};
+
+type ScannedNode = {
+  node: Node;
+  parents: Parent[];
+};
+
+export function scanTree(tree: Root, log: Logger<undefined>, options: MetadataOptions = {}): ScanResult {
+  const typeTest: Test = (probe: Node) => ['leafDirective', 'heading', 'yaml'].includes(probe.type);
+  const matchDirectives = makeMatchFn(options?.isMetadata ?? 'leafDirective');
+  const matchDestination = makeMatchFn(options?.isTarget ?? 'heading');
+
+  const orderedNodes: ScannedNode[] = [];
+  const pages: PageRecord[] = [];
+
+  const visitor: Visitor = (node: Node, parents: Node[]) => {
+    if (node.type === 'yaml' || matchDirectives(node) || matchDestination(node)) {
+      orderedNodes.push({ node: node, parents: [...parents] as Parent[] });
+      return SKIP
+    }
+    return CONTINUE;
+  }
+
+  // Walk the tree and collect all the nodes we care about
+  visitParents(tree, typeTest, visitor);
+  // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
+  const globalMetadata = orderedNodes.filter((probe) => probe.node.type === 'yaml').reduce((acc, probe) => { return { ...acc, ...(load(probe.node['value'])) } }, {});
+  if (globalMetadata) {
+    pages.push({ num: 0, root: tree, metadata: globalMetadata });
+  }
+
+  // Each target heading should be followed by its metadata (`leafDirective` nodes)
+  // and then the next heading.
+  for (const probe of orderedNodes) {
+    switch (probe.node.type) {
+      case 'heading': {
+        const page = { num: pages.length, root: probe.node, metadata: { scope: 'page' } };
+        pages.push(page);
+      }
+        break;
+      case 'leafDirective': {
+        const metadata = parseDirective(probe.node);
+        if (metadata) {
+          pages[pages.length - 1].metadata = { ...pages[pages.length - 1].metadata, ...metadata };
+        }
+      }
+        break;
+      case 'yaml':
+        // skip
+        break;
+      default:
+        log.debug(`Unexpected node type in metadata processing ${probe.node.type}`);
+    }
+  }
+
+  // Merge the metadata onto the target nodes
+  for (const page of pages) {
+    page.root.meta = { ...page.root.meta, ...page.metadata };
+  }
+
+  // Remove the metada nodes from the tree
+  for (const probe of orderedNodes.reverse()) {
+    if (probe.node.type === 'heading') continue;
+    // @ts-expect-error `probe.node` is a perfectly fine thing to search for
+    probe.parents[0].children.splice(probe.parents[0].children.indexOf(probe.node), 1);
+  }
+
+  return { frontmatter: globalMetadata, pages: pages };
 }
