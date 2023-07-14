@@ -17,8 +17,8 @@
 import { type Node, type Parent } from 'unist';
 
 import { ILogObj, Logger } from 'tslog';
-import makeMatchFn, { type MatcherType } from './util/matcher.js';
-import makeWrapFn, { type WrapperType } from './util/wrapper.js';
+import makeMatchFn, { type MatcherType } from './matcher.js';
+import makeWrapFn, { type WrapperType } from './wrapper.js';
 import { produce } from 'immer';
 
 export type NodeGroupingOptions = {
@@ -69,7 +69,7 @@ export default function groupNodes(options: NodeGroupingOptions) {
         (tree as Parent).children[matchPos]
       );
     });
-    const newTree = produce(tree, (draft) => ({...draft, children: wrappedNodes})) as Readonly<Node>;
+    const newTree = produce(tree, (draft) => ({ ...draft, children: wrappedNodes })) as Readonly<Node>;
     log.silly(`New tree: ${JSON.stringify(newTree)}`);
     return newTree;
   };

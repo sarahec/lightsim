@@ -14,7 +14,7 @@
 
 import { produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
-import makeMatchFn, { type MatcherType } from './util/matcher.js';
+import makeMatchFn, { type MatcherType } from './matcher.js';
 import { Node } from 'unist';
 
 const LOGGER_NAME = 'split trees';
