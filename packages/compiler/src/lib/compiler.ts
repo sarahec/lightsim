@@ -16,25 +16,15 @@
 
 import { type CompiledSimulation } from '@lightsim/runtime';
 import { freeze } from 'immer';
-import { Root } from 'mdast';
-import remarkDirective from "remark-directive";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkParse from 'remark-parse';
 import { ILogObj, Logger } from 'tslog';
-import { unified } from 'unified';
 import { VFile } from 'vfile';
-import freezeTree from './freezeTree.js';
-import groupNodes, { type NodeGroupingOptions } from './groupNodes.js';
-import { extractMetadata, hoistMetadata } from './metadata.js';
+import precompile from './precompiler.js';
 import render, { type RenderOptions } from './render.js';
-import splitTrees, { type SplitOptions } from './split-trees.js';
 
 const LOGGER_NAME = 'compiler';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export type CompileOptions = {
-  readonly group?: NodeGroupingOptions;
-  readonly split?: SplitOptions;
   readonly render?: RenderOptions;
   readonly singlePage?: boolean;
   readonly log?: Logger<ILogObj>;
@@ -57,40 +47,16 @@ export async function compile(
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
-  const groupConfiguration: NodeGroupingOptions = {
-    match: { type: 'heading', depth: 2 },
-    wrap: 'screen',
-    log: log,
-    ...options?.group,
-  };
-
-  const splitConfiguration: SplitOptions = {
-    match: 'screen',
-    log: log,
-    ...options?.split,
-  };
-
   const renderConfiguration: RenderOptions = {
     format: 'html',
     log: log,
     ...options?.render,
   };
 
-  const singlePage = options?.singlePage ?? false;
-
   log.trace('compiling', source.path);
-  const ast = unified().use(remarkParse).use([remarkFrontmatter, remarkDirective]).parse(source);
 
-  const transformedTree = unified()
-    .use(freezeTree) // make the tree immutable
-    .use(hoistMetadata) // move metadata to the root or its section heading
-    .use(groupNodes, groupConfiguration)
-    // TODO Add other stages here
-    .runSync(ast);
-
-  const globalMetadata = extractMetadata(transformedTree as Root, 'global', log);
-  const trees = singlePage ? [transformedTree as Root] : splitTrees(splitConfiguration)(transformedTree) as Root[];
-  const pages = render(trees, renderConfiguration, globalMetadata);
+  const precompiled = precompile(source, { log: log });
+  const pages = render(precompiled, renderConfiguration);
 
   return freeze({ pages: pages });
 }

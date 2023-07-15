@@ -25,7 +25,7 @@ import remarkStringify from 'remark-stringify';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
 import { VFile } from 'vfile';
-import { extractMetadata } from './metadata';
+import { type PageCollection, type PageRecord } from './precompiler';
 
 const HTML_LOGGER_NAME = 'rendering html';
 const MD_LOGGER_NAME = 'rendering markdown';
@@ -52,17 +52,12 @@ export type RenderOptions = {
   readonly log?: Logger<ILogObj>;
 }
 
-export default function render(trees: Root[] | Root, options?: RenderOptions, globalMetadata?: Metadata): Readonly<Readonly<Page>[]> {
+export default function render(source: PageCollection, options?: RenderOptions, globalMetadata?: Metadata): Readonly<Readonly<Page>[]> {
   const formatter = options?.format === 'html' ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
-  if (!Array.isArray(trees)) {
-    // Single tree
-    return [formatter(trees, options, globalMetadata)];
-  } else {
-    return freeze(trees.map((tree, index) =>
-      formatter(tree, { ...options, count: baseCount + index }, globalMetadata)
-    ));
-  }
+  return source.pages.map((record: PageRecord, index: number) =>
+    formatter(record.root as Root, { ...options, count: baseCount + index }, globalMetadata, record.metadata)
+  );
 }
 
 /**
@@ -71,12 +66,11 @@ export default function render(trees: Root[] | Root, options?: RenderOptions, gl
  * @param tree A single markdown tree
  * @returns a Page
  */
-export function toHTML(tree: Root, options?: RenderOptions, globalMetadata: Metadata = {}) {
+export function toHTML(tree: Root, options?: RenderOptions, globalMetadata?: Metadata, pageMetadata?: Metadata): Page {
   const { count = 0, name: name = 'page', extension: suffix = 'html' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
-  const pageMetadata = extractMetadata(tree, 'page', log);
   const metadata = { ...globalMetadata, ...pageMetadata };
   // @ts-expect-error runSync expects Node<Data>
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
@@ -95,12 +89,11 @@ markdown
  * @param tree A single markdown tree
  * @returns a Page
  */
-export function toMarkdown(tree: Root, options?: RenderOptions, globalMetadata: Metadata = {}) {
+export function toMarkdown(tree: Root, options?: RenderOptions, globalMetadata?: Metadata, pageMetadata?: Metadata) {
   const { count = 0, name: name = 'page', extension: suffix = 'md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
-  const pageMetadata = extractMetadata(tree, 'page', log) || {}
   const metadata = { ...globalMetadata, ...pageMetadata };
   // @ts-expect-error stringify expects Node<Data>
   const markdown = unified().use(remarkStringify).stringify(tree).trim();

@@ -21,26 +21,26 @@ import { toHTML, toMarkdown } from '../render';
 import { ILogObj, Logger } from 'tslog';
 import { Environment, Template } from 'nunjucks';
 
-const logger = new Logger({name: 'test', minLevel: 3}) as Logger<ILogObj>;
-const template = new Template('TEST:: {{contents}}', new Environment(null, {autoescape: false}));
+const logger = new Logger({ name: 'test', minLevel: 3 }) as Logger<ILogObj>;
+const template = new Template('TEST:: {{contents}}', new Environment(null, { autoescape: false }));
 
 describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
   it('renders a HTML fragment by default', () => {
-    const file = toHTML(tree as Root, {count: 0, name: 'test', log: logger}).file;
+    const file = toHTML(tree as Root, { count: 0, name: 'test', log: logger }).file;
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe('<h1>Hello</h1>');
   });
 
   it('renders HTML into a template', () => {
-    const file = toHTML(tree as Root, {count: 0, name: 'test', template: template, log: logger}).file;
+    const file = toHTML(tree as Root, { count: 0, name: 'test', template: template, log: logger }).file;
     expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.value).toBe("TEST:: <h1>Hello</h1>");
   });
 
   it('renders Markdown', () => {
-    const file = toMarkdown(tree as Root, {count: 1, name: 'test'}).file;
+    const file = toMarkdown(tree as Root, { count: 1, name: 'test' }).file;
     expect(file.basename).toBe('test1.md');
     expect(file.value).toBe('# Hello');
   });
@@ -50,12 +50,12 @@ describe('render', () => {
     let treeWithPageMetadata: Root;
     const globalMetadata = { title: 'Test', foo: 'bar' };
     const pageMetadata = { title: 'Page' };
-    
+
     beforeEach(() => {
-      treeWithFrontmatter = u('root', {meta: globalMetadata},  [
+      treeWithFrontmatter = u('root', { meta: globalMetadata }, [
         u('heading', { depth: 1 }, [u('text', 'Hello')]),
       ]) as Root;
-      treeWithPageMetadata = u('root', {meta: globalMetadata},  [
+      treeWithPageMetadata = u('root', { meta: globalMetadata }, [
         u('heading', { depth: 1, meta: { scope: 'page', ...pageMetadata } }, [u('text', 'Hello')]),
       ]) as Root;
     });
@@ -70,23 +70,13 @@ describe('render', () => {
       expect(page.metadata).toEqual(globalMetadata);
     });
 
-    it('captures page metadata when rendering html', () => {
-      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' });
-      expect(page.metadata).toEqual(pageMetadata);
-    });
-
-    it('captures page metadata when rendering markdown', () => {
-      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' });
-      expect(page.metadata).toEqual(pageMetadata);
-    });
-
     it('merges page metadata when rendering html', () => {
-      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata, pageMetadata);
       expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
 
     it('merges page metadata when rendering markdown', () => {
-      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata);
+      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata, pageMetadata);
       expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
 

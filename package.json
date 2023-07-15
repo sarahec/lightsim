@@ -30,7 +30,10 @@
     "remark-frontmatter": "^4.0.1",
     "rollup": "^3.21.6",
     "tslib": "^2.3.0",
-    "tslog": "^4.8.2"
+    "tslog": "^4.8.2",
+    "unist-util-filter": "^5.0.0",
+    "unist-util-visit": "^5.0.0",
+    "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
     "@mui/types": "^7.2.4",
