@@ -16,12 +16,13 @@
 
 import { Metadata } from "@lightsim/runtime";
 import { load } from "js-yaml";
-import { Root as MdastRoot, Parent } from 'mdast';
+import { Heading, Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
 import { Node as UnistNode } from "unist";
 import { CONTINUE, SKIP, Test, Visitor, visitParents } from "unist-util-visit-parents";
 import makeMatchFn, { type MatcherType } from './util/matcher.js';
 
+import { current } from "immer";
 import remarkDirective from "remark-directive";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkParse from "remark-parse";
@@ -45,8 +46,8 @@ export type MetadataOptions = {
 }
 
 export type PageRecord = {
-  num: number;
   root: Root;
+  heading: Heading;
   metadata: Metadata;
 }
 
@@ -99,46 +100,38 @@ export function scanTree(tree: Root, log: Logger<ILogObj>, options: MetadataOpti
 
   // Walk the tree and collect all the nodes we care about
   visitParents(tree, typeTest, visitor);
+
+
+  // Now begin processing the collection of nodes
+
   // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
   const globalMetadata = orderedNodes.filter((probe) => probe.node.type === 'yaml').reduce((acc, probe) => { return { ...acc, ...(load(probe.node['value'])) } }, {});
 
+  // 
   // Each target heading should be followed by its metadata (`leafDirective` nodes)
-  // and then the next heading.
-
-  let startIndex = -1;
-  let page: PageRecord | undefined;
+  // and then the next heading (or the end of the list)
 
   for (const probe of orderedNodes) {
+    let page: PageRecord | undefined;
     switch (probe.node.type) {
       case 'heading': {
-        if (page) {
-          // @ts-expect-error `probe` is a perfectly fine thing to search for
-          const endIndex = probe.parents.at(-1)?.children.indexOf(probe.node);
-
-          page.root.children = page.root.children.slice(startIndex, endIndex);
-        }
-        page = { num: pages.length, root: { type: 'root', children: [probe.node] } as Root, metadata: {} };
-        // @ts-expect-error `probe` is a perfectly fine thing to search for
-        startIndex = probe.parents.at(-1)?.children.indexOf(probe.node);
+        page = { heading: probe.node as Heading, root: { type: 'root', children: [probe.node] } as Root, metadata: {} };
         pages.push(page);
-      }
-        break;
+      } break;
       case 'leafDirective': {
-        const metadata = parseDirective(probe.node);
-        if (metadata) {
-          pages[pages.length - 1].metadata = { ...pages[pages.length - 1].metadata, ...metadata };
+        if (!page) {
+          log.warn(`Found metadata without a heading at ${probe.node.position?.start?.line}`);;
+        } else {
+          const metadata = parseDirective(probe.node);
+          page.metadata = { ...page.metadata, ...metadata };
         }
-      }
-        break;
+      } break;
       case 'yaml':
         // skip
         break;
       default:
         log.debug(`Unexpected node type in metadata processing ${probe.node.type}`);
     }
-  }
-  if (page) {
-    page.root.children = page?.root.children.slice(startIndex);
   }
 
   // Remove the metada nodes from the tree
@@ -148,7 +141,22 @@ export function scanTree(tree: Root, log: Logger<ILogObj>, options: MetadataOpti
     probe.parents[0].children.splice(probe.parents[0].children.indexOf(probe.node), 1);
   }
 
+  // Iterate the pages.
+  // For each page, find the next heading and splice all the nodes between the current heading (inclusive) and the next heading into the page's root
+  for (const page of pages) {
+    const heading = page.heading;
+    const headingIndex = tree.children.indexOf(heading);
+    if (headingIndex == -1) {
+      log.warn(`Could not find heading ${heading} in tree`); // Assumption: All headings are the direct child of root
+      continue;
+    }
+    const nextHeadingIndex = tree.children.slice(headingIndex + 1).findIndex((probe) => probe.type === 'heading');
+    if (nextHeadingIndex >= 0) {
+      page.root.children.push(...tree.children.slice(headingIndex + 1, nextHeadingIndex + headingIndex + 1));
+    } else {
+      page.root.children.push(...tree.children.slice(headingIndex + 1));
+    }
+  }
+
   return { frontmatter: globalMetadata, pages: pages };
 }
-
-

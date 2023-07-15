@@ -27,14 +27,13 @@ describe('precompiler', () => {
   it('should export a single page', async () => {
     const singlePage = new VFile({
       path: 'test.md',
-      value: `# Hello\n\nhow are you?`,
+      value: `# Hello\n\nhow are you?\n`,
     });
     const precompiled = precompile(singlePage);
     expect(precompiled.pages).toHaveLength(1);
     const page = precompiled.pages[0];
     removePositions(page.root);
     expect(page.root).toEqual(u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]));
-    expect(page.num).toEqual(1);
     expect(page.metadata).toEqual({});
     expect(precompiled.frontmatter).toEqual({});
   });
