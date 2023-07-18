@@ -18,7 +18,6 @@ import { VFile } from 'vfile';
 import { compile } from '../compiler.js';
 
 describe('compiler', () => {
-
   it('should export multiple pages from one source', async () => {
     const multiPage = new VFile({
       path: 'test.md',
@@ -27,12 +26,10 @@ describe('compiler', () => {
     const compiled = await compile(multiPage, {
       render: { format: 'md' },
     });
-    const files = compiled.pages.map((page) => page.file);
-    expect(files).toHaveLength(2); // TODO Pass the heading depth to the compiler
-    expect(files[0].value).toEqual('# Hello');
-    expect(files[0].path).toEqual('page.md');
-    expect(files[1].value).toEqual('## World!\n\nHow are you?');
-    expect(files[1].path).toEqual('page1.md');
+    expect(compiled.pages).toHaveLength(2); // TODO Pass the heading depth to the compiler
+    expect(compiled.pages[0].getContents()).toEqual('# Hello');
+    expect(compiled.pages[1].getContents()).toEqual(
+      '## World!\n\nHow are you?',
+    );
   });
-
 });
