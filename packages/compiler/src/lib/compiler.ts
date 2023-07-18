@@ -38,10 +38,10 @@ export type CompileOptions = {
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
 
-export async function compile(
+export function compile(
   source: VFile,
   options?: CompileOptions,
-): Promise<Readonly<CompiledSimulation>> {
+): Readonly<CompiledSimulation> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
