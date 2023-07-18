@@ -1,11 +1,12 @@
 {
   "name": "@lightsim/compiler",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "A compiler for markdown files (to simulations)",
   "main": "../../dist/packages/compiler/src/index.js",
   "module": "../../dist/packages/compiler/src/index.js",
   "dependencies": {
+    "@lightsim/runtime": "^0.1.0",
     "rehype-document": "^6.1.0"
   },
   "devDependencies": {
