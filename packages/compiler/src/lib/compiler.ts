@@ -26,9 +26,8 @@ const LOGGER_NAME = 'compiler';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export type CompileOptions = {
   readonly render?: RenderOptions;
-  readonly singlePage?: boolean;
   readonly log?: Logger<ILogObj>;
-}
+};
 
 /**
  * Compiles and formats a list of VFiles.
@@ -41,7 +40,7 @@ export type CompileOptions = {
 
 export async function compile(
   source: VFile,
-  options?: CompileOptions
+  options?: CompileOptions,
 ): Promise<Readonly<CompiledSimulation>> {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
