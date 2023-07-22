@@ -20,29 +20,42 @@ import { type Root } from 'mdast';
 import { toHTML, toMarkdown } from '../render';
 import { ILogObj, Logger } from 'tslog';
 import { Environment, Template } from 'nunjucks';
+import { type Page } from '@lightsim/runtime';
 
 const logger = new Logger({ name: 'test', minLevel: 3 }) as Logger<ILogObj>;
-const template = new Template('TEST:: {{contents}}', new Environment(null, { autoescape: false }));
+const template = new Template(
+  'TEST:: {{contents}}',
+  new Environment(null, { autoescape: false }),
+);
 
 describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
   it('renders a HTML fragment by default', () => {
-    const file = toHTML(tree as Root, { count: 0, name: 'test', log: logger }).file;
+    const file: Page = toHTML(tree as Root, {
+      count: 0,
+      name: 'test',
+      log: logger,
+    });
     expect(file.basename).toBe('test.html'); // count == 0 is elided
-    expect(file.value).toBe('<h1>Hello</h1>');
+    expect(file.getContents()).toBe('<h1>Hello</h1>');
   });
 
   it('renders HTML into a template', () => {
-    const file = toHTML(tree as Root, { count: 0, name: 'test', template: template, log: logger }).file;
+    const file = toHTML(tree as Root, {
+      count: 0,
+      name: 'test',
+      template: template,
+      log: logger,
+    });
     expect(file.basename).toBe('test.html'); // count == 0 is elided
-    expect(file.value).toBe("TEST:: <h1>Hello</h1>");
+    expect(file.getContents()).toBe('TEST:: <h1>Hello</h1>');
   });
 
   it('renders Markdown', () => {
-    const file = toMarkdown(tree as Root, { count: 1, name: 'test' }).file;
+    const file = toMarkdown(tree as Root, { count: 1, name: 'test' });
     expect(file.basename).toBe('test1.md');
-    expect(file.value).toBe('# Hello');
+    expect(file.getContents()).toBe('# Hello');
   });
 
   describe('with metadata', () => {
@@ -56,30 +69,48 @@ describe('render', () => {
         u('heading', { depth: 1 }, [u('text', 'Hello')]),
       ]) as Root;
       treeWithPageMetadata = u('root', { meta: globalMetadata }, [
-        u('heading', { depth: 1, meta: { scope: 'page', ...pageMetadata } }, [u('text', 'Hello')]),
+        u('heading', { depth: 1, meta: { scope: 'page', ...pageMetadata } }, [
+          u('text', 'Hello'),
+        ]),
       ]) as Root;
     });
 
     it('captures frontmatter when rendering html', () => {
-      const page = toHTML(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      const page = toHTML(
+        treeWithFrontmatter,
+        { count: 1, name: 'test' },
+        globalMetadata,
+      );
       expect(page.metadata).toEqual(globalMetadata);
     });
 
     it('captures frontmatter when rendering markdown', () => {
-      const page = toMarkdown(treeWithFrontmatter, { count: 1, name: 'test' }, globalMetadata);
+      const page = toMarkdown(
+        treeWithFrontmatter,
+        { count: 1, name: 'test' },
+        globalMetadata,
+      );
       expect(page.metadata).toEqual(globalMetadata);
     });
 
     it('merges page metadata when rendering html', () => {
-      const page = toHTML(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata, pageMetadata);
+      const page = toHTML(
+        treeWithPageMetadata,
+        { count: 1, name: 'test' },
+        globalMetadata,
+        pageMetadata,
+      );
       expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
 
     it('merges page metadata when rendering markdown', () => {
-      const page = toMarkdown(treeWithPageMetadata, { count: 1, name: 'test' }, globalMetadata, pageMetadata);
+      const page = toMarkdown(
+        treeWithPageMetadata,
+        { count: 1, name: 'test' },
+        globalMetadata,
+        pageMetadata,
+      );
       expect(page.metadata).toEqual({ ...globalMetadata, ...pageMetadata });
     });
-
   });
-
 });

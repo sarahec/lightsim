@@ -34,9 +34,9 @@ export type FileFormat = 'html' | 'md';
 
 /**
  * Options for rendering a markdown tree to a file.
- * 
+ *
  * @param name Basename for the file (default: 'page')
- * @param count Number between the name and extension, e.g. page*1*.html (unused if unspecified or 0) 
+ * @param count Number between the name and extension, e.g. page*1*.html (unused if unspecified or 0)
  * @param extension File extension (default: matches output format)
  * @param asHTMLDocument Whether to wrap HTML in a document (default: false, create a fragment)
  * @param format Whether to render as HTML or markdown
@@ -50,13 +50,22 @@ export type RenderOptions = {
   readonly template?: Template;
   readonly format?: FileFormat | string;
   readonly log?: Logger<ILogObj>;
-}
+};
 
-export default function render(source: PageCollection, options?: RenderOptions, globalMetadata?: Metadata): Readonly<Readonly<Page>[]> {
+export default function render(
+  source: PageCollection,
+  options?: RenderOptions,
+  globalMetadata?: Metadata,
+): Readonly<Readonly<Page>[]> {
   const formatter = options?.format === 'html' ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   return source.pages.map((record: PageRecord, index: number) =>
-    formatter(record.root as Root, { ...options, count: baseCount + index }, globalMetadata, record.metadata)
+    formatter(
+      record.root as Root,
+      { ...options, count: baseCount + index },
+      globalMetadata,
+      record.metadata,
+    ),
   );
 }
 
@@ -66,8 +75,17 @@ export default function render(source: PageCollection, options?: RenderOptions, 
  * @param tree A single markdown tree
  * @returns a Page
  */
-export function toHTML(tree: Root, options?: RenderOptions, globalMetadata?: Metadata, pageMetadata?: Metadata): Page {
-  const { count = 0, name: name = 'page', extension: suffix = 'html' } = options || {};
+export function toHTML(
+  tree: Root,
+  options?: RenderOptions,
+  globalMetadata?: Metadata,
+  pageMetadata?: Metadata,
+): Page {
+  const {
+    count = 0,
+    name: name = 'page',
+    extension: suffix = 'html',
+  } = options || {};
   const log =
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
@@ -79,7 +97,8 @@ export function toHTML(tree: Root, options?: RenderOptions, globalMetadata?: Met
   const html = unified().use(rehypeStringify).stringify(hast).trim();
   log.silly(`html: ${html}`);
 
-  const finalHTML = options?.template?.render({ contents: html, title: name, }) ?? html;
+  const finalHTML =
+    options?.template?.render({ contents: html, title: name }) ?? html;
   return makePage(finalHTML, suffix, count, name, metadata, log);
 }
 
@@ -89,8 +108,17 @@ markdown
  * @param tree A single markdown tree
  * @returns a Page
  */
-export function toMarkdown(tree: Root, options?: RenderOptions, globalMetadata?: Metadata, pageMetadata?: Metadata) {
-  const { count = 0, name: name = 'page', extension: suffix = 'md' } = options || {};
+export function toMarkdown(
+  tree: Root,
+  options?: RenderOptions,
+  globalMetadata?: Metadata,
+  pageMetadata?: Metadata,
+) {
+  const {
+    count = 0,
+    name: name = 'page',
+    extension: suffix = 'md',
+  } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
@@ -117,14 +145,17 @@ function makePage(
   count = 1,
   name = 'page',
   metadata: Metadata,
-  log?: Logger<ILogObj>
+  log?: Logger<ILogObj>,
 ): Readonly<Page> {
   const filename = (count ? `${name}${count}` : name) + '.' + extension;
   log?.trace(`New file: ${filename}, metadata: ${JSON.stringify(metadata)}`);
   const file = freeze(new VFile({ basename: filename, value: data }));
-  return freeze(
-    {
-      format: extension, file: file, getContents: () => String(file.value),
-      metadata: metadata,
-    });
+  return freeze({
+    format: extension,
+    file: file,
+    basename: file.basename,
+    title: metadata['title'] ?? undefined,
+    getContents: () => String(file.value),
+    metadata: metadata,
+  });
 }

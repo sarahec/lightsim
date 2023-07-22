@@ -12,14 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { VFile } from 'vfile';
+
 /**
  * One exported page from the precompiler
  * @property metadata - the metadata for the page
+ * @property name - the name of the page
  * @property format - the format of the page (e.g. markdown)
  * @property getContents - get the contents of the page as a String
  */
 export type Page = {
   readonly metadata: Readonly<Metadata>;
+  readonly file: Readonly<VFile> | undefined;
+  readonly basename: string | undefined;
+  readonly title: string | undefined;
   readonly format: string;
   getContents(): string;
 };
