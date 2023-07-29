@@ -16,7 +16,7 @@
 
 import { freeze } from 'immer';
 import { type CompiledSimulation, type Page } from '../interfaces.js';
-import makeRuntime from '../runtime.js';
+import { makeRuntime } from '../runtime.js';
 
 describe('makeRuntime', () => {
   const compiled: Readonly<CompiledSimulation> = freeze({
