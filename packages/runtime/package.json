@@ -1,5 +1,6 @@
 {
   "name": "@lightsim/runtime",
   "version": "0.1.0",
-  "type": "module"
+  "type": "commonjs",
+  "description": "Runtime for lightsim",
 }
