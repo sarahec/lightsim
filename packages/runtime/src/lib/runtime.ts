@@ -53,7 +53,7 @@ export type NavigationOption = {
  * @returns the control interface.
  */
 
-export default function makeRuntime(
+export function makeRuntime(
   sim: CompiledSimulation,
 ): Readonly<RuntimeControls> {
   const _pages = sim.pages;
