@@ -34,7 +34,6 @@ export type CompileOptions = {
  *
  * @param source A single markdown page
  * @param options Options for the compiler
- * @param logger A parent logger or or `null` to create a new one
  * @returns New VFiles with the compiled content (potentially multiple per source)
  */
 
@@ -52,7 +51,7 @@ export function compile(
     ...options?.render,
   };
 
-  log.trace('compiling', source.path);
+  log.trace('compiling', source.path ?? 'constant value');
 
   const precompiled = precompile(source, { log: log });
   const pages = render(precompiled, renderConfiguration);
