@@ -3,6 +3,10 @@
     "nrwl.angular-console",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-    "firsttris.vscode-jest-runner"
+    "firsttris.vscode-jest-runner",
+    "minherz.copyright-inserter",
+    "github.copilot",
+    "mkhl.direnv",
+    "burkeholland.simple-react-snippets"
   ]
 }
