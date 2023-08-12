@@ -95,6 +95,7 @@
     "remark": "^14.0.2",
     "remark-parse": "^10.0.1",
     "remark-rehype": "^10.1.0",
+    "remark-stringify": "^10.0.3",
     "to-vfile": "^7.2.4",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",

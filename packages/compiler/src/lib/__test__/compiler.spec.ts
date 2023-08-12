@@ -21,7 +21,7 @@ describe('compiler', () => {
   it('should export multiple pages from one source', async () => {
     const multiPage = new VFile({
       path: 'test.md',
-      value: `# Hello\n\n## World!\n\nHow are you?`,
+      value: '# Hello\n\n## World!\n\nHow are you?',
     });
     const compiled = await compile(multiPage, {
       render: { format: 'md' },
