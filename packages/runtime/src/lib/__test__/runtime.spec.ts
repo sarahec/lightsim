@@ -32,6 +32,7 @@ describe('makeRuntime', () => {
         getContents: () => 'This is a test',
       },
     ] as Page[],
+    frontmatter: {},
   });
 
   it('should access a list of pages in order', () => {
