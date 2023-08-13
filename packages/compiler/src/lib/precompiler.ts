@@ -20,7 +20,7 @@ import { Heading, Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
 import { Node as UnistNode } from "unist";
 import { CONTINUE, SKIP, Test, Visitor, visitParents } from "unist-util-visit-parents";
-import makeMatchFn, { type MatcherType } from './util/matcher.js';
+import makeMatchFn, { MatchFn, type MatcherType } from './util/matcher.js';
 
 import remarkDirective from "remark-directive";
 import remarkFrontmatter from "remark-frontmatter";
@@ -74,26 +74,27 @@ const LOGGER_NAME = 'precompile';
 
 /**
  * Parse a source file and return a list of pages with their metadata (also the global metadata).
- * @param source 
- * @param options 
- * @returns 
+ * @param source the Markdown source file with special annotations
+ * @param options Processing options (optional)
+ * @returns a PageCollection containing the global metadata and a list of pages with their metadata
  */
 
-export default function precompile(source: VFile, options: MetadataOptions = {}) {
+export default function precompile(source: VFile, options: MetadataOptions = {}): PageCollection {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
+  const matchDirectives = makeMatchFn(options?.isMetadata ?? 'leafDirective');
+  const matchDestination = makeMatchFn(options?.isTarget ?? 'heading');
 
-  const rawAST = parseWithMetadata(source);
-  return scanTree(rawAST, log, options);
+  const tree = parseWithMetadata(source);
+  const orderedNodes: ScannedNode[] = collectNodesOfInterest(tree, matchDirectives, matchDestination, log);
+  const globalMetadata = extractGlobalMetadata(orderedNodes);
+  const pages = collectPageRoots(orderedNodes, log);
+  dropMetadataNodes(orderedNodes); // from the tree
+  attachPageBodies(pages, tree, log);
+
+  return { frontmatter: globalMetadata, pages: pages };
 };
-
-/** @type {import('unified').Plugin<[Options?], Root>} */
-export function nullCompiler() {
-  const compiler = (tree: Root) => tree;  // JSON.stringify(tree, null, 2);
-  // @ts-expect-error We don't need to know the type of `this`
-  Object.assign(this, { Compiler: compiler });
-}
 
 /**
  * Calls the remark parser with Frontmatter and Directives extensions.
@@ -115,24 +116,6 @@ type ScannedNode = {
   parents: Parent[];
 };
 
-/**
- * Scan the mdast tree and return a list of pages plus the global metadata.
- * @param tree parsed mdast tree
- * @param log for logging
- * @param options for the metadata plugin
- * @returns a list of pages (mdast subtrees) and global metadata
- */
-
-export function scanTree(tree: Root, log: Logger<ILogObj>, options: MetadataOptions = {}): PageCollection {
-
-  const orderedNodes: ScannedNode[] = collectNodesOfInterest(tree, options);
-  const globalMetadata = extractGlobalMetadata(orderedNodes);
-  const pages = collectPageRoots(orderedNodes, log);
-  dropMetadataNodes(orderedNodes); // from the tree
-  attachPageBodies(pages, tree, log);
-
-  return { frontmatter: globalMetadata, pages: pages };
-}
 
 /**
  * Find all of the metadata and heading nodes (that match the heading rules) in the tree and 
@@ -142,10 +125,8 @@ export function scanTree(tree: Root, log: Logger<ILogObj>, options: MetadataOpti
  * @param options used for the `isMetadata` and `isTarget` functions.
  * @returns an array of nodes with their parents
  */
-export function collectNodesOfInterest(tree: Root, options?: MetadataOptions): ScannedNode[] {
+export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, matchDirectives: MatchFn, log?: Logger<ILogObj>): ScannedNode[] {
   const typeTest: Test = (probe: Node) => ['leafDirective', 'heading', 'yaml'].includes(probe.type);
-  const matchDirectives = makeMatchFn(options?.isMetadata ?? 'leafDirective');
-  const matchDestination = makeMatchFn(options?.isTarget ?? 'heading');
 
   const orderedNodes: ScannedNode[] = [];
 
@@ -159,6 +140,7 @@ export function collectNodesOfInterest(tree: Root, options?: MetadataOptions): S
 
   // Walk the tree and collect all the nodes we care about
   visitParents(tree, typeTest, visitor);
+
   return orderedNodes;
 }
 

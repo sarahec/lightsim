@@ -21,6 +21,7 @@ import { u } from 'unist-builder';
 import { CONTINUE, visit } from 'unist-util-visit';
 import { VFile } from 'vfile';
 import precompile, { collectNodesOfInterest, collectPageRoots, extractGlobalMetadata } from '../precompiler.js';
+import makeMatchFn from '../util/matcher.js';
 
 const log = new Logger({ name: 'test_precompiler', minLevel: 3 }) as Logger<ILogObj>;
 
@@ -56,31 +57,46 @@ describe('precompiler', () => {
     expect(precompiled.frontmatter).toEqual({ title: 'Hello' });
   });
 
+  it.skip('should export directives', async () => {
+    const singlePage = new VFile({
+      path: 'test.md',
+      value: '---\ntitle: Hello\n---\n\n# Hello\n\n::title[Hi]\n\nHow are you?',
+    });
+    const precompiled = precompile(singlePage, { log: log });
+    expect(precompiled.pages).toHaveLength(1);
+    const page = precompiled.pages[0];
+    removePositions(page.root);
+    expect(page.root).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'Hi' } }, [u('text', 'Hello')]), u('paragraph', [u('text', 'How are you?')])]));
+    expect(page.metadata).toEqual({ title: 'Hi' });
+    expect(precompiled.frontmatter).toEqual({ title: 'Hello' });
+  });
+
   describe('implementation', () => {
     // I know, "don't test implementation details", but this has many steps and they 
     // need to be correct
+    const matchDirectives = makeMatchFn('leafDirective');
+    const matchDestination = makeMatchFn('heading');
 
     it('should find headings and metadata', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
-      const scannedNodes = collectNodesOfInterest(mdast, { log: log });
+      const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
       expect(scannedNodes).toHaveLength(2); // frontmatter and heading
     });
 
     it('should extract frontmatter', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
-      const scannedNodes = collectNodesOfInterest(mdast, { log: log });
+      const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
       const globalMetadata = extractGlobalMetadata(scannedNodes);
       expect(globalMetadata).toEqual({ title: 'Hello' });
     });
 
     it('should identify the first page', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
-      const scannedNodes = collectNodesOfInterest(mdast, { log: log });
+      const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
       const pages = collectPageRoots(scannedNodes);
       expect(pages).toHaveLength(1);
       expect(pages[0].heading).toEqual(u('heading', { depth: 1 }, [u('text', 'Hello')]));
     });
-
 
   });
 
