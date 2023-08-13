@@ -32,6 +32,7 @@ export type Page = {
 
 export type CompiledSimulation = {
   readonly pages: Readonly<Page[]>;
+  readonly frontmatter: Readonly<Metadata>;
 };
 
 export type Metadata = Record<string, string>;

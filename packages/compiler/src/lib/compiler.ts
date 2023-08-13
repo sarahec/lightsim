@@ -56,5 +56,5 @@ export function compile(
   const precompiled = precompile(source, { log: log });
   const pages = render(precompiled, renderConfiguration);
 
-  return freeze({ pages: pages });
+  return freeze({ pages: pages, frontmatter: precompiled.frontmatter ?? {} });
 }

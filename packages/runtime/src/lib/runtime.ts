@@ -66,7 +66,8 @@ export function makeRuntime(
     getLocation: () => _index,
     getMetadata: (location?: number) => {
       const loc = location ?? _index;
-      return _pages[loc].metadata ?? {};
+      // Merge frontmatter and page  with the page overriding
+      return { ...sim.frontmatter, ..._pages[loc].metadata, }; 
     },
     getNavigation: (location?: number) => {
       const loc = location ?? _index;
