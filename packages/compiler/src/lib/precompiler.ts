@@ -30,6 +30,7 @@ import { VFile } from "vfile";
 import parseDirective from "./directives.js";
 
 export type MetadataScope = 'global' | 'page';
+export const IN_PAGE_DIRECTIVE = 'leafDirective';
 
 /**
  * Options for the metadata plugin.
@@ -83,13 +84,13 @@ export default function precompile(source: VFile, options: MetadataOptions = {})
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
-  const matchDirectives = makeMatchFn(options?.isMetadata ?? 'leafDirective');
+  const matchDirectives = makeMatchFn(options?.isMetadata ?? IN_PAGE_DIRECTIVE);
   const matchDestination = makeMatchFn(options?.isTarget ?? 'heading');
 
   const tree = parseWithMetadata(source);
   const orderedNodes: ScannedNode[] = collectNodesOfInterest(tree, matchDirectives, matchDestination, log);
   const globalMetadata = extractGlobalMetadata(orderedNodes);
-  const pages = collectPageRoots(orderedNodes, log);
+  const pages = buildPageRoots(orderedNodes, log);
   dropMetadataNodes(orderedNodes); // from the tree
   attachPageBodies(pages, tree, log);
 
@@ -125,8 +126,9 @@ type ScannedNode = {
  * @param options used for the `isMetadata` and `isTarget` functions.
  * @returns an array of nodes with their parents
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, matchDirectives: MatchFn, log?: Logger<ILogObj>): ScannedNode[] {
-  const typeTest: Test = (probe: Node) => ['leafDirective', 'heading', 'yaml'].includes(probe.type);
+  const typeTest: Test = (probe: Node) => [IN_PAGE_DIRECTIVE, 'heading', 'yaml'].includes(probe.type);
 
   const orderedNodes: ScannedNode[] = [];
 
@@ -152,7 +154,8 @@ export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, ma
  * @param orderedNodes a source-order list of nodes with their parents
  * @returns an Object containing the combined global metadata
  */
-export function extractGlobalMetadata(orderedNodes: ScannedNode[]): Metadata | undefined {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function extractGlobalMetadata(orderedNodes: ScannedNode[], log?: Logger<ILogObj>): Metadata | undefined {
   // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
   return orderedNodes.filter((probe) => probe.node.type === 'yaml').reduce((acc, probe) => { return { ...acc, ...(load(probe.node['value'])) } }, {});
 }
@@ -164,19 +167,23 @@ export function extractGlobalMetadata(orderedNodes: ScannedNode[]): Metadata | u
  * @param log for logging
  * @returns a lst of pages with their root nodes and metadata.
  */
-export function collectPageRoots(orderedNodes: ScannedNode[], log?: Logger<ILogObj>): PageRecord[] {
+export function buildPageRoots(orderedNodes: ScannedNode[], log?: Logger<ILogObj>): PageRecord[] {
   // Each target heading should be followed by its metadata (`leafDirective` nodes)
   // and then the next heading (or the end of the list)
   const pages: PageRecord[] = [];
 
+  log?.trace('--- start of buildPageRoots');
   for (const probe of orderedNodes) {
-    let page: PageRecord | undefined;
+    // eslint-disable-next-line no-var
+    var page: PageRecord | undefined; // `let` has too limited of a scope
+    log?.trace(`Processing ${probe.node.type}`);
     switch (probe.node.type) {
       case 'heading': {
         page = { heading: probe.node as Heading, root: { type: 'root', children: [probe.node] } as Root, metadata: {} };
         pages.push(page);
       } break;
-      case 'leafDirective': {
+      case IN_PAGE_DIRECTIVE: {
+        log?.trace(`Found metadata  ${JSON.stringify(probe.node)}`);
         if (!page) {
           log?.warn(`Found metadata without a heading at ${probe.node.position?.start?.line}`);;
         } else {

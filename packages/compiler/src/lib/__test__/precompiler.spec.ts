@@ -20,7 +20,7 @@ import { type Node } from 'unist';
 import { u } from 'unist-builder';
 import { CONTINUE, visit } from 'unist-util-visit';
 import { VFile } from 'vfile';
-import precompile, { collectNodesOfInterest, collectPageRoots, extractGlobalMetadata } from '../precompiler.js';
+import precompile, { collectNodesOfInterest, buildPageRoots, extractGlobalMetadata, IN_PAGE_DIRECTIVE } from '../precompiler.js';
 import makeMatchFn from '../util/matcher.js';
 
 const log = new Logger({ name: 'test_precompiler', minLevel: 3 }) as Logger<ILogObj>;
@@ -57,7 +57,7 @@ describe('precompiler', () => {
     expect(precompiled.frontmatter).toEqual({ title: 'Hello' });
   });
 
-  it.skip('should export directives', async () => {
+  it('should export directives', async () => {
     const singlePage = new VFile({
       path: 'test.md',
       value: '---\ntitle: Hello\n---\n\n# Hello\n\n::title[Hi]\n\nHow are you?',
@@ -66,7 +66,7 @@ describe('precompiler', () => {
     expect(precompiled.pages).toHaveLength(1);
     const page = precompiled.pages[0];
     removePositions(page.root);
-    expect(page.root).toEqual(u('root', [u('heading', { depth: 1, meta: { title: 'Hi' } }, [u('text', 'Hello')]), u('paragraph', [u('text', 'How are you?')])]));
+    expect(page.root).toEqual(u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'How are you?')])]));
     expect(page.metadata).toEqual({ title: 'Hi' });
     expect(precompiled.frontmatter).toEqual({ title: 'Hello' });
   });
@@ -74,10 +74,10 @@ describe('precompiler', () => {
   describe('implementation', () => {
     // I know, "don't test implementation details", but this has many steps and they 
     // need to be correct
-    const matchDirectives = makeMatchFn('leafDirective');
+    const matchDirectives = makeMatchFn(IN_PAGE_DIRECTIVE);
     const matchDestination = makeMatchFn('heading');
 
-    it('should find headings and metadata', async () => {
+    it('should find headings and frontmatter', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
       const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
       expect(scannedNodes).toHaveLength(2); // frontmatter and heading
@@ -86,14 +86,23 @@ describe('precompiler', () => {
     it('should extract frontmatter', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
       const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
-      const globalMetadata = extractGlobalMetadata(scannedNodes);
+      const globalMetadata = extractGlobalMetadata(scannedNodes, log);
       expect(globalMetadata).toEqual({ title: 'Hello' });
+    });
+
+    it('should attach local metadata to the page', async () => {
+      const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u(IN_PAGE_DIRECTIVE, { name: 'title' }, [u('text', { value: 'Greetings, program' })]), u('paragraph', [u('text', 'how are you?')])]) as Root;
+      const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
+      const pages = buildPageRoots(scannedNodes, log);
+      expect(pages).toHaveLength(1);
+      expect(pages[0].heading).toEqual(u('heading', { depth: 1 }, [u('text', 'Hello')]));
+      expect(pages[0].metadata).toEqual({ title: 'Greetings, program' });
     });
 
     it('should identify the first page', async () => {
       const mdast = u('root', [u('yaml', { value: 'title: Hello' }), u('heading', { depth: 1 }, [u('text', 'Hello')]), u('paragraph', [u('text', 'how are you?')])]) as Root;
       const scannedNodes = collectNodesOfInterest(mdast, matchDirectives, matchDestination, log);
-      const pages = collectPageRoots(scannedNodes);
+      const pages = buildPageRoots(scannedNodes, log);
       expect(pages).toHaveLength(1);
       expect(pages[0].heading).toEqual(u('heading', { depth: 1 }, [u('text', 'Hello')]));
     });
