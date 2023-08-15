@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "api",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/server/src",
+  "sourceRoot": "packages/api/src",
   "projectType": "application",
   "targets": {
     "build": {
@@ -13,14 +13,14 @@
       "options": {
         "target": "node",
         "compiler": "tsc",
-        "outputPath": "dist/packages/server",
-        "main": "packages/server/src/main.ts",
-        "tsConfig": "packages/server/tsconfig.app.json",
+        "outputPath": "dist/packages/api",
+        "main": "packages/api/src/main.ts",
+        "tsConfig": "packages/api/tsconfig.app.json",
         "assets": [
-          "packages/server/src/assets"
+          "packages/api/src/assets"
         ],
         "isolatedConfig": true,
-        "webpackConfig": "packages/server/webpack.config.js"
+        "webpackConfig": "packages/api/webpack.config.js"
       },
       "configurations": {
         "development": {},
@@ -31,14 +31,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "server:build"
+        "buildTarget": "api:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "server:build:development"
+          "buildTarget": "api:build:development"
         },
         "production": {
-          "buildTarget": "server:build:production"
+          "buildTarget": "api:build:production"
         }
       }
     },
@@ -49,7 +49,7 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/server/**/*.ts"
+          "packages/api/**/*.ts"
         ]
       }
     },
@@ -59,7 +59,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "packages/server/jest.config.ts",
+        "jestConfig": "packages/api/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
