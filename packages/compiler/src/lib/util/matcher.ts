@@ -47,8 +47,7 @@ export default function makeMatchFn(matcher: MatcherType): MatchFn {
           if (key === 'value') {
             if (value !== undefined && value !== m[key]) return false;
           }
-          // @ts-expect-error an unknown key will return undefined, which we can compare to the desired value
-          if (probe[key] !== m[key]) return false;
+          if (probe[key as keyof Node] !== m[key]) return false;
         }
         return true;
       };
