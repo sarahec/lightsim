@@ -1,16 +1,18 @@
-// Copyright 2023 Sarah Clark
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ Copyright 2023 Sarah Clark
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
 
 import { CompiledSimulation, Metadata } from './interfaces.js';
 
@@ -62,12 +64,12 @@ export function makeRuntime(
 
   return {
     numPages: _pages.length,
-    getContents: (location: number) => String(_pages[location].getContents()),
+    getContents: (location: number) => String(_pages[location].contents),
     getLocation: () => _index,
     getMetadata: (location?: number) => {
       const loc = location ?? _index;
       // Merge frontmatter and page  with the page overriding
-      return { ...sim.frontmatter, ..._pages[loc].metadata, }; 
+      return { ...sim.frontmatter, ..._pages[loc].metadata };
     },
     getNavigation: (location?: number) => {
       const loc = location ?? _index;

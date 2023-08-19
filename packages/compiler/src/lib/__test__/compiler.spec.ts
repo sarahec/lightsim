@@ -27,9 +27,7 @@ describe('compiler', () => {
       render: { format: 'md' },
     });
     expect(compiled.pages).toHaveLength(2); // TODO Pass the heading depth to the compiler
-    expect(compiled.pages[0].getContents()).toEqual('# Hello');
-    expect(compiled.pages[1].getContents()).toEqual(
-      '## World!\n\nHow are you?',
-    );
+    expect(compiled.pages[0].contents).toEqual('# Hello');
+    expect(compiled.pages[1].contents).toEqual('## World!\n\nHow are you?');
   });
 });

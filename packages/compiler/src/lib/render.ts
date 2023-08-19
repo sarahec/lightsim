@@ -155,7 +155,7 @@ function makePage(
     file: file,
     basename: file.basename,
     title: metadata['title'] ?? undefined,
-    getContents: () => String(file.value),
+    contents: String(file.value),
     metadata: metadata,
   });
 }

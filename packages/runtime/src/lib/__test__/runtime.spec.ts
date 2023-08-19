@@ -24,12 +24,12 @@ describe('makeRuntime', () => {
       {
         metadata: {},
         format: 'html',
-        getContents: () => 'Hello, world!',
+        contents: 'Hello, world!',
       },
       {
         metadata: { title: 'Page 2' },
         format: 'html',
-        getContents: () => 'This is a test',
+        contents: 'This is a test',
       },
     ] as Page[],
     frontmatter: {},

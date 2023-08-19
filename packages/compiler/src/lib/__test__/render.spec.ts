@@ -38,7 +38,7 @@ describe('render', () => {
       log: logger,
     });
     expect(file.basename).toBe('test.html'); // count == 0 is elided
-    expect(file.getContents()).toBe('<h1>Hello</h1>');
+    expect(file.contents).toBe('<h1>Hello</h1>');
   });
 
   it('renders HTML into a template', () => {
@@ -49,13 +49,13 @@ describe('render', () => {
       log: logger,
     });
     expect(file.basename).toBe('test.html'); // count == 0 is elided
-    expect(file.getContents()).toBe('TEST:: <h1>Hello</h1>');
+    expect(file.contents).toBe('TEST:: <h1>Hello</h1>');
   });
 
   it('renders Markdown', () => {
     const file = toMarkdown(tree as Root, { count: 1, name: 'test' });
     expect(file.basename).toBe('test1.md');
-    expect(file.getContents()).toBe('# Hello');
+    expect(file.contents).toBe('# Hello');
   });
 
   describe('with metadata', () => {
