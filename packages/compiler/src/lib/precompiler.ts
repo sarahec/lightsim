@@ -128,11 +128,12 @@ type ScannedNode = {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, matchDirectives: MatchFn, log?: Logger<ILogObj>): ScannedNode[] {
-  const typeTest: Test = (probe: Node) => [IN_PAGE_DIRECTIVE, 'heading', 'yaml'].includes(probe.type);
+  const typeTest = (probe: Node) => [IN_PAGE_DIRECTIVE, 'heading', 'yaml'].includes(probe.type);
 
   const orderedNodes: ScannedNode[] = [];
 
-  const visitor: Visitor = (node: Node, parents: Node[]) => {
+  // 
+  const visitor = (node: Node, parents: Node[]) => {
     if (node.type === 'yaml' || matchDirectives(node) || matchDestination(node)) {
       orderedNodes.push({ node: node, parents: [...parents] as Parent[] });
       return SKIP;
@@ -141,7 +142,7 @@ export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, ma
   };
 
   // Walk the tree and collect all the nodes we care about
-  visitParents(tree, typeTest, visitor);
+  visitParents(tree, typeTest as Test, visitor as Visitor);
 
   return orderedNodes;
 }
