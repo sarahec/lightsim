@@ -10,8 +10,9 @@
       devShells.default = pkgs.mkShell {
         packages = [ 
           pkgs.bashInteractive
-          pkgs.nodejs-18_x
           pkgs.cypress
+          pkgs.nodejs-18_x
+          pkgs.sqlite
         ];
         shellHook = ''
           export CYPRESS_INSTALL_BINARY=0
