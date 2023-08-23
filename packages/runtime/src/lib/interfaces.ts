@@ -16,22 +16,28 @@
 
 /**
  * One exported page from the precompiler
+ * @property sequence - the sequence number of the page
  * @property metadata - the metadata for the page
- * @property name - the name of the page
  * @property format - the format of the page (e.g. markdown)
  * @property getContents - get the contents of the page as a String
  */
-export type Page = {
+export type CompiledPage = {
+  readonly sequence: number;
   readonly contents: string;
   readonly metadata: Readonly<Metadata>;
-  readonly basename: string | undefined;
-  readonly title: string | undefined;
   readonly format: string;
 };
 
+/**
+ * The compiled simulation
+ * @property id - the id of the simulation
+ * @property pages - the pages of the simulation
+ * @property metadata - the frontmatter of the simulation
+ */
 export type CompiledSimulation = {
-  readonly pages: Readonly<Page[]>;
-  readonly frontmatter: Readonly<Metadata>;
+  readonly id: string;
+  readonly pages: Readonly<CompiledPage[]>;
+  readonly metadata: Readonly<Metadata>;
 };
 
 export type Metadata = Record<string, string>;

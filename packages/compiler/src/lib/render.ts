@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-import { Metadata, Page } from '@lightsim/runtime';
+import { CompiledPage, Metadata } from '@lightsim/runtime';
 import { type Root as HastRoot } from 'hast';
 import { freeze } from 'immer';
 import { type Root } from 'mdast';
@@ -24,7 +24,6 @@ import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
-import { VFile } from 'vfile';
 import { type PageCollection, type PageRecord } from './precompiler';
 
 const HTML_LOGGER_NAME = 'rendering html';
@@ -56,7 +55,7 @@ export default function render(
   source: PageCollection,
   options?: RenderOptions,
   globalMetadata?: Metadata,
-): Readonly<Readonly<Page>[]> {
+): Readonly<Readonly<CompiledPage>[]> {
   const formatter = options?.format === 'html' ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   return source.pages.map((record: PageRecord, index: number) =>
@@ -80,7 +79,7 @@ export function toHTML(
   options?: RenderOptions,
   globalMetadata?: Metadata,
   pageMetadata?: Metadata,
-): Page {
+): CompiledPage {
   const {
     count = 0,
     name: name = 'page',
@@ -90,14 +89,16 @@ export function toHTML(
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
+  // @ts-expect-error -- type confusion over the source tree
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
   log.silly(`hast: ${JSON.stringify(hast)}`);
+  // @ts-expect-error -- unified now creates a processor w/ return type void and type confusion over HastRoot
   const html = unified().use(rehypeStringify).stringify(hast).trim();
   log.silly(`html: ${html}`);
 
   const finalHTML =
     options?.template?.render({ contents: html, title: name }) ?? html;
-  return makePage(finalHTML, suffix, count, name, metadata, log);
+  return makePage(finalHTML, suffix, count, metadata, log);
 }
 
 /**
@@ -112,18 +113,15 @@ export function toMarkdown(
   globalMetadata?: Metadata,
   pageMetadata?: Metadata,
 ) {
-  const {
-    count = 0,
-    name: name = 'page',
-    extension: suffix = 'md',
-  } = options || {};
+  const { count = 0, extension: suffix = 'md' } = options || {};
   const log =
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
+  // @ts-expect-error -- default processor type is `undefined`
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
   log.silly(`markdown: ${JSON.stringify(markdown)}`);
-  return makePage(markdown, suffix, count, name, metadata, log);
+  return makePage(markdown, suffix, count, metadata, log);
 }
 
 /**
@@ -131,7 +129,6 @@ export function toMarkdown(
  * @param data contents
  * @param extension file extension
  * @param count optional sequence number (ignored if 0, default 1)
- * @param name base filename (default: 'page')
  * @param metadata optional metadata to attach to the file
  * @param log logger
  * @returns an Page with an in-memory VFile
@@ -140,19 +137,14 @@ function makePage(
   data: string,
   extension: string,
   count = 1,
-  name = 'page',
   metadata: Metadata,
   log?: Logger<ILogObj>,
-): Readonly<Page> {
-  const filename = (count ? `${name}${count}` : name) + '.' + extension;
-  log?.trace(`New file: ${filename}, metadata: ${JSON.stringify(metadata)}`);
-  const file = freeze(new VFile({ basename: filename, value: data }));
+): Readonly<CompiledPage> {
+  log?.trace(`New page: ${data}, metadata: ${JSON.stringify(metadata)}`);
   return freeze({
+    sequence: count,
     format: extension,
-    file: file,
-    basename: file.basename,
-    title: metadata['title'] ?? undefined,
-    contents: String(file.value),
+    contents: data,
     metadata: metadata,
   });
 }

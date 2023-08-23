@@ -20,7 +20,7 @@ import { type Root } from 'mdast';
 import { toHTML, toMarkdown } from '../render';
 import { ILogObj, Logger } from 'tslog';
 import { Environment, Template } from 'nunjucks';
-import { type Page } from '@lightsim/runtime';
+import { type CompiledPage } from '@lightsim/runtime';
 
 const logger = new Logger({ name: 'test', minLevel: 3 }) as Logger<ILogObj>;
 const template = new Template(
@@ -32,12 +32,11 @@ describe('render', () => {
   const tree = u('root', [u('heading', { depth: 1 }, [u('text', 'Hello')])]);
 
   it('renders a HTML fragment by default', () => {
-    const file: Page = toHTML(tree as Root, {
+    const file: CompiledPage = toHTML(tree as Root, {
       count: 0,
       name: 'test',
       log: logger,
     });
-    expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.contents).toBe('<h1>Hello</h1>');
   });
 
@@ -48,13 +47,11 @@ describe('render', () => {
       template: template,
       log: logger,
     });
-    expect(file.basename).toBe('test.html'); // count == 0 is elided
     expect(file.contents).toBe('TEST:: <h1>Hello</h1>');
   });
 
   it('renders Markdown', () => {
     const file = toMarkdown(tree as Root, { count: 1, name: 'test' });
-    expect(file.basename).toBe('test1.md');
     expect(file.contents).toBe('# Hello');
   });
 

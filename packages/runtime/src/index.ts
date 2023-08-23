@@ -12,17 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 import {
-  type CompiledSimulation, type Page, type Metadata,
-} from "./lib/interfaces";
+  type CompiledSimulation,
+  type CompiledPage,
+  type Metadata,
+} from './lib/interfaces';
 import {
-  makeRuntime, type RuntimeControls,
-  type NavigationOption
-} from "./lib/runtime";
+  makeRuntime,
+  type RuntimeControls,
+  type NavigationOption,
+} from './lib/runtime';
 
 export {
-  makeRuntime as default, type CompiledSimulation, type Page, type Metadata,
-  type RuntimeControls, type NavigationOption,
+  makeRuntime as default,
+  type CompiledSimulation,
+  type CompiledPage,
+  type Metadata,
+  type RuntimeControls,
+  type NavigationOption,
 };
-

@@ -15,11 +15,12 @@
  */
 
 import { freeze } from 'immer';
-import { type CompiledSimulation, type Page } from '../interfaces.js';
+import { type CompiledSimulation, type CompiledPage } from '../interfaces.js';
 import { makeRuntime } from '../runtime.js';
 
 describe('makeRuntime', () => {
   const compiled: Readonly<CompiledSimulation> = freeze({
+    id: 'test',
     pages: [
       {
         metadata: {},
@@ -31,8 +32,8 @@ describe('makeRuntime', () => {
         format: 'html',
         contents: 'This is a test',
       },
-    ] as Page[],
-    frontmatter: {},
+    ] as CompiledPage[],
+    metadata: {},
   });
 
   it('should access a list of pages in order', () => {
