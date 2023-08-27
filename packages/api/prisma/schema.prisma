@@ -28,14 +28,15 @@ model Simulation {
   sim_id    String   @unique
   metadata  String
   pages     Page[]
+  path      String?
 }
 
 model Page {
-  id        Int      @id @default(autoincrement())
-  sim_id    Int
-  sim       Simulation @relation(fields: [sim_id], references: [id])
-  sequence  Int
-  contents   String
-  metadata  String
+  id       Int        @id @default(autoincrement())
+  sim_id   Int
+  sim      Simulation @relation(fields: [sim_id], references: [id])
+  sequence Int
+  contents String
+  metadata String
   format   String
-} 
+}
