@@ -43,3 +43,7 @@ Thumbs.db
 result
 .vscode/settings.json
 .env
+
+# Prisma database
+packages/api/prisma/dev.db
+packages/api/prisma/dev.db-journal
