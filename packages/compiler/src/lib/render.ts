@@ -89,10 +89,8 @@ export function toHTML(
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
-  // @ts-expect-error -- type confusion over the source tree
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
   log.silly(`hast: ${JSON.stringify(hast)}`);
-  // @ts-expect-error -- unified now creates a processor w/ return type void and type confusion over HastRoot
   const html = unified().use(rehypeStringify).stringify(hast).trim();
   log.silly(`html: ${html}`);
 
@@ -118,7 +116,6 @@ export function toMarkdown(
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
-  // @ts-expect-error -- default processor type is `undefined`
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
   log.silly(`markdown: ${JSON.stringify(markdown)}`);
   return makePage(markdown, suffix, count, metadata, log);

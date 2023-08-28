@@ -24,7 +24,7 @@ describe('compiling', () => {
 
   it('should return a proxy for a missing file', async () => {
     const result = await compileFile('no-such-file.md');
-    expect(result).toEqual({ frontmatter: {}, pages: [] });
+    expect(result).toEqual({ 'id': 'no-such-file.md', metadata: {}, pages: [] });
   });
 
 });

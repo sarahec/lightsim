@@ -142,7 +142,7 @@ export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, ma
   };
 
   // Walk the tree and collect all the nodes we care about
-  visitParents(tree, typeTest as Test, visitor as Visitor);
+  visitParents(tree, typeTest as Test, visitor as unknown as Visitor);
 
   return orderedNodes;
 }
