@@ -1,5 +1,5 @@
 /*
- Copyright 2023 Google LLC
+ Copyright 2023 Sarah Clark
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import { loadFile } from './file_io';
 
 /**
  * Load the specified file, then compile it. If the file isn't found, the promise will be rejected.
- * 
+ *
  * @param filename the file to load
  * @returns a promise that resolves to the compiled simulation or contains the error.
  */
-export async function compileFile(filename: string): Promise<CompiledSimulation> {
+export async function compileFile(
+  filename: string,
+): Promise<CompiledSimulation> {
   return loadFile(filename).then(compile);
 }

@@ -1,5 +1,5 @@
 /*
- Copyright 2023 Google LLC
+ Copyright 2023 Sarah Clark
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ describe('compiling', () => {
 
   it('should return a proxy for a missing file', async () => {
     const result = await compileFile('no-such-file.md');
-    expect(result).toEqual({ 'id': 'no-such-file.md', metadata: {}, pages: [] });
+    expect(result).toEqual({ id: 'no-such-file.md', metadata: {}, pages: [] });
   });
-
 });
-
