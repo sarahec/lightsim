@@ -43,7 +43,6 @@
     "@cypress/webpack-dev-server": "^2.0.0",
     "@mui/types": "^7.2.4",
     "@nrwl/nx": "^7.8.7",
-    "@nx-plus/vue": "^15.0.0-rc.0",
     "@nx/cypress": "16.7.4",
     "@nx/esbuild": "16.7.4",
     "@nx/eslint-plugin": "16.7.4",
