@@ -16,9 +16,7 @@
         "main": "packages/cli/src/cli.ts",
         "assets": [
           "packages/cli/*.md"
-        ],
-        "updateBuildableProjectDepsInPackageJson": true,
-        "buildableProjectDepsInPackageJsonType": "dependencies"
+        ]
       }
     },
     "lint": {

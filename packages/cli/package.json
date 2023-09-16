@@ -11,5 +11,15 @@
   },
   "dependencies": {
     "@lightsim/compiler": "*"
+  },
+  "lint": {
+    "executor": "@nx/linter:eslint",
+    "outputs": ["{options.outputFile}"],
+    "options": {
+      "lintFilePatterns": [
+        "libs/my-lib/**/*.{ts,tsx,js,jsx}",
+        "libs/my-lib/package.json"
+      ]
+    }
   }
 }
