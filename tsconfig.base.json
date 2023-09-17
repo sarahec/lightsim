@@ -7,11 +7,11 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "rootDir": ".",
     "sourceMap": true,
-    "target": "es2015",
+    "target": "ES6",
     "lib": [
       "es2020",
       "dom"

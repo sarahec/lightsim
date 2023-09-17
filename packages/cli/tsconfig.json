@@ -9,8 +9,5 @@
     {
       "path": "./tsconfig.spec.json"
     },
-    {
-      "path": "../compiler/tsconfig.json"
-    }
   ]
 }
