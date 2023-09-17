@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "cli": "node dist/packages/compiler-cli"
+    "cli": "node dist/packages/cli"
   },
   "private": true,
   "dependencies": {
