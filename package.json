@@ -5,6 +5,9 @@
   "scripts": {
     "cli": "node dist/packages/cli"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "private": true,
   "dependencies": {
     "@emotion/react": "11.11.1",
