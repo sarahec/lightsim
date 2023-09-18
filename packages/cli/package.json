@@ -10,7 +10,7 @@
     "esModuleInterop": true    
   },
   "dependencies": {
-    "@lightsim/compiler": "workspace:*"
+    "@lightsim/compiler": "*"
   },
   "lint": {
     "executor": "@nx/linter:eslint",

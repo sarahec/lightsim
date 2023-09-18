@@ -4,7 +4,7 @@
   "type": "module",
   "description": "A compiler for markdown files (to simulations)",
   "dependencies": {
-    "@lightsim/runtime": "workspace:*",
+    "@lightsim/runtime": "*",
     "rehype-document": "^6.1.0"
   },
   "devDependencies": {
