@@ -114,7 +114,7 @@
     "unified": "^10.1.2",
     "unist-builder": "^3.0.1",
     "unist-util-inspect": "^7.0.2",
-    "verdaccio": "^5.0.4",
+    "verdaccio": "^5.26.2",
     "vfile": "^5.3.7",
     "vite": "4.4.1",
     "vite-plugin-eslint": "^1.8.1",

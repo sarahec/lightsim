@@ -2,5 +2,8 @@
   "name": "@lightsim/runtime",
   "version": "0.1.0",
   "type": "module",
-  "description": "Runtime for lightsim"
+  "description": "Runtime for lightsim",
+  "scripts": {
+    "publish-package": "npm publish"
+  }
 }

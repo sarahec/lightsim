@@ -3,23 +3,29 @@
   "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
+  "main": "./src/index.js",
   "bin": {
     "cli": "./src/cli.js"
   },
   "compilerOptions": {
-    "esModuleInterop": true    
+    "esModuleInterop": true
   },
   "dependencies": {
     "@lightsim/compiler": "*"
   },
   "lint": {
     "executor": "@nx/linter:eslint",
-    "outputs": ["{options.outputFile}"],
+    "outputs": [
+      "{options.outputFile}"
+    ],
     "options": {
       "lintFilePatterns": [
         "libs/my-lib/**/*.{ts,tsx,js,jsx}",
         "libs/my-lib/package.json"
       ]
     }
+  },
+  "scripts": {
+    "publish-package": "npm publish"
   }
 }
