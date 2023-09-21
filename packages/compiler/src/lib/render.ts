@@ -24,7 +24,7 @@ import remarkRehype from 'remark-rehype';
 import remarkStringify from 'remark-stringify';
 import { ILogObj, Logger } from 'tslog';
 import { unified } from 'unified';
-import { type PageCollection, type PageRecord } from './precompiler';
+import { type PageCollection, type PageRecord } from './precompiler.js';
 
 const HTML_LOGGER_NAME = 'rendering html';
 const MD_LOGGER_NAME = 'rendering markdown';

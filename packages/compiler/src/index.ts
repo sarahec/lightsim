@@ -14,6 +14,6 @@
  limitations under the License.
  */
 
-import { compile, CompileOptions } from './lib/compiler';
+import { compile, CompileOptions } from './lib/compiler.js';
  
 export { type CompileOptions, compile as default };

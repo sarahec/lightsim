@@ -16,7 +16,7 @@
  */
 
 import { type Node, type Parent } from 'unist';
-import makeMatchFn, { type MatcherType } from './matcher';
+import makeMatchFn, { type MatcherType } from './matcher.js';
 
 type PathStep = {
   node: Parent;

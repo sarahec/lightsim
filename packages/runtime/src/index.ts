@@ -16,12 +16,12 @@ import {
   type CompiledSimulation,
   type CompiledPage,
   type Metadata,
-} from './lib/interfaces';
+} from './lib/interfaces.js';
 import {
   makeRuntime,
   type RuntimeControls,
   type NavigationOption,
-} from './lib/runtime';
+} from './lib/runtime.js';
 
 export {
   makeRuntime as default,
