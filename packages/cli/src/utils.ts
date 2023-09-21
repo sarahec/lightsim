@@ -13,12 +13,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
  */
+import { Command } from 'commander';
 
 import Debug from 'debug';
 
 export const rootDebug = Debug('compiler-cli');
 
-export const printVerboseHook = (thisCommand) => {
+export const printVerboseHook = (thisCommand: Command) => {
   const options = thisCommand.opts();
 
   if (options.verbose) {
