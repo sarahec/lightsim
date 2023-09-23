@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  Copyright 2023 Sarah Clark
 
@@ -14,33 +16,41 @@
  limitations under the License.
  */
 
+
 import compile from '@lightsim/compiler';
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as process from 'process';
-import { read } from 'to-vfile';
+import { readSync } from 'to-vfile';
+import { ILogObj, Logger } from 'tslog';
 import { VFile } from 'vfile';
-import { printVerboseHook, rootDebug } from '../utils.js';
 
-const debug = rootDebug.extend('compile');
-const debugError = rootDebug.extend('compile:error');
+const program = new Command();
 
-export const compileCommand = () => {
-  const command = new Command('compile');
-  command
+function main() {
+  const log = new Logger<ILogObj>({ name: 'sim-cli' });
+
+  program
+    .name('sim')
+    .description('Builds simulation apps from martdown files')
+    .version('0.1.0');
+
+  program
+    .command('compile')
     .argument('file', 'source file')
     // .option('--verbose', 'output debug logs', false)
     .option('--output <name>', 'the output directory', 'sim')
-    .hook('preAction', printVerboseHook)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    .action(async (path, options) => {
+    .action((path, options) => {
       if (path && !fs.existsSync(path)) {
-        debugError('invalid path provided');
-        process.exit(1);
+        program.error(`file not found: ${path}`);
       }
-      const source: VFile = await read(path);
+      const source: VFile = readSync(path);
       const generated = compile(source);
-      debug(`Compiler generated ${generated.pages.length} files`);
+      log.debug(`Compiler generated ${generated.pages.length} files`);
     });
-  return command;
-};
+
+  program.parseAsync(process.argv);
+}
+
+main();
