@@ -28,16 +28,17 @@ import { VFile } from 'vfile';
 const program = new Command();
 
 function main() {
-  const log = new Logger<ILogObj>({ name: 'sim-cli' });
+  const log = new Logger<ILogObj>({ name: 'lsc' });
 
   program
-    .name('sim')
-    .description('Builds simulation apps from martdown files')
+    .name('lsc')
+    .description('Builds simulation apps from markdown files')
     .version('0.1.0');
 
   program
     .command('compile')
     .argument('file', 'source file')
+    .option('--dry-run', 'do not write files', false)
     // .option('--verbose', 'output debug logs', false)
     .option('--output <name>', 'the output directory', 'sim')
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
