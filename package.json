@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "cli": "node dist/packages/cli"
+    "lsc": "node dist/packages/cli"
   },
   "workspaces": [
     "packages/*"

@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
+  "main": "./src/cli.js",
   "bin": {
-    "lsc": "./src/index.js"
+    "lsc": "./src/cli.js"
   },
   "compilerOptions": {
     "esModuleInterop": true
