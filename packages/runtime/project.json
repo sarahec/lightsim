@@ -1,7 +1,7 @@
 {
   "name": "runtime",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/runtime/src",
+  "sourceRoot": "{projectRoot}/src",
   "projectType": "library",
   "targets": {
     "build": {
@@ -11,10 +11,10 @@
       ],
       "options": {
         "outputPath": "dist/packages/runtime",
-        "main": "packages/runtime/src/index.ts",
-        "tsConfig": "packages/runtime/tsconfig.lib.json",
+        "main": "{projectRoot}/src/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
         "assets": [
-          "packages/runtime/*.md"
+          "{projectRoot}/*.md"
         ]
       }
     },
@@ -31,7 +31,9 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/runtime/**/*.ts"
+          "{projectRoot}/**/*.ts",
+          "{projectRoot}/package.json",
+          "{projectRoot}/project.json"
         ]
       }
     },
@@ -41,7 +43,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "packages/runtime/jest.config.ts",
+        "jestConfig": "{projectRoot}/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

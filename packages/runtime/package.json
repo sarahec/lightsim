@@ -5,5 +5,7 @@
   "description": "Runtime for lightsim",
   "scripts": {
     "publish-package": "npm publish"
+  },
+  "dependencies": {
   }
 }

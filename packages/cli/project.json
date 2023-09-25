@@ -1,7 +1,7 @@
 {
   "name": "cli",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/cli/src",
+  "sourceRoot": "{projectRoot}/src",
   "projectType": "library",
   "targets": {
     "build": {
@@ -11,11 +11,11 @@
       ],
       "options": {
         "outputPath": "dist/packages/cli",
-        "tsConfig": "packages/cli/tsconfig.lib.json",
-        "packageJson": "packages/cli/package.json",
-        "main": "packages/cli/src/cli.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
+        "packageJson": "{projectRoot}/package.json",
+        "main": "{projectRoot}/src/cli.ts",
         "assets": [
-          "packages/cli/*.md"
+          "{projectRoot}/*.md"
         ]
       }
     },
@@ -26,9 +26,9 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/cli/**/*.ts",
-          "packages/cli/package.json",
-          "packages/cli/project.json"
+          "{projectRoot}/**/*.ts",
+          "{projectRoot}/package.json",
+          "{projectRoot}/project.json"
         ]
       }
     },
@@ -38,7 +38,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "packages/cli/jest.config.ts",
+        "jestConfig": "{projectRoot}/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
