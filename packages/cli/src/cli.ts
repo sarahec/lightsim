@@ -51,7 +51,7 @@ function main() {
       log.debug(`Compiler generated ${generated.pages.length} files`);
     });
 
-  program.parseAsync(process.argv);
+  program.parse(process.argv);
 }
 
 main();
