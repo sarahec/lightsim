@@ -1,7 +1,7 @@
 {
   "name": "cli",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "{projectRoot}/src",
+  "sourceRoot": "packages/cli/src",
   "projectType": "library",
   "targets": {
     "build": {
@@ -11,13 +11,21 @@
       ],
       "options": {
         "outputPath": "dist/packages/cli",
-        "tsConfig": "{projectRoot}/tsconfig.lib.json",
-        "packageJson": "{projectRoot}/package.json",
-        "main": "{projectRoot}/src/cli.ts",
+        "tsConfig": "packages/cli/tsconfig.lib.json",
+        "packageJson": "packages/cli/package.json",
+        "main": "packages/cli/src/index.ts",
         "assets": [
-          "{projectRoot}/*.md"
+          "packages/cli/*.md"
         ]
       }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs cli {args.ver} {args.tag}",
+      "dependsOn": [
+        "build",
+        "test",
+        "lint"
+      ]
     },
     "lint": {
       "executor": "@nx/linter:eslint",
@@ -26,9 +34,9 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "{projectRoot}/**/*.ts",
-          "{projectRoot}/package.json",
-          "{projectRoot}/project.json"
+          "packages/cli/**/*.ts",
+          "packages/cli/package.json",
+          "packages/cli/project.json"
         ]
       }
     },
@@ -38,7 +46,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "{projectRoot}/jest.config.ts",
+        "jestConfig": "packages/cli/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

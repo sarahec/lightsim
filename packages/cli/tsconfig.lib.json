@@ -1,11 +1,11 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "ESNext",
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "allowSyntheticDefaultImports": true,
     "types": ["node"]
   },
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "include": ["src/**/*.ts", "src/cli.ts"]
+  "include": ["src/**/*.ts"]
 }

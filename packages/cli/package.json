@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "./src/cli.js",
+  "main": "./src/index.js",
   "bin": {
-    "lsc": "./src/cli.js"
+    "lsc": "./src/index.js"
   },
   "compilerOptions": {
     "esModuleInterop": true
@@ -18,8 +18,5 @@
     "tslog": "^4.8.2",
     "vfile": "^5.3.7",
     "tslib": "^2.3.0"
-  },
-  "scripts": {
-    "publish-package": "npm publish"
   }
 }
