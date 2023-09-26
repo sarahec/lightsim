@@ -24,7 +24,9 @@
         "command": "node tools/scripts/publish.mjs compiler {args.ver} {args.tag}"
       },
       "dependsOn": [
-        "build"
+        "build",
+        "test",
+        "lint"
       ]
     },
     "lint": {
@@ -34,7 +36,9 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/compiler/**/*.ts"
+          "packages/compiler/**/*.ts",
+          "packages/compiler/package.json",
+          "packages/compiler/project.json"
         ]
       }
     },

@@ -4,14 +4,10 @@
   "type": "module",
   "description": "A compiler for markdown files (to simulations)",
   "dependencies": {
-    "@lightsim/runtime": "*",
-    "rehype-document": "^6.1.0"
+    "@lightsim/runtime": "*"
   },
   "devDependencies": {
     "typescript": "^4.1.3",
     "unist-builder": "^3.0.1"
-  },
-  "scripts": {
-    "publish-package": "npm publish"
   }
 }

@@ -21,7 +21,9 @@
     "publish": {
       "command": "node tools/scripts/publish.mjs runtime {args.ver} {args.tag}",
       "dependsOn": [
-        "build"
+        "build",
+        "test",
+        "lint"
       ]
     },
     "lint": {

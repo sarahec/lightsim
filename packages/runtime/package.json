@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Runtime for lightsim",
-  "scripts": {
-    "publish-package": "npm publish"
-  },
   "dependencies": {
+  
+    "immer": "^10.0.2",
+    "tslib": "^2.3.0"
   }
 }
