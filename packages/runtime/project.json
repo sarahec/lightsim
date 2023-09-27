@@ -19,7 +19,7 @@
       }
     },
     "publish": {
-      "command": "node tools/scripts/publish.mjs runtime {args.ver} {args.tag}",
+      "command": "npm publish dist/packages/runtime",
       "dependsOn": [
         "build",
         "test",

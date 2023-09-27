@@ -20,7 +20,7 @@
       }
     },
     "publish": {
-      "command": "node tools/scripts/publish.mjs cli {args.ver} {args.tag}",
+      "command": "npm publish dist/packages/cli",
       "dependsOn": [
         "build",
         "test",
