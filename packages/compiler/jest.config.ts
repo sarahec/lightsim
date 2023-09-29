@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Modules throwing error "Jest encountered an unexpected token"
-const esModules = ['unified', 'remark-parse'];
+const esModules = ['unified', 'unist-builder', 'remark-parse', 'vfile'];
 
 
 export default {

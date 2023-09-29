@@ -89,6 +89,8 @@ export function toHTML(
     options?.log?.getSubLogger({ name: HTML_LOGGER_NAME }) ??
     new Logger({ name: HTML_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
+
+  // @ts-expect-error Root type isn't consistent across Remark packages as of 10/2023
   const hast = unified().use(remarkRehype).runSync(tree) as HastRoot;
   log.silly(`hast: ${JSON.stringify(hast)}`);
   const html = unified().use(rehypeStringify).stringify(hast).trim();
@@ -116,6 +118,7 @@ export function toMarkdown(
     options?.log?.getSubLogger({ name: MD_LOGGER_NAME }) ??
     new Logger({ name: MD_LOGGER_NAME, minLevel: 3 });
   const metadata = { ...globalMetadata, ...pageMetadata };
+  // @ts-expect-error Root type isn't consistent across Remark packages as of 10/2023
   const markdown = unified().use(remarkStringify).stringify(tree).trim();
   log.silly(`markdown: ${JSON.stringify(markdown)}`);
   return makePage(markdown, suffix, count, metadata, log);
