@@ -20,25 +20,13 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2020",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "baseUrl": ".",
     "paths": {
-      "@lightsim/cli": [
-        "packages/cli/src/index.ts"
-      ],
-      "@lightsim/compiler": [
-        "packages/compiler/src/index.ts"
-      ],
-      "@lightsim/runtime": [
-        "packages/runtime/src/index.ts"
-      ]
+      "@lightsim/cli": ["apps/cli/src/index.ts"],
+      "@lightsim/compiler": ["packages/compiler/src/index.ts"],
+      "@lightsim/runtime": ["packages/runtime/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

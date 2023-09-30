@@ -16,7 +16,6 @@
  limitations under the License.
  */
 
-
 import compile from '@lightsim/compiler';
 import { Command } from 'commander';
 import * as fs from 'fs';
