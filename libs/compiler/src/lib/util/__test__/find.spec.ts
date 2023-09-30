@@ -86,8 +86,8 @@ describe('findResult', () => {
 
     it('replace should work with immer', () => {
       const _tree = freeze(tree, true);
-      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
       const result = produce(_tree, (draft) =>
+        // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
         find(draft, 'text')!.replace(u('text', 'Hey')),
       );
       expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));

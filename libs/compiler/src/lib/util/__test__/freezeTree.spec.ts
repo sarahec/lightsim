@@ -23,6 +23,7 @@ describe('freezeTree', () => {
   ]);
 
   it('should freeze all of the children', () => {
+    // @ts-expect-error - ignore type confusion re: plugin type definition
     const processor = unified().use(freezeTree);
     const tree2 = processor.runSync(tree);
     expect(tree2).toBe(tree);

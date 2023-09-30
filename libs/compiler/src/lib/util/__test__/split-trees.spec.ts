@@ -27,11 +27,13 @@ describe('split', () => {
   });
 
   it('should return the tree if no matches are found', () => {
+    // @ts-expect-error - ignore type confusion re: plugin type definition
     const processor = unified().use(splitTrees, { match: 'foo' });
     expect(processor.runSync(tree)).toEqual([rawTree]);
   });
 
   it('should return a set of trees if found', () => {
+    // @ts-expect-error - ignore type confusion re: plugin type definition
     const processor = unified().use(splitTrees, { match: 'page' });
     const trees = processor.runSync(tree) as unknown as Node[];
     expect(trees).toHaveLength(2);
