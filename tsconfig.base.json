@@ -25,7 +25,7 @@
     "paths": {
       "@lightsim/cli": ["apps/cli/src/index.ts"],
       "@lightsim/compiler": ["libs/compiler/src/index.ts"],
-      "@lightsim/runtime": ["packages/runtime/src/index.ts"]
+      "@lightsim/runtime": ["libs/runtime/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
