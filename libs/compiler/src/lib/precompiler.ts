@@ -16,7 +16,7 @@
 
 import { Metadata } from '@lightsim/runtime';
 import { load } from 'js-yaml';
-import { Heading, Root as MdastRoot, Parent } from 'mdast';
+import { Content, Heading, Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
 import { Node as UnistNode } from 'unist';
 import {
@@ -183,10 +183,10 @@ export function extractGlobalMetadata(
   orderedNodes: ScannedNode[],
   log?: Logger<ILogObj>,
 ): Metadata | undefined {
-  // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
   return orderedNodes
     .filter((probe) => probe.node.type === 'yaml')
     .reduce((acc, probe) => {
+      // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
       return { ...acc, ...load(probe.node['value']) };
     }, {});
 }
@@ -256,9 +256,8 @@ export function buildPageRoots(
 function dropMetadataNodes(orderedNodes: ScannedNode[]) {
   for (const probe of orderedNodes.reverse()) {
     if (probe.node.type === 'heading') continue;
-    // @ts-expect-error `probe.node` is a perfectly fine thing to search for
     probe.parents[0].children.splice(
-      probe.parents[0].children.indexOf(probe.node),
+      probe.parents[0].children.indexOf(probe.node as Content),
       1,
     );
   }
