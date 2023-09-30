@@ -28,7 +28,7 @@ describe('findAll', () => {
   const tree = u('root', [heading, bodyText]);
 
   it('should return nothing if not found', () => {
-    const gen = findAll(tree, 'nothing')
+    const gen = findAll(tree, 'nothing');
     expect(gen.next().done).toBe(true);
   });
 
@@ -48,14 +48,14 @@ describe('findAll', () => {
   });
 });
 
-
 describe('find', () => {
   const text = u('text', 'Hello, world!');
   const heading = u('heading', { name: 'h1' }, [text]);
   const tree = u('root', [heading]);
 
   it('should return undefined if not found', () => {
-    expect(find(tree, 'nothing')).toBeUndefined(); find
+    expect(find(tree, 'nothing')).toBeUndefined();
+    find;
     const result = find(tree, 'root');
     expect(result?.node).toBe(tree);
   });
@@ -69,7 +69,6 @@ describe('find', () => {
     const result = find(tree, { type: 'text', value: 'Hello, world!' });
     expect(result?.node).toBe(text);
   });
-
 });
 
 describe('findResult', () => {
@@ -87,8 +86,10 @@ describe('findResult', () => {
 
     it('replace should work with immer', () => {
       const _tree = freeze(tree, true);
-      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>) 
-      const result = produce(_tree, (draft) => find(draft, 'text')!.replace(u('text', 'Hey')));
+      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
+      const result = produce(_tree, (draft) =>
+        find(draft, 'text')!.replace(u('text', 'Hey')),
+      );
       expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
     });
   });
@@ -101,7 +102,7 @@ describe('findResult', () => {
 
     it('should work with immer', () => {
       const _tree = freeze(tree, true);
-      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>) 
+      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
       const result = produce(_tree, (draft) => find(draft, 'text')?.remove());
       expect(result).toEqual(u('root', [u('heading', [])]));
     });
@@ -110,6 +111,5 @@ describe('findResult', () => {
       const result = find(tree, 'text')?.remove(true);
       expect(result).toEqual(u('root', []));
     });
-
   });
 });

@@ -26,9 +26,9 @@ type PathStep = {
 
 /**
  * The outcome of a find operation.
- * 
+ *
  * Note that will only work if the node is not the root node.
- * 
+ *
  * @property value The found node.
  * @property replace Replaces the found node with the new value. Returns the tree root.
  * @property remove Removes the found node. Returns the tree root.
@@ -41,12 +41,14 @@ export type FindResult = {
 
 /**
  * Returns a generator with all matching nodes in depth-first order.
- * 
+ *
  * @param root start of the search tree.
  * @param matcher matching pattern for the node (string, object, or function: boolean)
  */
-export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult> {
-
+export function* findAll(
+  root: Node,
+  matcher: MatcherType,
+): Generator<FindResult> {
   function makeFindResult(value: Node, parents: PathStep[]): FindResult {
     const noParents = parents.length === 0;
 
@@ -63,15 +65,19 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
       remove: (removeEmptyContainer?: boolean) => {
         if (noParents) throw new Error('Cannot remove root node');
         const step = parentCopy.at(-1)!;
-        (step.node).children.splice(step.index!, 1);
-        if (removeEmptyContainer && step.node.children.length === 0 && parentCopy.length > 1) {
+        step.node.children.splice(step.index!, 1);
+        if (
+          removeEmptyContainer &&
+          step.node.children.length === 0 &&
+          parentCopy.length > 1
+        ) {
           const parentStep = parentCopy.at(-2)!;
           parentStep.node.children.splice(parentStep.index!, 1);
         }
         return parentCopy[0].node;
-      }
+      },
     };
-  };
+  }
 
   const matchFn = makeMatchFn(matcher);
   const parents: PathStep[] = [];
@@ -83,12 +89,18 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
       yield makeFindResult(probe, parents);
     }
     // @ts-expect-error idiomatic JS is fine
-    if (probe.children) { // descend into a parent node
-      step = { node: probe as Parent, index: 0, numChildren: ((probe as Parent).children.length) };
+    if (probe.children) {
+      // descend into a parent node
+      step = {
+        node: probe as Parent,
+        index: 0,
+        numChildren: (probe as Parent).children.length,
+      };
       parents.push(step);
     } else {
       step!.index++;
-      while (step!.index >= step!.numChildren) { // ascend to the next parent
+      while (step!.index >= step!.numChildren) {
+        // ascend to the next parent
         step = parents.pop();
         if (!step) return { value: undefined, done: true };
         step.index++;
@@ -102,11 +114,14 @@ export function* findAll(root: Node, matcher: MatcherType): Generator<FindResult
 
 /**
  * Returns the first matching node in depth-first order.
- * 
+ *
  * @param root start of the search tree.
  * @param matcher matching pattern for the node (string, object, or function: boolean)
  */
-export default function find(root: Node, matcher: MatcherType): FindResult | undefined {
+export default function find(
+  root: Node,
+  matcher: MatcherType,
+): FindResult | undefined {
   const found = findAll(root, matcher).next();
   return found.done ? undefined : found.value;
 }

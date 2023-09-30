@@ -25,7 +25,7 @@ export type NodeGroupingOptions = {
   readonly match: MatcherType;
   readonly wrap: WrapperType;
   readonly log?: Logger<ILogObj>;
-}
+};
 
 const LOGGER_NAME = 'group nodes';
 
@@ -66,10 +66,13 @@ export default function groupNodes(options: NodeGroupingOptions) {
       return wrapper(
         (tree as Parent).children.slice(matchPos, endIndex),
         i,
-        (tree as Parent).children[matchPos]
+        (tree as Parent).children[matchPos],
       );
     });
-    const newTree = produce(tree, (draft) => ({ ...draft, children: wrappedNodes })) as Readonly<Node>;
+    const newTree = produce(tree, (draft) => ({
+      ...draft,
+      children: wrappedNodes,
+    })) as Readonly<Node>;
     log.silly(`New tree: ${JSON.stringify(newTree)}`);
     return newTree;
   };

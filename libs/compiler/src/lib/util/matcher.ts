@@ -20,7 +20,7 @@ import { type Node } from 'unist';
 /**
  * Matching function, matched the parameters used by unist::filter
  */
-export type MatchFn = (probe: Node, name?: string, value?: object,) => boolean;
+export type MatchFn = (probe: Node, name?: string, value?: object) => boolean;
 
 export type MatcherType = string | Record<string, any> | MatchFn;
 
@@ -39,7 +39,7 @@ export default function makeMatchFn(matcher: MatcherType): MatchFn {
       break;
     case 'object': {
       const m = matcher as Record<string, any>;
-      return (probe: Node, name?: string, value?: object,) => {
+      return (probe: Node, name?: string, value?: object) => {
         for (const key in m) {
           if (key === 'name') {
             if (name !== m[key]) return false;
@@ -51,8 +51,8 @@ export default function makeMatchFn(matcher: MatcherType): MatchFn {
         }
         return true;
       };
-    };
+    }
     default:
       throw new Error(`Invalid matcher type: ${typeof matcher}`);
-  };
+  }
 }

@@ -17,7 +17,11 @@
 import { produce } from 'immer';
 import { type Node, type Parent } from 'unist';
 
-export type WrapFn = (nodes: Node[], count?: number, matched?: Node) => Readonly<Parent>;
+export type WrapFn = (
+  nodes: Node[],
+  count?: number,
+  matched?: Node,
+) => Readonly<Parent>;
 
 export type WrapperType = string | Node | WrapFn;
 
@@ -35,5 +39,9 @@ export default function makeWrapFn(wrapper: WrapperType): WrapFn {
   }
 
   // This function returns an immutable result
-  return (nodes: Node[]) => produce(wrapper, (draft) => ({ ...draft, children: nodes })) as Readonly<Parent>;
+  return (nodes: Node[]) =>
+    produce(wrapper, (draft) => ({
+      ...draft,
+      children: nodes,
+    })) as Readonly<Parent>;
 }

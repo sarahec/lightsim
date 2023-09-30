@@ -14,20 +14,26 @@
  limitations under the License.
  */
 
-import { Metadata } from "@lightsim/runtime";
-import { load } from "js-yaml";
+import { Metadata } from '@lightsim/runtime';
+import { load } from 'js-yaml';
 import { Heading, Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
-import { Node as UnistNode } from "unist";
-import { CONTINUE, SKIP, Test, Visitor, visitParents } from "unist-util-visit-parents";
+import { Node as UnistNode } from 'unist';
+import {
+  CONTINUE,
+  SKIP,
+  Test,
+  Visitor,
+  visitParents,
+} from 'unist-util-visit-parents';
 import makeMatchFn, { MatchFn, type MatcherType } from './util/matcher.js';
 
-import remarkDirective from "remark-directive";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkParse from "remark-parse";
-import { unified } from "unified";
-import { VFile } from "vfile";
-import parseDirective from "./directives.js";
+import remarkDirective from 'remark-directive';
+import remarkFrontmatter from 'remark-frontmatter';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
+import { VFile } from 'vfile';
+import parseDirective from './directives.js';
 
 export type MetadataScope = 'global' | 'page';
 export const IN_PAGE_DIRECTIVE = 'leafDirective';
@@ -42,7 +48,7 @@ export type MetadataOptions = {
   readonly isTarget?: MatcherType;
   readonly isMetadata?: MatcherType;
   readonly log?: Logger<ILogObj>;
-}
+};
 
 /**
  * A single page with its content root, topmost heading, and metadata.
@@ -51,7 +57,7 @@ export type PageRecord = {
   root: Root;
   heading: Heading;
   metadata: Metadata;
-}
+};
 
 /**
  * All of the pages found in the source (with their metadata) plus the global metadata.
@@ -80,7 +86,10 @@ const LOGGER_NAME = 'precompile';
  * @returns a PageCollection containing the global metadata and a list of pages with their metadata
  */
 
-export default function precompile(source: VFile, options: MetadataOptions = {}): PageCollection {
+export default function precompile(
+  source: VFile,
+  options: MetadataOptions = {},
+): PageCollection {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
@@ -88,21 +97,26 @@ export default function precompile(source: VFile, options: MetadataOptions = {})
   const matchDestination = makeMatchFn(options?.isTarget ?? 'heading');
 
   const tree = parseWithMetadata(source);
-  const orderedNodes: ScannedNode[] = collectNodesOfInterest(tree, matchDirectives, matchDestination, log);
+  const orderedNodes: ScannedNode[] = collectNodesOfInterest(
+    tree,
+    matchDirectives,
+    matchDestination,
+    log,
+  );
   const globalMetadata = extractGlobalMetadata(orderedNodes);
   const pages = buildPageRoots(orderedNodes, log);
   dropMetadataNodes(orderedNodes); // from the tree
   attachPageBodies(pages, tree, log);
 
   return { frontmatter: globalMetadata, pages: pages };
-};
+}
 
 /**
  * Calls the remark parser with Frontmatter and Directives extensions.
  * Exported for testing.
- * 
- * @param source 
- * @returns 
+ *
+ * @param source
+ * @returns
  */
 export function parseWithMetadata(source: VFile) {
   return unified()
@@ -117,24 +131,33 @@ type ScannedNode = {
   parents: Parent[];
 };
 
-
 /**
- * Find all of the metadata and heading nodes (that match the heading rules) in the tree and 
+ * Find all of the metadata and heading nodes (that match the heading rules) in the tree and
  * return them in source order.
- * 
+ *
  * @param tree the tree to be scanned
  * @param options used for the `isMetadata` and `isTarget` functions.
  * @returns an array of nodes with their parents
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, matchDirectives: MatchFn, log?: Logger<ILogObj>): ScannedNode[] {
-  const typeTest = (probe: Node) => [IN_PAGE_DIRECTIVE, 'heading', 'yaml'].includes(probe.type);
+export function collectNodesOfInterest(
+  tree: Root,
+  matchDestination: MatchFn,
+  matchDirectives: MatchFn,
+  log?: Logger<ILogObj>,
+): ScannedNode[] {
+  const typeTest = (probe: Node) =>
+    [IN_PAGE_DIRECTIVE, 'heading', 'yaml'].includes(probe.type);
 
   const orderedNodes: ScannedNode[] = [];
 
-  // 
+  //
   const visitor = (node: Node, parents: Node[]) => {
-    if (node.type === 'yaml' || matchDirectives(node) || matchDestination(node)) {
+    if (
+      node.type === 'yaml' ||
+      matchDirectives(node) ||
+      matchDestination(node)
+    ) {
       orderedNodes.push({ node: node, parents: [...parents] as Parent[] });
       return SKIP;
     }
@@ -149,26 +172,36 @@ export function collectNodesOfInterest(tree: Root, matchDestination: MatchFn, ma
 
 /**
  * Find all the global metadata nodes in the tree and return them as a single object.
- * 
+ *
  * Currently this involves finding frontmatter YAML and parsing it (via the `load` function from `js-yaml`).
- * 
+ *
  * @param orderedNodes a source-order list of nodes with their parents
  * @returns an Object containing the combined global metadata
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function extractGlobalMetadata(orderedNodes: ScannedNode[], log?: Logger<ILogObj>): Metadata | undefined {
+export function extractGlobalMetadata(
+  orderedNodes: ScannedNode[],
+  log?: Logger<ILogObj>,
+): Metadata | undefined {
   // @ts-expect-error 'value' will exist, the output of `load` is a `Record<string, unknown> | undefined`
-  return orderedNodes.filter((probe) => probe.node.type === 'yaml').reduce((acc, probe) => { return { ...acc, ...(load(probe.node['value'])) } }, {});
+  return orderedNodes
+    .filter((probe) => probe.node.type === 'yaml')
+    .reduce((acc, probe) => {
+      return { ...acc, ...load(probe.node['value']) };
+    }, {});
 }
 
 /**
- * Using the result of the node scan, extract the headings into a list of page roots and attach 
+ * Using the result of the node scan, extract the headings into a list of page roots and attach
  * any directive-based metadata.
  * @param orderedNodes an array of nodes with their parents
  * @param log for logging
  * @returns a lst of pages with their root nodes and metadata.
  */
-export function buildPageRoots(orderedNodes: ScannedNode[], log?: Logger<ILogObj>): PageRecord[] {
+export function buildPageRoots(
+  orderedNodes: ScannedNode[],
+  log?: Logger<ILogObj>,
+): PageRecord[] {
   // Each target heading should be followed by its metadata (`leafDirective` nodes)
   // and then the next heading (or the end of the list)
   const pages: PageRecord[] = [];
@@ -179,24 +212,36 @@ export function buildPageRoots(orderedNodes: ScannedNode[], log?: Logger<ILogObj
     var page: PageRecord | undefined; // `let` has too limited of a scope
     log?.trace(`Processing ${probe.node.type}`);
     switch (probe.node.type) {
-      case 'heading': {
-        page = { heading: probe.node as Heading, root: { type: 'root', children: [probe.node] } as Root, metadata: {} };
-        pages.push(page);
-      } break;
-      case IN_PAGE_DIRECTIVE: {
-        log?.trace(`Found metadata  ${JSON.stringify(probe.node)}`);
-        if (!page) {
-          log?.warn(`Found metadata without a heading at ${probe.node.position?.start?.line}`);;
-        } else {
-          const metadata = parseDirective(probe.node);
-          page.metadata = { ...page.metadata, ...metadata };
+      case 'heading':
+        {
+          page = {
+            heading: probe.node as Heading,
+            root: { type: 'root', children: [probe.node] } as Root,
+            metadata: {},
+          };
+          pages.push(page);
         }
-      } break;
+        break;
+      case IN_PAGE_DIRECTIVE:
+        {
+          log?.trace(`Found metadata  ${JSON.stringify(probe.node)}`);
+          if (!page) {
+            log?.warn(
+              `Found metadata without a heading at ${probe.node.position?.start?.line}`,
+            );
+          } else {
+            const metadata = parseDirective(probe.node);
+            page.metadata = { ...page.metadata, ...metadata };
+          }
+        }
+        break;
       case 'yaml':
         // skip
         break;
       default:
-        log?.debug(`Unexpected node type in metadata processing ${probe.node.type}`);
+        log?.debug(
+          `Unexpected node type in metadata processing ${probe.node.type}`,
+        );
     }
   }
   return pages;
@@ -205,14 +250,17 @@ export function buildPageRoots(orderedNodes: ScannedNode[], log?: Logger<ILogObj
 /**
  * Drops the metadata nodes from the tree.
  * (The scanned nodes are pointers into the tree, so this will modify the tree.)
- * 
+ *
  * @param orderedNodes a list of metadata and heading nodes with their parents
  */
 function dropMetadataNodes(orderedNodes: ScannedNode[]) {
   for (const probe of orderedNodes.reverse()) {
     if (probe.node.type === 'heading') continue;
     // @ts-expect-error `probe.node` is a perfectly fine thing to search for
-    probe.parents[0].children.splice(probe.parents[0].children.indexOf(probe.node), 1);
+    probe.parents[0].children.splice(
+      probe.parents[0].children.indexOf(probe.node),
+      1,
+    );
   }
 }
 
@@ -222,7 +270,11 @@ function dropMetadataNodes(orderedNodes: ScannedNode[]) {
  * @param tree source tree
  * @param log for logging
  */
-function attachPageBodies(pages: PageRecord[], tree: Root, log: Logger<ILogObj>) {
+function attachPageBodies(
+  pages: PageRecord[],
+  tree: Root,
+  log: Logger<ILogObj>,
+) {
   for (const page of pages) {
     const heading = page.heading;
     const headingIndex = tree.children.indexOf(heading);
@@ -230,9 +282,16 @@ function attachPageBodies(pages: PageRecord[], tree: Root, log: Logger<ILogObj>)
       log.warn(`Could not find heading ${heading} in tree`); // Assumption: All headings are the direct child of root
       continue;
     }
-    const nextHeadingIndex = tree.children.slice(headingIndex + 1).findIndex((probe) => probe.type === 'heading');
+    const nextHeadingIndex = tree.children
+      .slice(headingIndex + 1)
+      .findIndex((probe) => probe.type === 'heading');
     if (nextHeadingIndex >= 0) {
-      page.root.children.push(...tree.children.slice(headingIndex + 1, nextHeadingIndex + headingIndex + 1));
+      page.root.children.push(
+        ...tree.children.slice(
+          headingIndex + 1,
+          nextHeadingIndex + headingIndex + 1,
+        ),
+      );
     } else {
       page.root.children.push(...tree.children.slice(headingIndex + 1));
     }

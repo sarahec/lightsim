@@ -14,16 +14,18 @@
  limitations under the License.
  */
 
-import { ILogObj, Logger } from "tslog";
-import { u } from "unist-builder";
-import parseDirective from "../directives.js";
+import { ILogObj, Logger } from 'tslog';
+import { u } from 'unist-builder';
+import parseDirective from '../directives.js';
 
 const log = new Logger<ILogObj>({ minLevel: 3 });
 
 describe('parseDirective', () => {
-	it('should parse a leaf directive', () => {
-		const directive = u('leafDirective', { name: 'title' }, [u('text', "This is a test")]);
-		const result = parseDirective(directive, log);
-		expect(result).toEqual({ title: 'This is a test' });
-	});
+  it('should parse a leaf directive', () => {
+    const directive = u('leafDirective', { name: 'title' }, [
+      u('text', 'This is a test'),
+    ]);
+    const result = parseDirective(directive, log);
+    expect(result).toEqual({ title: 'This is a test' });
+  });
 });

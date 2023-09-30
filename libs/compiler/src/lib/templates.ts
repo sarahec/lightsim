@@ -16,9 +16,14 @@
 
 import { Template, Environment, FileSystemLoader } from 'nunjucks';
 
-const defaultEnvironment = new Environment(new FileSystemLoader('templates'), { autoescape: false });
+const defaultEnvironment = new Environment(new FileSystemLoader('templates'), {
+  autoescape: false,
+});
 
-export default function useTemplate(name: string, environment?: Environment): Template {
-	const env = environment || defaultEnvironment;
+export default function useTemplate(
+  name: string,
+  environment?: Environment,
+): Template {
+  const env = environment || defaultEnvironment;
   return Object.freeze(env.getTemplate(name));
 }

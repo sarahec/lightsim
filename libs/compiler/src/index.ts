@@ -15,5 +15,5 @@
  */
 
 import { compile, CompileOptions } from './lib/compiler.js';
- 
+
 export { type CompileOptions, compile as default };

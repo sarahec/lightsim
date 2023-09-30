@@ -26,14 +26,17 @@ export type FreezeOptions = {
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
-export default function freezeTree(options?: FreezeOptions): (tree: Node) => Node
-{
+export default function freezeTree(
+  options?: FreezeOptions,
+): (tree: Node) => Node {
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   log.trace('Freezing tree');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (tree: any /* Node */): any /* Node */ => 
-     produce(tree, (draft: Node) => { freezeObj(draft, true); });
+  return (tree: any /* Node */): any /* Node */ =>
+    produce(tree, (draft: Node) => {
+      freezeObj(draft, true);
+    });
 }

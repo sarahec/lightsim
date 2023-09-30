@@ -28,7 +28,7 @@ import glob from 'fast-glob';
  */
 export default async function findContentFiles(
   includePattern = 'content/**/*.md',
-  excludePattern = '_*.md'
+  excludePattern = '_*.md',
 ) {
   return glob(includePattern, {
     onlyFiles: true,

@@ -26,7 +26,8 @@ describe('freezeTree', () => {
     const processor = unified().use(freezeTree);
     const tree2 = processor.runSync(tree);
     expect(tree2).toBe(tree);
-    tree.children.forEach((node) => { expect(Object.isFrozen(node)).toBe(true); });
+    tree.children.forEach((node) => {
+      expect(Object.isFrozen(node)).toBe(true);
+    });
   });
-
 });

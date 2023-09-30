@@ -15,7 +15,7 @@
  */
 
 import { ILogObj, Logger } from 'tslog';
-import { Node } from "unist";
+import { Node } from 'unist';
 
 /**
  * Parse a directive node into a metadata object.
@@ -25,7 +25,8 @@ import { Node } from "unist";
  */
 export default function parseDirective(node: Node, log?: Logger<ILogObj>) {
   const LOGGER_NAME = 'parse directive';
-  const _log = log?.getSubLogger({ name: LOGGER_NAME }) ??
+  const _log =
+    log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
   _log.trace(`Directive: ${JSON.stringify(node)}`);

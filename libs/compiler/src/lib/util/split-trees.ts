@@ -30,7 +30,9 @@ export type SplitOptions = {
  */
 
 /** @type {import('unified').Plugin<[Options]>} */
-export default function splitTrees(options: SplitOptions): (tree: Node) => Node[] {
+export default function splitTrees(
+  options: SplitOptions,
+): (tree: Node) => Node[] {
   const matcher = makeMatchFn(options.match);
   const log =
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
@@ -58,7 +60,11 @@ export default function splitTrees(options: SplitOptions): (tree: Node) => Node[
       log.debug('all matches should be at the top level of the tree');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = tree.children.map((child: any /* Node */) => (produce(child, (draft: any) => { return { ...draft, type: 'root' }; })));
+    const result = tree.children.map((child: any /* Node */) =>
+      produce(child, (draft: any) => {
+        return { ...draft, type: 'root' };
+      }),
+    );
     log.silly(`result: ${JSON.stringify(result)}`);
     return Object.freeze(result);
   };

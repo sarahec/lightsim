@@ -22,7 +22,9 @@ describe('split', () => {
     u('page', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
     u('page', [u('heading', { depth: 2 }, [u('text', 'World')])]),
   ]);
-  const tree = produce(rawTree, (draft) => { freeze(draft, true); });
+  const tree = produce(rawTree, (draft) => {
+    freeze(draft, true);
+  });
 
   it('should return the tree if no matches are found', () => {
     const processor = unified().use(splitTrees, { match: 'foo' });
