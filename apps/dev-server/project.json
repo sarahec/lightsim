@@ -5,22 +5,24 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/dev-server",
         "main": "apps/dev-server/src/main.ts",
+        "outputPath": "dist/apps/dev-server",
+        "outputFileName": "main.js",
         "tsConfig": "apps/dev-server/tsconfig.app.json",
-        "assets": ["apps/dev-server/src/assets"],
-        "isolatedConfig": true,
-        "webpackConfig": "apps/dev-server/webpack.config.js"
+        "assets": [],
+        "platform": "node"
       },
       "configurations": {
-        "development": {},
-        "production": {}
+        "development": {
+          "minify": false
+        },
+        "production": {
+          "minify": true
+        }
       }
     },
     "serve": {
