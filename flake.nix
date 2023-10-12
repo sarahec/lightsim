@@ -10,24 +10,26 @@
       devShells.default = pkgs.mkShell {
         packages = [ 
           pkgs.bashInteractive
-          pkgs.cypress
+          # pkgs.cypress
           pkgs.nodejs-18_x
           # For prisma
-          pkgs.nodePackages.prisma
-          pkgs.prisma-engines
-          pkgs.openssl
-          pkgs.sqlite
+          # pkgs.nodePackages.prisma
+          # pkgs.prisma-engines
+          # pkgs.openssl
+          # pkgs.sqlite
+          # For nix editing
+          pkgs.rnix-lsp
         ];
         shellHook = with pkgs; ''
           # export PRISMA_MIGRATION_ENGINE_BINARY="${prisma-engines}/bin/migration-engine"
-          export PRISMA_QUERY_ENGINE_BINARY="${prisma-engines}/bin/query-engine"
-          export PRISMA_QUERY_ENGINE_LIBRARY="${prisma-engines}/lib/libquery_engine.node"
-          export PRISMA_INTROSPECTION_ENGINE_BINARY="${prisma-engines}/bin/introspection-engine"
-          export PRISMA_FMT_BINARY="${prisma-engines}/bin/prisma-fmt"
-          export PRISMA_GENERATE_BINARY="${prisma-engines}/bin/prisma-generate-schema"
+          # export PRISMA_QUERY_ENGINE_BINARY="${prisma-engines}/bin/query-engine"
+          # export PRISMA_QUERY_ENGINE_LIBRARY="${prisma-engines}/lib/libquery_engine.node"
+          # export PRISMA_INTROSPECTION_ENGINE_BINARY="${prisma-engines}/bin/introspection-engine"
+          # export PRISMA_FMT_BINARY="${prisma-engines}/bin/prisma-fmt"
+          # export PRISMA_GENERATE_BINARY="${prisma-engines}/bin/prisma-generate-schema"
           
-          export CYPRESS_INSTALL_BINARY=0
-          export CYPRESS_RUN_BINARY=${pkgs.cypress}/bin/Cypress
+          # export CYPRESS_INSTALL_BINARY=0
+          # export CYPRESS_RUN_BINARY=${pkgs.cypress}/bin/Cypress
           npm set prefix ~/.npm-global
           export PATH=$PATH:~/.npm-global/bin
         '';
