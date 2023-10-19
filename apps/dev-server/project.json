@@ -13,7 +13,11 @@
         "outputPath": "dist/apps/dev-server",
         "outputFileName": "main.js",
         "tsConfig": "apps/dev-server/tsconfig.app.json",
-        "assets": [],
+        "assets": [
+          { "input": "apps/dev-server/src/assets", "glob": "*.html", "output": "/assets" },
+          { "input": "apps/dev-server/src/assets", "glob": "examples/*.md", "output": "/" },
+          { "input": "apps/dev-server/src/assets", "glob": "scripts/*", "output": "/assets" }
+        ],
         "platform": "node"
       },
       "configurations": {
