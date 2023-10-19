@@ -9,7 +9,7 @@
 
 <body>
   <h1>Lightsim Dev Server</h1>
-  <div id="compiled" hx-get="/compiled"></div>
+  <div id="catalog" hx-get="/catalog" hx-trigger="load" hx-target="this" hx-swap="outerHTML"></div>
   <a href="compile.html">Compile a simulation</a>
 </body>
 
