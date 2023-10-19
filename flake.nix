@@ -18,7 +18,7 @@
           # pkgs.openssl
           # pkgs.sqlite
           # For nix editing
-          pkgs.rnix-lsp
+          pkgs.nixd
         ];
         shellHook = with pkgs; ''
           # export PRISMA_MIGRATION_ENGINE_BINARY="${prisma-engines}/bin/migration-engine"
