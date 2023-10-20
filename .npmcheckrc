@@ -2,6 +2,6 @@
   "ignoreMatches": [
     "nunjucks",
     "rehype-document", "remark-directive", "remark-frontmatter", "hast", 
-    "@nrwl/nx", "@nx/esbuild", "@nx/js", "@nx/linter", "@nx/node","@nx/workspace", "@nx/webpack" ]
+    "@nrwl/nx", "@nx/esbuild", "@nx/js", "@nx/eslint", "@nx/node","@nx/workspace", "@nx/webpack" ]
   }
 }

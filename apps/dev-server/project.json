@@ -14,9 +14,21 @@
         "outputFileName": "main.js",
         "tsConfig": "apps/dev-server/tsconfig.app.json",
         "assets": [
-          { "input": "apps/dev-server/src/assets", "glob": "*.html", "output": "/assets" },
-          { "input": "apps/dev-server/src/assets", "glob": "examples/*.md", "output": "/" },
-          { "input": "apps/dev-server/src/assets", "glob": "scripts/*", "output": "/assets" }
+          {
+            "input": "apps/dev-server/src/assets",
+            "glob": "*.html",
+            "output": "/assets"
+          },
+          {
+            "input": "apps/dev-server/src/assets",
+            "glob": "examples/*.md",
+            "output": "/"
+          },
+          {
+            "input": "apps/dev-server/src/assets",
+            "glob": "scripts/*",
+            "output": "/assets"
+          }
         ],
         "platform": "node"
       },
@@ -45,7 +57,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/dev-server/**/*.ts"]
