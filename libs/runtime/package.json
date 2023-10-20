@@ -4,7 +4,6 @@
   "type": "module",
   "description": "Runtime for lightsim",
   "dependencies": {
-  
     "immer": "^10.0.2",
     "tslib": "^2.3.0"
   }
