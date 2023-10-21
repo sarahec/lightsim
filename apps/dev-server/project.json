@@ -6,12 +6,11 @@
   "targets": {
     "build": {
       "executor": "@nx/esbuild:esbuild",
-      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "main": "apps/dev-server/src/main.ts",
         "outputPath": "dist/apps/dev-server",
-        "outputFileName": "main.js",
+        "additionalEntryPoints": ["apps/dev-server/src/components.ts"],
         "tsConfig": "apps/dev-server/tsconfig.app.json",
         "assets": [
           {
