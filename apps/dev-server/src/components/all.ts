@@ -14,6 +14,6 @@
  limitations under the License.
  */
 
-import { Catalog, CatalogItem } from './components/catalog.js';
+import { Catalog } from './catalog.js';
 
 export { Catalog };

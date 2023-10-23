@@ -36,10 +36,12 @@ const app = express();
 
 app.use('/', express.static(path.join(__dirname, 'assets')));
 
+app.use('/lib/components', express.static(path.join(__dirname, 'components')));
+
 app.get('/catalog', (req, res) => {
   log.trace('/catalog request: ', req.url);
-  res.send(`<Catalog sources=${files} />
-    ${files.map((file) => `<Compiler source="${file.path}" />`).join('\n')}
+  res.send(`<sim-catalog sources=${files} />
+    ${files.map((file) => `<catalog-item source="${file.path}" />`).join('\n')}
   </Catalog>`);
 });
 
@@ -48,4 +50,3 @@ const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}/`);
 });
 server.on('error', console.error);
-

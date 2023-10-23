@@ -18,7 +18,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { VFile } from 'vfile';
 
-@customElement('catalog-component')
+@customElement('sim-catalog')
 export class Catalog extends LitElement {
   @property({ type: Array })
   sources: VFile[] = [];
