@@ -9,8 +9,8 @@
       "defaultConfiguration": "production",
       "options": {
         "main": "apps/dev-server/src/main.ts",
+        "additionalEntryPoints": ["apps/dev-server/src/components/*"],
         "outputPath": "dist/apps/dev-server",
-        "additionalEntryPoints": ["apps/dev-server/src/components.ts"],
         "tsConfig": "apps/dev-server/tsconfig.app.json",
         "assets": [
           {
