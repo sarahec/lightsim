@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@lightsim/compiler": "*",
+    "@swc/helpers": "~0.5.2",
     "commander": "^11.0.0",
     "process": "0.11.10",
     "to-vfile": "^8.0.0",
+    "tslib": "^2.3.0",
     "tslog": "^4.8.2",
-    "vfile": "^6.0.1",
-    "tslib": "^2.3.0"
-  }
+    "vfile": "^6.0.1"
+  },
+  "devDependencies": {}
 }
