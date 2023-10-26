@@ -5,23 +5,33 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/js:swc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/cli",
         "tsConfig": "apps/cli/tsconfig.lib.json",
         "packageJson": "apps/cli/package.json",
         "main": "apps/cli/src/index.ts",
-        "assets": ["apps/cli/*.md"]
+        "assets": [
+          "apps/cli/*.md"
+        ]
       }
     },
     "publish": {
       "command": "npm publish dist/apps/cli",
-      "dependsOn": ["build", "test", "lint"]
+      "dependsOn": [
+        "build",
+        "test",
+        "lint"
+      ]
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "apps/cli/**/*.ts",
@@ -32,7 +42,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/cli/jest.config.ts",
         "passWithNoTests": true
