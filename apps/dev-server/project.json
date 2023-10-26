@@ -4,32 +4,25 @@
   "sourceRoot": "apps/dev-server/src",
   "projectType": "application",
   "targets": {
-    "build": {
+    "build_node": {
       "executor": "@nx/esbuild:esbuild",
       "defaultConfiguration": "production",
       "options": {
         "main": "apps/dev-server/src/main.ts",
-        "additionalEntryPoints": ["apps/dev-server/src/components/*"],
         "outputPath": "dist/apps/dev-server",
+        "deleteOutputPath": true,
+        "outputFileName": "main.js",
         "tsConfig": "apps/dev-server/tsconfig.app.json",
-        "assets": [
-          {
-            "input": "apps/dev-server/src/assets",
-            "glob": "*.html",
-            "output": "/assets"
-          },
-          {
-            "input": "apps/dev-server/src/assets",
-            "glob": "examples/*.md",
-            "output": "/"
-          },
-          {
-            "input": "apps/dev-server/src/assets",
-            "glob": "scripts/*",
-            "output": "/assets"
-          }
-        ],
-        "platform": "node"
+        "platform": "node"      }
+    },
+    "build_web": {
+      "executor": "@nx/esbuild:esbuild",
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "apps/dev-server/src/lib/components/all.ts",
+        "outputPath": "dist/apps/dev-server/lib/components",
+        "tsConfig": "apps/dev-server/tsconfig.app.json",
+        "platform": "browser"
       },
       "configurations": {
         "development": {
@@ -38,6 +31,24 @@
         "production": {
           "minify": true
         }
+      }
+    },
+    "build": {
+      "dependsOn": [
+        {
+          "target": "build_node"
+        },
+        {
+          "target": "build_web"
+        }
+      ],
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "sh apps/dev-server/package.sh"
+          }
+        ]
       }
     },
     "serve": {
@@ -59,7 +70,11 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["apps/dev-server/**/*.ts"]
+        "lintFilePatterns": [
+          "apps/dev-server/**/*.ts",
+          "apps/cli/package.json",
+          "apps/cli/project.json"
+        ]
       }
     },
     "test": {

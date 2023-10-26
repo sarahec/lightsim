@@ -19,7 +19,7 @@ log.trace('pwd: ', __dirname);
 
 dotenv.config();
 
-const sourcePath = process.env.SOURCE_PATH || 'examples';
+const sourcePath = process.env.SOURCE_PATH || 'assets/examples';
 const sourceDir = path.join(__dirname, sourcePath);
 log.trace('Source directory: ', sourceDir);
 
@@ -35,8 +35,6 @@ log.trace('Sample files loaded: ', files?.length ?? 0);
 const app = express();
 
 app.use('/', express.static(path.join(__dirname, 'assets')));
-
-app.use('/lib/components', express.static(path.join(__dirname, 'components')));
 
 app.get('/catalog', (req, res) => {
   log.trace('/catalog request: ', req.url);
