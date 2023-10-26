@@ -23,7 +23,9 @@
         "main": "apps/dev-server/src/lib/components/all.ts",
         "outputPath": "dist/apps/dev-server/lib/components",
         "tsConfig": "apps/dev-server/tsconfig.app.json",
-        "platform": "browser"
+        "platform": "browser",
+        "bundle": true,
+        "thirdParty": true
       },
       "configurations": {
         "development": {
