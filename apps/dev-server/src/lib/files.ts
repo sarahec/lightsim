@@ -2,8 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { VFile } from 'vfile';
 
-export function getFilesRecursively(dirPath: string): VFile[] {
-  let paths: VFile[] = [];
+export function getFilesRecursively(
+  dirPath: string,
+  filter?: (path: string) => boolean,
+): string[] {
+  let paths: string[] = [];
 
   // Read all files and directories under the given path
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -14,10 +17,12 @@ export function getFilesRecursively(dirPath: string): VFile[] {
 
     // If the entry is a directory, recursively call this function on it
     if (entry.isDirectory()) {
-      paths = paths.concat(getFilesRecursively(fullPath));
+      paths = paths.concat(getFilesRecursively(fullPath, filter));
     } else {
       // Otherwise, add the file path to the list of files
-      paths.push(new VFile({ path: fullPath }));
+      if (filter && filter(fullPath)) {
+        paths.push('file://' + fullPath);
+      }
     }
   }
 

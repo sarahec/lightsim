@@ -16,12 +16,19 @@
 
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { VFile } from 'vfile';
 
+type FileSet = {
+  source: string[];
+};
+
+/**
+ * A catalog of simulation sources and their compiled versions.
+ * @property {string[]} sources - The list of simulation sources, JSON encoded.
+ */
 @customElement('sim-catalog')
 export class Catalog extends LitElement {
-  @property({ type: Array })
-  sources: VFile[] = [];
+  @property({ type: String })
+  fileset = '';
 
   static override styles = [
     css`
@@ -32,16 +39,18 @@ export class Catalog extends LitElement {
   ];
 
   override render() {
-    return html`${this.sources.map(
-      (source) => html`<catalog-item .source=${source}></catalog-item>`,
+    console.debug('Rendering catalog: ', this.fileset);
+    const files = JSON.parse(this.fileset) ?? { source: [] };
+    return html`${files.source.map(
+      (source: string) => html`<catalog-item .source=${source}></catalog-item>`,
     )}`;
   }
 }
 
 @customElement('catalog-item')
 export class CatalogItem extends LitElement {
-  @property({ type: Object })
-  source: VFile = new VFile({ path: 'none' });
+  @property({ type: String })
+  source = '';
 
   static override styles = [
     css`
@@ -52,6 +61,8 @@ export class CatalogItem extends LitElement {
   ];
 
   override render() {
-    return html`<a href=${this.source.path}>${this.source.basename}</a>`;
+    const url = new URL(this.source);
+    const basename = url.pathname.split('/').pop();
+    return html`<a href=${url.pathname}>${basename}</a>`;
   }
 }

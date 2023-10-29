@@ -28,7 +28,9 @@ const buildDir = path.join(__dirname, buildPath);
 log.trace('Build directory: ', buildDir);
 
 // Load sources
-const files = getFilesRecursively(sourceDir);
+const files: string[] = getFilesRecursively(sourceDir, (path: string) =>
+  path.endsWith('.md'),
+);
 log.trace('Sample files loaded: ', files?.length ?? 0);
 
 // Start app
@@ -38,9 +40,9 @@ app.use('/', express.static(path.join(__dirname, 'assets')));
 
 app.get('/catalog', (req, res) => {
   log.trace('/catalog request: ', req.url);
-  res.send(`<sim-catalog sources=${files} />
-    ${files.map((file) => `<catalog-item source="${file.path}" />`).join('\n')}
-  </Catalog>`);
+  const fileset = { source: files };
+  log.debug('Sending catalog: ', fileset); // <<<
+  res.send(`<sim-catalog fileset=${JSON.stringify(fileset)} />`);
 });
 
 const port = process.env.PORT || 3333;
