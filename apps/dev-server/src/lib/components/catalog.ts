@@ -34,6 +34,9 @@ export class Catalog extends LitElement {
     css`
       :host {
         display: block;
+        border: 1px solid black;
+        padding: 1em;
+        width: fit-content;
       }
     `,
   ];
