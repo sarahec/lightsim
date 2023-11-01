@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@cypress/webpack-dev-server": "^2.0.0",
+    "@material/web": "^1.0.1",
     "@nx/cypress": "17.0.0",
     "@nx/esbuild": "17.0.0",
     "@nx/eslint": "17.0.0",
