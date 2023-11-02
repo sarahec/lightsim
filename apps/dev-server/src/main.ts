@@ -3,12 +3,15 @@
  * This is only a minimal backend to get started.
  */
 
+import compile from '@lightsim/compiler';
+import dotenv from 'dotenv';
 import express from 'express';
 import * as path from 'path';
+import { readSync } from 'to-vfile';
+import { ILogObj, Logger } from 'tslog';
 import * as url from 'url';
-import { Logger, ILogObj } from 'tslog';
 import { getFilesRecursively } from './lib/files';
-import dotenv from 'dotenv';
+
 
 // Logging
 const log = new Logger<ILogObj>({ name: 'dev-server' });
@@ -39,10 +42,23 @@ const app = express();
 app.use('/', express.static(path.join(__dirname, 'assets')));
 
 app.get('/catalog', (req, res) => {
-  log.trace('/catalog request: ', req.url);
   const fileset = { source: files };
-  log.debug('Sending catalog: ', fileset); // <<<
+  log.trace('Sending /catalog: ', fileset);
   res.send(`<sim-catalog fileset=${JSON.stringify(fileset)} />`);
+});
+
+app.get('/compile', (req, res) => {
+  const path = req.query.path as string;
+  log.trace('Received /compile: ', path);
+  const vfile = readSync(path);
+  if (vfile.messages.length > 0) {
+    log.error('Error reading file: ', vfile.messages);
+    res.status(500).send(vfile.messages);
+    return;
+  }
+  const result = compile(vfile);
+  // TODO reconfiguring the renderer to supply and write finished files when requested
+
 });
 
 const port = process.env.PORT || 3333;
