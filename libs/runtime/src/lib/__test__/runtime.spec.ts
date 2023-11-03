@@ -14,12 +14,11 @@
  limitations under the License.
  */
 
-import { freeze } from 'immer';
 import { type CompiledSimulation, type CompiledPage } from '../interfaces.js';
 import { makeRuntime } from '../runtime.js';
 
 describe('makeRuntime', () => {
-  const compiled: Readonly<CompiledSimulation> = freeze({
+  const compiled: CompiledSimulation = {
     id: 'test',
     pages: [
       {
@@ -34,7 +33,7 @@ describe('makeRuntime', () => {
       },
     ] as CompiledPage[],
     metadata: {},
-  });
+  };
 
   it('should access a list of pages in order', () => {
     const runtime = makeRuntime(compiled);

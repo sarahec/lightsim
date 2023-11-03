@@ -57,7 +57,7 @@ export type NavigationOption = {
 
 export function makeRuntime(
   sim: CompiledSimulation,
-): Readonly<RuntimeControls> {
+): RuntimeControls {
   const _pages = sim.pages;
   let _index = 0;
   const _end = sim.pages.length - 1;

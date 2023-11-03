@@ -15,7 +15,6 @@
  limitations under the License.
  */
 
-import { freeze, produce } from 'immer';
 import { type Root } from 'mdast';
 import { u } from 'unist-builder';
 import find, { findAll } from '../find.js';
@@ -83,27 +82,11 @@ describe('findResult', () => {
       const result = find(tree, 'text')!.replace(u('text', 'Hey'));
       expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
     });
-
-    it('replace should work with immer', () => {
-      const _tree = freeze(tree, true);
-      const result = produce(_tree, (draft) =>
-        // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
-        find(draft, 'text')!.replace(u('text', 'Hey')),
-      );
-      expect(result).toEqual(u('root', [u('heading', [u('text', 'Hey')])]));
-    });
   });
 
   describe('remove', () => {
     it('should remove a mutable node', () => {
       const result = find(tree, 'text')?.remove();
-      expect(result).toEqual(u('root', [u('heading', [])]));
-    });
-
-    it('should work with immer', () => {
-      const _tree = freeze(tree, true);
-      // @ts-expect-error TODO remove this once immer exports WritableDraft correctly (then we can use WritableDraft<Root>)
-      const result = produce(_tree, (draft) => find(draft, 'text')?.remove());
       expect(result).toEqual(u('root', [u('heading', [])]));
     });
 

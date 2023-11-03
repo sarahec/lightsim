@@ -24,7 +24,7 @@
 export type CompiledPage = {
   readonly sequence: number;
   readonly contents: string;
-  readonly metadata: Readonly<Metadata>;
+  readonly metadata: Metadata;
   readonly format: string;
 };
 
@@ -36,8 +36,8 @@ export type CompiledPage = {
  */
 export type CompiledSimulation = {
   readonly id: string;
-  readonly pages: Readonly<CompiledPage[]>;
-  readonly metadata: Readonly<Metadata>;
+  readonly pages: CompiledPage[];
+  readonly metadata: Metadata;
 };
 
 export type Metadata = Record<string, string>;

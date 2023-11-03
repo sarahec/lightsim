@@ -34,7 +34,7 @@ type PathStep = {
  * @property remove Removes the found node. Returns the tree root.
  */
 export type FindResult = {
-  node: Readonly<Node>;
+  node: Node;
   replace: (newValue: Node) => Node;
   remove: (removeEmptyContainer?: boolean) => Node;
 };

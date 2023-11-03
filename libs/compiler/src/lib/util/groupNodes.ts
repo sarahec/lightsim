@@ -19,7 +19,6 @@ import { type Node, type Parent } from 'unist';
 import { ILogObj, Logger } from 'tslog';
 import makeMatchFn, { type MatcherType } from './matcher.js';
 import makeWrapFn, { type WrapperType } from './wrapper.js';
-import { produce } from 'immer';
 
 export type NodeGroupingOptions = {
   readonly match: MatcherType;
@@ -41,7 +40,7 @@ export default function groupNodes(options: NodeGroupingOptions) {
     options?.log?.getSubLogger({ name: LOGGER_NAME }) ??
     new Logger({ name: LOGGER_NAME, minLevel: 3 });
 
-  return (tree: Node): Readonly<Node> => {
+  return (tree: Node): Node => {
     // No tree? No-op.
     if (!Object.prototype.hasOwnProperty.call(tree, 'children')) {
       log.warn('No children found in tree');
@@ -69,10 +68,10 @@ export default function groupNodes(options: NodeGroupingOptions) {
         (tree as Parent).children[matchPos],
       );
     });
-    const newTree = produce(tree, (draft) => ({
-      ...draft,
+    const newTree = ({
+      ...tree,
       children: wrappedNodes,
-    })) as Readonly<Node>;
+    });
     log.silly(`New tree: ${JSON.stringify(newTree)}`);
     return newTree;
   };

@@ -12,24 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { freeze, produce } from 'immer';
 import { unified } from 'unified';
 import { u } from 'unist-builder';
 import splitTrees from '../split-trees.js';
 
 describe('split', () => {
-  const rawTree = u('root', [
+  const tree = u('root', [
     u('page', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
     u('page', [u('heading', { depth: 2 }, [u('text', 'World')])]),
   ]);
-  const tree = produce(rawTree, (draft) => {
-    freeze(draft, true);
-  });
 
   it('should return the tree if no matches are found', () => {
     // @ts-expect-error - ignore type confusion re: plugin type definition
     const processor = unified().use(splitTrees, { match: 'foo' });
-    expect(processor.runSync(tree)).toEqual([rawTree]);
+    expect(processor.runSync(tree)).toEqual([tree]);
   });
 
   it('should return a set of trees if found', () => {
@@ -41,7 +37,5 @@ describe('split', () => {
       u('root', [u('heading', { depth: 2 }, [u('text', 'Hello')])]),
       u('root', [u('heading', { depth: 2 }, [u('text', 'World')])]),
     ]);
-    expect(Object.isFrozen(trees)).toBe(true);
-    expect(Object.isFrozen(trees[0])).toBe(true);
   });
 });
