@@ -14,14 +14,13 @@
  limitations under the License.
  */
 
-import { produce } from 'immer';
 import { type Node, type Parent } from 'unist';
 
 export type WrapFn = (
   nodes: Node[],
   count?: number,
   matched?: Node,
-) => Readonly<Parent>;
+) => Parent;
 
 export type WrapperType = string | Node | WrapFn;
 
@@ -37,11 +36,9 @@ export default function makeWrapFn(wrapper: WrapperType): WrapFn {
   if (typeof wrapper === 'function') {
     return wrapper;
   }
-
-  // This function returns an immutable result
-  return (nodes: Node[]) =>
-    produce(wrapper, (draft) => ({
-      ...draft,
-      children: nodes,
-    })) as Readonly<Parent>;
+  // wrapper is a partial node
+  return (nodes: Node[]) => ({
+    ...wrapper,
+    children: nodes,
+  });
 }

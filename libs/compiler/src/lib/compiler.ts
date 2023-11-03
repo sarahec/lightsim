@@ -15,7 +15,6 @@
  */
 
 import { type CompiledSimulation } from '@lightsim/runtime';
-import { freeze } from 'immer';
 import { ILogObj, Logger } from 'tslog';
 import { VFile } from 'vfile';
 import precompile from './precompiler.js';
@@ -56,9 +55,9 @@ export function compile(
   const precompiled = precompile(source, { log: log });
   const pages = render(precompiled, renderConfiguration);
 
-  return freeze({
+  return {
     id: source.basename || 'simulation',
     pages: pages,
     metadata: precompiled.frontmatter ?? {},
-  });
+  };
 }

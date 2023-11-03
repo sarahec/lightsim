@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { produce } from 'immer';
 import { ILogObj, Logger } from 'tslog';
 import makeMatchFn, { type MatcherType } from './matcher.js';
 import { Node } from 'unist';
@@ -61,9 +60,7 @@ export default function splitTrees(
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = tree.children.map((child: any /* Node */) =>
-      produce(child, (draft: any) => {
-        return { ...draft, type: 'root' };
-      }),
+      ({ ...child, type: 'root' })
     );
     log.silly(`result: ${JSON.stringify(result)}`);
     return Object.freeze(result);

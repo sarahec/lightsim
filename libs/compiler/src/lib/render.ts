@@ -16,7 +16,6 @@
 
 import { CompiledPage, Metadata } from '@lightsim/runtime';
 import { type Root as HastRoot } from 'hast';
-import { freeze } from 'immer';
 import { type Root } from 'mdast';
 import { Template } from 'nunjucks';
 import rehypeStringify from 'rehype-stringify';
@@ -55,7 +54,7 @@ export default function render(
   source: PageCollection,
   options?: RenderOptions,
   globalMetadata?: Metadata,
-): Readonly<Readonly<CompiledPage>[]> {
+): CompiledPage[] {
   const formatter = options?.format === 'html' ? toHTML : toMarkdown;
   const baseCount = options?.count || 0;
   return source.pages.map((record: PageRecord, index: number) =>
@@ -137,12 +136,12 @@ function makePage(
   count = 1,
   metadata: Metadata,
   log?: Logger<ILogObj>,
-): Readonly<CompiledPage> {
+): CompiledPage {
   log?.trace(`New page: ${data}, metadata: ${JSON.stringify(metadata)}`);
-  return freeze({
+  return {
     sequence: count,
     format: extension,
     contents: data,
     metadata: metadata,
-  });
+  };
 }
