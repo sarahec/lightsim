@@ -130,7 +130,7 @@ describe('precompiler', () => {
         matchDestination,
         log,
       );
-      const globalMetadata = extractGlobalMetadata(scannedNodes, log);
+      const globalMetadata = extractGlobalMetadata(scannedNodes);
       expect(globalMetadata).toEqual({ title: 'Hello' });
     });
 

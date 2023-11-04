@@ -16,7 +16,7 @@
 
 import { Metadata } from '@lightsim/runtime';
 import { load } from 'js-yaml';
-import { Content, Heading, Root as MdastRoot, Parent } from 'mdast';
+import { RootContent, Heading, Root as MdastRoot, Parent } from 'mdast';
 import { ILogObj, Logger } from 'tslog';
 import { Node as UnistNode } from 'unist';
 import {
@@ -158,6 +158,7 @@ export function collectNodesOfInterest(
       matchDirectives(node) ||
       matchDestination(node)
     ) {
+      log?.trace(`Found ${node.type} at ${node.position?.start?.line}`);
       orderedNodes.push({ node: node, parents: [...parents] as Parent[] });
       return SKIP;
     }
@@ -178,10 +179,8 @@ export function collectNodesOfInterest(
  * @param orderedNodes a source-order list of nodes with their parents
  * @returns an Object containing the combined global metadata
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function extractGlobalMetadata(
   orderedNodes: ScannedNode[],
-  log?: Logger<ILogObj>,
 ): Metadata | undefined {
   return orderedNodes
     .filter((probe) => probe.node.type === 'yaml')
@@ -257,7 +256,7 @@ function dropMetadataNodes(orderedNodes: ScannedNode[]) {
   for (const probe of orderedNodes.reverse()) {
     if (probe.node.type === 'heading') continue;
     probe.parents[0].children.splice(
-      probe.parents[0].children.indexOf(probe.node as Content),
+      probe.parents[0].children.indexOf(probe.node as RootContent),
       1,
     );
   }
