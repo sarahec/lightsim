@@ -11,7 +11,7 @@
         packages = [ 
           pkgs.bashInteractive
           # pkgs.cypress
-          pkgs.nodejs-18_x
+          pkgs.nodejs_20
           # For prisma
           # pkgs.nodePackages.prisma
           # pkgs.prisma-engines
