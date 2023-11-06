@@ -10,7 +10,7 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/packages/runtime",
+        "outputPath": "dist/libs/runtime",
         "main": "{projectRoot}/src/index.ts",
         "tsConfig": "{projectRoot}/tsconfig.lib.json",
         "assets": [
@@ -19,7 +19,7 @@
       }
     },
     "publish": {
-      "command": "npm publish dist/packages/runtime",
+      "command": "npm publish dist/libs/runtime",
       "dependsOn": [
         "build",
         "test",
