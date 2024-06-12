@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/dev-server/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build_node": {
       "executor": "@nx/esbuild:esbuild",
@@ -71,33 +72,16 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
       "options": {
-        "lintFilePatterns": [
-          "apps/dev-server/**/*.ts",
-          "apps/cli/package.json",
-          "apps/cli/project.json"
-        ]
+        "lintFilePatterns": ["apps/cli/package.json", "apps/cli/project.json"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/dev-server/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "jestConfig": "apps/dev-server/jest.config.ts"
       }
     }
-  },
-  "tags": []
+  }
 }
